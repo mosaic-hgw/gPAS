@@ -1,0 +1,248 @@
+<!--
+  ###license-information-start###
+  gPAS - a Generic Pseudonym Administration Service
+  __
+  Copyright (C) 2013 - 2017 The MOSAIC Project - Institut fuer Community Medicine der
+  							Universitaetsmedizin Greifswald - mosaic-projekt@uni-greifswald.de
+  							concept and implementation
+  							l. geidel
+  							web client
+  							g. weiher
+  							a. blumentritt
+  							please cite our publications
+  							http://dx.doi.org/10.3414/ME14-01-0133
+  							http://dx.doi.org/10.1186/s12967-015-0545-6
+  __
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU Affero General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+  
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+  
+  You should have received a copy of the GNU Affero General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  ###license-information-end###
+  -->
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:jstl="http://java.sun.com/jsp/jstl/functions" xmlns:p="http://primefaces.org/ui">
+
+<body>
+	<ui:composition template="/template/ths_templ.xhtml">
+		<ui:define name="meta_tags">
+			<link rel="stylesheet" type="text/css" href="#{request.contextPath}/css/psn.css" />
+
+		</ui:define>
+		<ui:define name="customLogo">
+			<img src="#{request.contextPath}/img/gpas_logo.png" />
+		</ui:define>
+		<ui:define name="header_title">#{msgs['general.headerTitle']}</ui:define>
+		<ui:define name="title">
+			<h1>
+				<h:outputFormat value="#{msgs['general.title']}">
+					<f:param value="${display_version}" />
+				</h:outputFormat>
+			</h1>
+		</ui:define>
+		<ui:define name="info">
+			<p:tabMenu activeIndex="1">
+				<p:menuitem value="#{msgs['label.navigation.domain']}" url="domain_management.xhtml" />
+				<p:menuitem value="#{msgs['label.navigation.psn']}" url="psn_management.xhtml" />
+				<p:menuitem value="#{msgs['label.navigation.File']}" url="batch_processing.xhtml" />
+				<p:menuitem value="#{msgs['label.navigation.stat']}" url="statistic.xhtml" />
+			</p:tabMenu>
+		</ui:define>
+		<ui:define name="content">
+			<p:growl id="growl" autoUpdate="true" globalOnly="true"></p:growl>
+			<div class="psnContent" align="left">
+				<p:outputPanel styleClass="navigationTree">
+					<h:form id="domain_table_form">
+						<p:dataTable widgetVar="domain_navigation" var="domain" value="#{PsnControllerV2.domains}" rowKey="#{domain.domain}" selectionMode="single"
+							selection="#{PsnControllerV2.selectedDomain}">
+							<p:ajax listener="#{PsnControllerV2.onDomainSelect}" event="rowSelect" update=":psn_table_form:" oncomplete="clearFilter()" />
+							<f:facet name="header">
+								<div align="center">Domains</div>
+								<!-- <p:separator />
+								<div align="right">
+									<p:outputPanel>
+										<p:inputText id="globalFilter"
+											onkeyup="PF('domain_navigation').filter();"
+											style="width:150px" />					
+										<p:watermark for="globalFilter" value="#{msgs['general.label.filterValues']}"></p:watermark>
+									</p:outputPanel>
+								</div> -->
+							</f:facet>
+							<p:column filterBy="#{domain.domain}" filterMatchMode="contains" filterStyle="display:none;">
+								#{domain.domain} (#{domain.numberOfPseudonyms} entries)
+							</p:column>
+						</p:dataTable>
+					</h:form>
+				</p:outputPanel>
+				<p:outputPanel>
+					<h:form id="psn_table_form">
+						<h:outputText value="#{msgs['pseudonym.label.pleaseSelectDomain']}" rendered="#{empty PsnControllerV2.selectedDomain}" />
+						<p:outputPanel styleClass="psnPanel" rendered="#{not empty PsnControllerV2.selectedDomain}">
+							<h:outputText value="#{msgs['pseudonym.label.operations']}" class="headline" />
+							<p:tabView id="tabView" styleClass="psntabView">
+								<p:tab title="#{msgs['pseudonym.label.search']}">
+									<p>#{msgs['pseudonym.tooltip.search']}</p>
+									<p:inputText value="#{PsnControllerV2.searchValue}" id="search_input" autocomplete="off">
+										<p:ajax event="keyup" update="search_button" />
+									</p:inputText>
+									<p:watermark for="search_input" value="#{msgs['pseudonym.watermark.originalValue']}"></p:watermark>
+									<p:commandButton value="#{msgs['pseudonym.label.search']}" id="search_button" actionListener="#{PsnControllerV2.searchPseudonym}"
+										update="@form" disabled="#{(empty PsnControllerV2.searchValue) or (empty PsnControllerV2.selectedDomain)}" oncomplete="PF('psntable').filter()" />
+									<p:messages for="search" closable="true"></p:messages>
+								</p:tab>
+								<p:tab title="#{msgs['pseudonym.label.pseudonymisation']}">
+									<p>#{msgs['pseudonym.tooltip.pseudonymise']}</p>
+									<p:inputText value="#{PsnControllerV2.originalValue}" id="original_value_input" autocomplete="off">
+										<p:ajax event="keyup" update="pseudonymise_button" />
+									</p:inputText>
+									<p:watermark for="original_value_input" value="#{msgs['pseudonym.watermark.originalValue']}"></p:watermark>
+									<p:commandButton value="#{msgs['pseudonym.label.pseudonymise']}" id="pseudonymise_button" actionListener="#{PsnControllerV2.builtPseudonym}"
+										update=":domain_table_form:,@form" disabled="#{(empty PsnControllerV2.originalValue) or (empty PsnControllerV2.selectedDomain)}" oncomplete="PF('psntable').filter()"/>
+									<p:messages for="pseudonymisation" closable="true"></p:messages>
+								</p:tab>
+								<p:tab title="#{msgs['pseudonym.label.depseudonymisation']}">
+									<p>#{msgs['pseudonym.tooltip.depseudonymise']}</p>
+									<p:inputText value="#{PsnControllerV2.pseudonym}" id="pseudonym_input">
+										<p:ajax event="keyup" update="depseudonymise_button" />
+									</p:inputText>
+									<p:watermark for="pseudonym_input" value="#{msgs['pseudonym.watermark.pseudonym']}"></p:watermark>
+									<p:commandButton value="#{msgs['pseudonym.label.depseudonymise']}" id="depseudonymise_button"
+										actionListener="#{PsnControllerV2.valueOfPseudonym}" update="@form" oncomplete="PF('psntable').filter()"
+										disabled="#{empty PsnControllerV2.pseudonym or empty PsnControllerV2.selectedDomain}" />
+									<p:messages for="depseudonymisation" closable="true"></p:messages>
+								</p:tab>
+								<p:tab title="#{msgs['pseudonym.label.anonymisation']}" id="anonymisation_tab">
+									<p>#{msgs['pseudonym.tooltip.anonymise']}</p>
+									<p:autoComplete id="anonymisation_input" value="#{PsnControllerV2.origValueForAnonymisation}" completeMethod="#{PsnControllerV2.complete}" maxResults="20"
+										queryDelay="500" minQueryLength="1">
+										<p:ajax event="keyup" update="anonymise_button" />
+									</p:autoComplete>
+									<p:watermark for="anonymisation_input" value="#{msgs['pseudonym.watermark.originalValue']}"></p:watermark>
+									<p:commandButton id="anonymise_button" value="#{msgs['pseudonym.label.anonymise']}" onsuccess="PF('confirm_anonym').show()"
+										disabled="#{empty PsnControllerV2.origValueForAnonymisation or empty PsnControllerV2.selectedDomain}">
+									</p:commandButton>
+									<p:messages for="anonymisation" closable="true"></p:messages>
+									<p:confirmDialog style="max-width:600px;" message="#{msgs['psn.warning.anonymise']}" header="Anonymisation" severity="alert"
+										widgetVar="confirm_anonym">
+										<p:commandButton value="Yes" actionListener="#{PsnControllerV2.anonymiseSelectedEntry}" update=":domain_table_form:,@form"
+											oncomplete="PF('confirm_anonym').hide();PF('psntable').filter()" process="@this" />
+										<p:commandButton value="No" onclick="PF('confirm_anonym').hide();" type="button" />
+									</p:confirmDialog>
+								</p:tab>
+								
+								<p:tab title="#{msgs['pseudonym.label.deletion']}" id="deletion_tab" >
+									<p>#{msgs['pseudonym.tooltip.delete']}</p>
+									<p:autoComplete id="deletion_input" value="#{PsnControllerV2.origValueForDeletion}" completeMethod="#{PsnControllerV2.complete}" maxResults="20"
+										queryDelay="500" minQueryLength="1">
+										<p:ajax event="keyup" update="delete_button" />
+									</p:autoComplete>
+									<p:watermark for="deletion_input" value="#{msgs['pseudonym.watermark.originalValue']}"></p:watermark>
+									<p:commandButton id="delete_button" value="#{msgs['pseudonym.label.delete']}" onsuccess="PF('confirm_delete').show()"
+										disabled="#{empty PsnControllerV2.origValueForDeletion or empty PsnControllerV2.selectedDomain}" >
+									</p:commandButton>
+									<p:messages for="deletion" severity="info" closable="true"></p:messages>
+									<p:confirmDialog style="max-width:600px;" message="#{msgs['psn.warning.delete']}" header="#{msgs['pseudonym.label.deletion']}" severity="alert"
+										widgetVar="confirm_delete">
+										<p:commandButton value="Yes" actionListener="#{PsnControllerV2.deleteSelectedEntry}" update=":domain_table_form:,@form" oncomplete="PF('psntable').filter()" />
+										<p:commandButton value="No" onclick="PF('confirm_delete').hide();" type="button" />
+									</p:confirmDialog>
+								</p:tab>
+
+								<p:tab title="#{msgs['pseudonym.label.psnValuePairs']}" id="insertValuePair_tab">
+									<p>#{msgs['pseudonym.tooltip.psnValuePairs']}</p>
+									<p:inputText value="#{PsnControllerV2.psnValuePairOriginalValue}" id="insertValuePair_input" autocomplete="off">
+										<p:ajax event="keyup" update="valuePair_button" />
+									</p:inputText>
+
+									<p:watermark for="insertValuePair_input" value="#{msgs['pseudonym.watermark.originalValue']}"></p:watermark>
+
+									<p:inputText value="#{PsnControllerV2.psnValuePairPseudonym}" id="valuePair_psn" autocomplete="off" style="margin-left:5px">
+										<p:watermark for="valuePair_psn" value="#{msgs['pseudonym.watermark.pseudonym']}"></p:watermark>
+										<p:ajax event="keyup" update="valuePair_button" />
+									</p:inputText>
+									<p:commandButton id="valuePair_button" value="#{msgs['pseudonym.label.insertValuePair']}"
+										actionListener="#{PsnControllerV2.insertPSNValuePair}" update="@form,:domain_table_form" oncomplete="PF('psntable').filter()"
+										disabled="#{empty PsnControllerV2.psnValuePairOriginalValue or empty PsnControllerV2.psnValuePairPseudonym}">
+									</p:commandButton>
+									<p:messages for="psnValuePairsMessage" closable="true"></p:messages>
+								</p:tab>
+
+								<p:tab title="#{msgs['pseudonym.label.psnTree']}" id="psnTree_tab">
+									<p>#{msgs['pseudonym.tooltip.psnTree']}</p>
+									<p:inputText value="#{PsnControllerV2.selectedPsnForTree}" id="psnTree_selectedPSN" autocomplete="off">
+										<p:ajax event="keyup" update="showTree_button" />
+									</p:inputText>
+									<p:watermark for="psnTree_selectedPSN" value="#{msgs['pseudonym.watermark.pseudonym']}"></p:watermark>
+									<p:commandButton id="showTree_button" value="#{msgs['pseudonym.label.displayPsnTree']}" actionListener="#{PsnControllerV2.displayPSNTree}"
+										update="@form" disabled="#{empty PsnControllerV2.selectedPsnForTree}">
+									</p:commandButton>
+									<p:tree value="#{PsnControllerV2.psnTree}" var="node" dynamic="true" orientation="horizontal" rendered="#{not empty PsnControllerV2.psnTree}">
+										<p:treeNode>
+											<h:outputText value="#{node}" />
+										</p:treeNode>
+									</p:tree>
+									<p:messages for="psnTreeMessage" closable="true"></p:messages>
+								</p:tab>
+							</p:tabView>
+							<p:spacer height="5px" width="100%"></p:spacer>
+							<h:outputText value="#{msgs['pseudonym.label.pseudonymsForDomain']}" class="headline" />
+							<p:dataTable id="psn_table" widgetVar="psntable" value="#{PsnControllerV2.psnList}" var="psn"
+								filteredValue="#{PsnControllerV2.filteredPsnList}" paginator="true" rows="15" paginatorAlwaysVisible="false" paginatorPosition="top"
+								currentPageReportTemplate="({startRecord}-{endRecord} of {totalRecords})"
+								paginatorTemplate=" {JumpToPageDropdown}  {FirstPageLink} {PreviousPageLink} {CurrentPageReport} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+								rowsPerPageTemplate="10,20,30,40,50">
+								<f:facet name="header">
+									<div align="right">
+										<p:outputPanel>
+											<p:inputText id="globalFilter" title="#{msgs['pseudonym.tooltip.filter']}" onkeyup="PF('psntable').filter();" style="width:150px" />
+											<p:watermark for="globalFilter" value="#{msgs['general.label.filterValues']}"></p:watermark>
+											<p:tooltip for="globalFilter" showEvent="focus"></p:tooltip>
+										</p:outputPanel>
+									</div>
+								</f:facet>
+								<p:column headerText="#{msgs['pseudonym.label.originalValue']}" filterBy="#{psn.originalValue}" filterStyle="display:none"
+									filterMatchMode="contains">
+									<h:outputText id="table_value_out" value="#{psn.originalValue}" title="#{psn.originalValue}" />
+								</p:column>
+								<p:column headerText="#{msgs['pseudonym.label.Pseudonym']}" filterBy="#{psn.pseudonym}" filterMatchMode="contains" filterStyle="display:none">
+									<h:outputText id="table_psn_out" value="#{psn.pseudonym}" title="#{psn.pseudonym}" />
+								</p:column>
+							</p:dataTable>
+						</p:outputPanel>
+					</h:form>
+				</p:outputPanel>
+				<p:outputPanel layout="block" style="clear:both">
+				</p:outputPanel>
+			</div>
+			<p:ajaxStatus style="width:64px;height:64px;position:fixed;right:5px;bottom:5px">
+				<f:facet name="start">
+					<p:graphicImage value="/img/ajax-loader_pf.gif" />
+					<h:outputText value="Loading" />
+				</f:facet>
+				<f:facet name="complete">
+					<h:outputText value="" />
+				</f:facet>
+			</p:ajaxStatus>
+
+			<script type="text/javascript">
+				function clearFilter() {
+					if ($("#psn_table_form\\:psn_table").length > 0) {
+						$('#psn_table_form\\:psn_table\\:globalFilter').val('')
+								.keyup();
+					}
+				}
+			</script>
+		</ui:define>
+		<ui:define name="version">
+			<h:outputText value="${display_version}" />
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

@@ -1,0 +1,19 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<artifactId>psn-ear</artifactId>
+	<packaging>ear</packaging>
+	<parent>
+		<artifactId>psn-project</artifactId>
+		<groupId>org.emau.icmvc.ganimed.ttp</groupId>
+		<version>1.7.10</version>
+	</parent>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.emau.icmvc.ganimed.ttp</groupId>
+			<artifactId>psn-ejb</artifactId>
+			<type>ejb</type>
+		</dependency>
+	</dependencies>
+
+</project>

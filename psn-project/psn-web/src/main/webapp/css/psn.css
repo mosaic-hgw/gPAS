@@ -1,0 +1,144 @@
+/*
+ * ###license-information-start###
+ * gPAS - a Generic Pseudonym Administration Service
+ * __
+ * Copyright (C) 2013 - 2017 The MOSAIC Project - Institut fuer Community Medicine der
+ * 							Universitaetsmedizin Greifswald - mosaic-projekt@uni-greifswald.de
+ * 							concept and implementation
+ * 							l. geidel
+ * 							web client
+ * 							g. weiher
+ * 							a. blumentritt
+ * 							please cite our publications
+ * 							http://dx.doi.org/10.3414/ME14-01-0133
+ * 							http://dx.doi.org/10.1186/s12967-015-0545-6
+ * __
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * ###license-information-end###
+ */
+@CHARSET "UTF-8";
+
+#mainColumn {
+	width: 1550px !important;
+}
+
+#header {
+	width: 1550px !important;
+}
+
+.psnContent {
+	padding: 10px 10px 10px 10px;
+	min-width: 800px;
+}
+
+.navigationTree {
+	float: left;
+	min-width: 200px;
+	margin-right: 10px;
+	margin-bottom: 10px;
+}
+
+.navigationTree table {
+	table-layout: auto;
+}
+
+.ui-tree {
+	width: auto;
+}
+
+.psnPanel {
+	overflow: hidden;
+}
+
+.psntabView {
+	border: none;
+}
+
+.psnPanel .content {
+	margin-bottom: 10px;
+}
+
+.entityDataGrid {
+	width: 100%;
+	border: none;
+	vertical-align: top;
+}
+
+.psnTable {
+	max-width: inherit;
+}
+
+.hide-column-names table thead tr {
+	display: none;
+}
+
+#content table {
+	/* width:100%; */
+	margin-left: inherit;
+}
+
+.hiddenGrid tr,.hiddenGrid td {
+	border-style: none;
+	background: none;
+}
+
+.ui-selectonebutton {
+	width: 100%;
+	padding: 0;
+}
+
+div.ui-button,.ui-splitbutton {
+	display: inline-block;
+	width: 20%;
+}
+
+.domainPanel {
+	padding-top: 10px;
+	padding-left: 15px;
+	padding-right: 15px;
+}
+
+.fileOptionsColumn {
+	width: 150px;
+}
+
+.fileOptionsColumn2 {
+	
+}
+
+.ui-growl {
+	left: 20px;
+}
+
+.ui-fileupload-buttonbar {
+	background: none;
+	border: none;
+	padding: 0;
+}
+
+.ui-button.ui-widget.ui-state-default.ui-corner-all.ui-button-text-icon-left.ui-fileupload-cancel {
+	display: none;
+}
+
+.ui-fileupload-content.ui-widget-content.ui-corner-bottom {
+	border: medium none;
+}
+
+.propertiesTable td {
+	border-style: none;
+}
+
+.ui-inputfield {
+	width: inherit;
+}

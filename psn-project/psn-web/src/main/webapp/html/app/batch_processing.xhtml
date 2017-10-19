@@ -1,0 +1,232 @@
+<!--
+  ###license-information-start###
+  gPAS - a Generic Pseudonym Administration Service
+  __
+  Copyright (C) 2013 - 2017 The MOSAIC Project - Institut fuer Community Medicine der
+  							Universitaetsmedizin Greifswald - mosaic-projekt@uni-greifswald.de
+  							concept and implementation
+  							l. geidel
+  							web client
+  							g. weiher
+  							a. blumentritt
+  							please cite our publications
+  							http://dx.doi.org/10.3414/ME14-01-0133
+  							http://dx.doi.org/10.1186/s12967-015-0545-6
+  __
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU Affero General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+  
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+  
+  You should have received a copy of the GNU Affero General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  ###license-information-end###
+  -->
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:jstl="http://java.sun.com/jsp/jstl/functions" xmlns:p="http://primefaces.org/ui">
+
+<body>
+	<ui:composition template="/template/ths_templ.xhtml">
+		<ui:define name="meta_tags">
+			<link rel="stylesheet" type="text/css" href="#{request.contextPath}/css/psn.css" />
+		</ui:define>
+		<ui:define name="customLogo">
+			<img src="#{request.contextPath}/img/gpas_logo.png" />
+		</ui:define>
+		<ui:define name="header_title">#{msgs['general.headerTitle']}</ui:define>
+		<ui:define name="title">
+			<h1>
+				<h:outputFormat value="#{msgs['general.title']}">
+					<f:param value="${display_version}" />
+				</h:outputFormat>
+			</h1>
+		</ui:define>
+		<ui:define name="info">
+			<p:tabMenu activeIndex="2">
+				<p:menuitem value="#{msgs['label.navigation.domain']}" url="domain_management.xhtml" />
+				<p:menuitem value="#{msgs['label.navigation.psn']}" url="psn_management.xhtml" />
+				<p:menuitem value="#{msgs['label.navigation.File']}" url="batch_processing.xhtml" />
+				<p:menuitem value="#{msgs['label.navigation.stat']}" url="statistic.xhtml" />
+			</p:tabMenu>
+		</ui:define>
+		<ui:define name="content">
+			<p:dialog id="file_download_dialog" header="File Download" widgetVar="file_download_dialog" modal="true" resizable="false">
+				<h:form id="file_download_dialog_form">
+					<div align="left">
+						<p:outputLabel value="File Name" />
+						<p:inputText id="file_name_input" value="#{FileHolder.uploadFileName}" />
+						<br />
+						<p:watermark for="file_name_input" value="Insert a name for the result file" />
+					</div>
+					<p:commandButton id="downloadLink" value="Save" ajax="false" actionListener="#{FileControllerV2.handleFileDownload}"
+						onclick="PrimeFaces.monitorDownload(start, stop)" icon="ui-icon-arrowthichk-s">
+						<p:fileDownload value="#{FileControllerV2.outputFile}" />
+					</p:commandButton>
+					<p:commandButton value="Cancel" oncomplete="PF('file_download_dialog').hide();" />
+				</h:form>
+				<script type="text/javascript">  
+					function start() {  
+    					PF('statusDialog').show();  
+					}  
+  
+					function stop() {  
+    					PF('statusDialog').hide();
+    					PF('file_download_dialog').hide();
+					}  
+        		</script>
+			</p:dialog>
+			<p:dialog modal="true" widgetVar="statusDialog" header="Status" draggable="false" closable="false" resizable="false">
+				<p:graphicImage value="/img/ajax-loader_pf.gif" />
+			</p:dialog>
+			<p:growl id="growl" autoUpdate="true"></p:growl>
+			<div class="psnContent" align="left">
+				<p:outputPanel styleClass="psnPanel" id="file_panel">
+					<h:form enctype="multipart/form-data">
+						<h:outputText value="#{msgs['file.label.selectInputFileHeader']}" class="headline" rendered="#{empty FileControllerV2.uploadFile}" />
+						<p:panel rendered="#{empty FileControllerV2.uploadFile}">
+							#{msgs['file.tooltip.selectInputFile1']}<br />
+							#{msgs['file.tooltip.selectInputFile2']}<br />
+							<p:spacer height="2px" width="100%"></p:spacer>
+							<p:selectBooleanCheckbox value="#{FileControllerV2.tableHeaderOption}">
+								<p:ajax process="@this" />
+							</p:selectBooleanCheckbox>
+							<p:spacer width="4px"></p:spacer>
+							<p:outputLabel>#{msgs['file.label.useFirstLineHeader']}</p:outputLabel>
+
+							<p:fileUpload id="file_upload" label="Browse" uploadLabel="Import" value="#{FileControllerV2.uploadFile}" allowTypes="/(\.|\/)(csv|txt)$/"
+								auto="false" multiple="false" fileUploadListener="#{FileControllerV2.handleFileUpload}" update=":file_panel" process="@form">
+							</p:fileUpload>
+
+						</p:panel>
+					</h:form>
+					<p:spacer width="100%" height="5px"></p:spacer>
+					<p:outputPanel id="batch_processing_panel" rendered="#{not empty FileControllerV2.uploadFile}">
+						<h:form id="file_data_form">
+
+							<h:panelGrid columns="2" styleClass="hiddenGrid">
+								<p:outputLabel value="#{msgs['file.label.fileName']}" />
+								<h:outputText value="#{FileHolder.uploadFileName}" />
+								<p:outputLabel value="#{msgs['file.label.entries']}" />
+								<h:outputText value="#{FileHolder.fileSize == -1 ? '' : FileHolder.fileSize }" />
+							</h:panelGrid>
+							<p:dataTable widgetVar="file_value_table" styleClass="psnTable" var="row" value="#{FileHolder.rows}" filteredValue="#{FileHolder.filteredRows}"
+								paginator="true" rows="10" paginatorAlwaysVisible="false" paginatorPosition="top"
+								currentPageReportTemplate="({startRecord}-{endRecord} of {totalRecords})"
+								paginatorTemplate=" {JumpToPageDropdown}  {FirstPageLink} {PreviousPageLink} {CurrentPageReport} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+								rowsPerPageTemplate="10,20,30,40,50">
+								<f:facet name="header">
+									<div align="right">
+										<p:outputPanel>
+
+											<p:inputText id="globalFilter" onkeyup="PF('file_value_table').filter()" style="width:150px" />
+											<p:watermark for="globalFilter" value="filter values"></p:watermark>
+										</p:outputPanel>
+									</div>
+								</f:facet>
+								<p:columns filterStyle="display:none;" filterMatchMode="contains" filterBy="#{row[colIndex]}" value="#{FileHolder.columns}" var="column"
+									columnIndexVar="colIndex">
+									<f:facet name="header">		
+									#{column}		
+								</f:facet>
+									<h:outputText value="#{row[colIndex]}" />
+								</p:columns>
+							</p:dataTable>
+							<div align="right" style="margin-top: 2px;">
+								<p:commandButton actionListener="#{FileControllerV2.handleFileDownload}" value="#{msgs['file.label.downloadList']}"
+									oncomplete="PF('file_download_dialog').show()"></p:commandButton>
+							</div>
+
+						</h:form>
+						<p:spacer width="100%" height="5px"></p:spacer>
+						<h:outputText value="#{msgs['file.lable.batchProcessing']}" class="headline" />
+						<p:panel>
+						#{msgs['file.tooltip.options']}
+						<h:form id="file_options_form">
+								<h:panelGrid columns="3">
+									<ui:repeat var="operation" value="#{FileControllerV2.operations}">
+									</ui:repeat>
+								</h:panelGrid>
+								<div align="left">
+									<p:panelGrid style="width:100%" columns="2" columnClasses="fileOptionsColumn,fileOptionsColumn2">
+
+										<p:outputLabel for="mode_select">#{msgs['file.label.operation']}</p:outputLabel>
+										<p:selectOneRadio id="mode_select" layout="grid" columns="1" value="#{FileControllerV2.currentOperation.mode}">
+											<f:selectItems value="#{FileControllerV2.processingModes}" var="mode" itemLabel="#{mode.label}" itemValue="#{mode}" />
+											<p:ajax process="@this" event="change" update="@form:confirm_dialog,@form:start_button" />
+										</p:selectOneRadio>
+
+										<p:outputLabel for="domain_select">#{msgs['file.label.domain']}</p:outputLabel>
+										<p:selectOneMenu id="domain_select" value="#{FileControllerV2.currentOperation.selectedDomain}">
+											<f:selectItem itemLabel="select a domain" noSelectionOption="true" />
+											<f:selectItems value="#{FileControllerV2.domainMap}" />
+											<p:ajax process="@this" event="change" update="@form:start_button" />
+										</p:selectOneMenu>
+
+										<p:outputLabel for="column_select">#{msgs['file.label.sourceColumn']}</p:outputLabel>
+										<p:selectOneMenu id="column_select" value="#{FileControllerV2.currentOperation.sourceColumnIndex}">
+											<f:selectItem itemLabel="please select a column" itemValue="-1" noSelectionOption="true" />
+											<f:selectItems value="#{FileHolder.columnsMap.entrySet()}" var="column" itemLabel="#{column.key}" itemValue="#{column.value}" />
+											<p:ajax process="@this" event="change" update="@form:start_button" />
+										</p:selectOneMenu>
+										<!-- <h:outputText value="#{msgs['file.label.saveResults']}" />
+										<p:selectBooleanCheckbox
+											value="#{FileControllerV2.overrideOriginalFile}">
+											<p:ajax
+												update="@form:destination_column_panel_label,@form:destination_column_panel_content"></p:ajax>
+										</p:selectBooleanCheckbox> -->
+										<p:outputPanel id="destination_column_panel_label">
+											<p:outputLabel id="destiantion_column_label">#{msgs['file.label.destColumn']}</p:outputLabel>
+										</p:outputPanel>
+										<p:outputPanel id="destination_column_panel_content">
+											<p:selectOneRadio id="bla_select" required="true" layout="grid" columns="1" value="#{FileControllerV2.currentOperation.columnHandling}">												
+												<f:selectItems value="#{FileControllerV2.columnHandling}" var="columnhandling" itemLabel="#{columnhandling.label}" itemValue="#{columnhandling}" />
+											</p:selectOneRadio>
+										</p:outputPanel>
+
+									</p:panelGrid>
+								</div>
+								<div align="right" style="margin-top: 2px;">
+									<p:commandButton
+										disabled="#{(empty FileControllerV2.currentOperation.mode) or (empty FileControllerV2.currentOperation.selectedDomain) or (FileControllerV2.currentOperation.sourceColumnIndex==-1)}"
+										id="start_button" value="#{msgs['file.label.start']}" oncomplete="PF('confirm_start').show()">
+									</p:commandButton>
+									<p:commandButton id="reset_button" value="#{msgs['general.label.Reset']}" actionListener="#{FileControllerV2.reset()}" ajax="false">
+										<p:ajax update=":file_data_form:,@form" resetValues="true" />
+										<p:resetInput target=":file_options_form:" />
+									</p:commandButton>
+								</div>
+								<p:blockUI block="file_options_form" widgetVar="blockui" trigger="file_options_form:confirm_button">  
+        							LOADING<br />
+									<p:graphicImage value="/img/ajax-loader_pf.gif" />
+								</p:blockUI>
+								<p:confirmDialog widgetVar="confirm_start" header="Confirmation" severity="alert" id="confirm_dialog"
+									message="#{msgs['file.dialog.start']}">
+									<p:commandButton id="confirm_button" value="Continue" styleClass="ui-confirmdialog-yes" icon="ui-icon-check"
+										oncomplete="PF('confirm_start').hide()" actionListener="#{FileControllerV2.onStart}" update=":file_data_form:,@form,:file_download_dialog_form:" />
+									<p:commandButton value="Cancel" styleClass="ui-confirmdialog-no" icon="ui-icon-close" oncomplete="PF('confirm_start').hide()" />
+								</p:confirmDialog>
+
+							</h:form>
+							<p:blockUI id="block_ui" block=":file_options_form" trigger=":file_options_form">  
+        							LOADING 
+    						</p:blockUI>
+						</p:panel>
+					</p:outputPanel>
+
+
+				</p:outputPanel>
+				<p:outputPanel layout="block" style="clear:both">
+				</p:outputPanel>
+			</div>
+		</ui:define>
+		<ui:define name="version">
+			<h:outputText value="${display_version}" />
+		</ui:define>
+	</ui:composition>
+</body>
+</html>
