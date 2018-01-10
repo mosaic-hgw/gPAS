@@ -42,6 +42,7 @@ import javax.jws.WebService;
 import javax.jws.soap.SOAPBinding;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.StoredProcedureQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
@@ -66,7 +67,8 @@ public class StatisticManagerBean implements StatisticManager {
 
 	private static final Logger logger = Logger.getLogger(StatisticManagerBean.class);
 	private static final Object emSynchronizerDummy = new Object();
-	private static final String UPDATE_QUERY = "call updateStats()";
+	//private static final String UPDATE_QUERY = "call updateStats()";
+	private static final String UPDATE_PROCEDURE_NAME = "updateStats";
 
 	@PersistenceContext
 	private EntityManager em;
@@ -148,7 +150,9 @@ public class StatisticManagerBean implements StatisticManager {
 		if (em != null) {
 			// schreibzugriff ueber stored procedure
 			synchronized (emSynchronizerDummy) {
-				List<?> results = em.createNativeQuery(UPDATE_QUERY).getResultList();
+				StoredProcedureQuery updateStatsQuery = em.createStoredProcedureQuery(UPDATE_PROCEDURE_NAME);
+				updateStatsQuery.execute();
+				List<?> results = updateStatsQuery.getResultList();//em.createNativeQuery(UPDATE_QUERY).getResultList();
 				if (results.size() > 0) {
 					logger.info("updated");
 				}
@@ -186,6 +190,6 @@ public class StatisticManagerBean implements StatisticManager {
 
 	private void setSchedulingEnabled(boolean enableAutoUpdate) {
 		this.enableAutoUpdate = enableAutoUpdate;
-		logger.info("Scheduling Mode enabled: " +enableAutoUpdate);
+		//logger.info("Scheduling Mode enabled: " +enableAutoUpdate);
 	}
 }
