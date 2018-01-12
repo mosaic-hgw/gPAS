@@ -151,7 +151,7 @@ public class StatisticManagerBean implements StatisticManager {
 			// schreibzugriff ueber stored procedure
 			synchronized (emSynchronizerDummy) {
 				StoredProcedureQuery updateStatsQuery = em.createStoredProcedureQuery(UPDATE_PROCEDURE_NAME);
-				updateStatsQuery.execute();
+				updateStatsQuery.execute();				
 				List<?> results = updateStatsQuery.getResultList();//em.createNativeQuery(UPDATE_QUERY).getResultList();
 				if (results.size() > 0) {
 					logger.info("updated");
@@ -190,6 +190,6 @@ public class StatisticManagerBean implements StatisticManager {
 
 	private void setSchedulingEnabled(boolean enableAutoUpdate) {
 		this.enableAutoUpdate = enableAutoUpdate;
-		//logger.info("Scheduling Mode enabled: " +enableAutoUpdate);
+		logger.info("Scheduling Mode enabled: " +enableAutoUpdate);
 	}
 }
