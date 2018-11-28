@@ -1,4 +1,4 @@
-![context](https://user-images.githubusercontent.com/22166209/47564456-5fdaeb00-d925-11e8-88f7-26ba42cb449f.png)
+![context](https://user-images.githubusercontent.com/12081369/49164566-a5794200-f32f-11e8-8d3a-96244ea00832.png)
 
 Current Version: 1.7.10
 
