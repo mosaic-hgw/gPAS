@@ -15,4 +15,4 @@ Use the Docker-Image to easily try out gPAS.
 https://hub.docker.com/r/tmfev/gpas/
 
 # More Information
-Visit https://mosaic-greifswald.de/werkzeuge-und-vorlagen/pseudonymverwaltung-gpas.html
+Visit https://www.ths-greifswald.de/forscher/gpas/
