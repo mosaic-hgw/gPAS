@@ -27,4 +27,4 @@ The WSDL URL is ``http://<YOUR IPADDRESS>:8080/gpas/DomainService?wsdl``
  The WSDL URL is ``http://<YOUR IPADDRESS>:8080/gpas/gpasService?wsdl``
 
 # More Information
-Visit https://www.ths-greifswald.de/forscher/gpas/
+Visit https://www.ths-greifswald.de/gpas
