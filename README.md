@@ -4,16 +4,16 @@ Current Version: 1.7.10
 
 The gPAS generates and administers appropriate pseudonyms using non-deterministic pseudonyms for arbitrary alphanumeric sequences. Additionally it allows defining domain-specific alphabets and generator algorithms as required and offers functions for de-pseudonymisation and anonymisation.
 
+# Docker and source code
+This repository does not provide the latest version of gpas. Please find the latest versions of gPAS here:
+* docker-compose: https://github.com/mosaic-hgw/Dockerbank/tree/master/gPAS
+* source code: https://www.ths-greifswald.de/kontakt/ 
+
 # License
 This Software was developed by the Institute for Community Medicine of the University Medicine Greifswald. It it licensed under AGPLv3 and provided by the DFG-funded MOSAIC-Project (grant number HO 1937/2-1).
 
 # Build
 To build gPAS with maven use the goals "clean install".
-
-# Docker
-Use the Docker-Image to easily try out gPAS.
-https://hub.docker.com/r/tmfev/gpas/
-
 
 # Web-based Interface
 All functionalities of the gPAS are provided for external use via a SOAP-Interface. Use SOAP-UI to create sample requests. (Please modify IP Address and Port accordingly).
