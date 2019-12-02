@@ -1,6 +1,6 @@
 ![context](https://user-images.githubusercontent.com/12081369/49164566-a5794200-f32f-11e8-8d3a-96244ea00832.png)
 
-Current Version: 1.7.10
+Current Source Code Version: 1.7.10
 
 The gPAS generates and administers appropriate pseudonyms using non-deterministic pseudonyms for arbitrary alphanumeric sequences. Additionally it allows defining domain-specific alphabets and generator algorithms as required and offers functions for de-pseudonymisation and anonymisation.
 
