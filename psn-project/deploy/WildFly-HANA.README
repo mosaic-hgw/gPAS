@@ -1,0 +1,49 @@
+Set the datasource of your wildFly in standalone.xml:
+
+```xml
+<datasource jta="true" jndi-name="java:jboss/datasources/gpasDS" pool-name="gpasSqlDS" enabled="true" use-java-context="true" use-ccm="true">
+	<connection-url>jdbc:sap://mo-f5d3cb3f2.mo.sap.corp:30015/?autocommit=false&#x26;currentschema=GPAS</connection-url>
+	<driver>hdb</driver>
+	<transaction-isolation>TRANSACTION_READ_COMMITTED</transaction-isolation>
+	<pool>
+		<min-pool-size>0</min-pool-size>
+		<max-pool-size>20</max-pool-size>
+		<prefill>true</prefill>
+		<use-strict-min>false</use-strict-min>
+		<flush-strategy>FailingConnectionOnly</flush-strategy>
+	</pool>
+	<security>
+		<user-name>GPAS_USER</user-name>
+		<password>Gpas_2016</password>
+	</security>
+	<statement>
+		<prepared-statement-cache-size>32</prepared-statement-cache-size>
+		<share-prepared-statements>true</share-prepared-statements>
+	</statement>
+</datasource>
+```
+
+```xml
+<driver name="hdb" module="hdb">
+	<driver-class>com.sap.db.jdbc.Driver</driver-class>
+	<xa-datasource-class>com.sap.db.jdbc.Driver</xa-datasource-class>
+</driver>					
+```
+
+and add the HANA JDBC Driver as a module in the modules/hdm/main folder (module.xml):
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<module xmlns="urn:jboss:module:1.0" name="hdb">
+  <resources>
+    <resource-root path="ngdbc.jar"/>
+  </resources>
+  <dependencies>
+    <module name="javax.api"/>
+  </dependencies>
+</module>
+```
+
+Also add the JDBC Driver to this Folder (ngdbc.jar)
+
+You can find the JDBC Driver in your HANA Database Client Installation Folder.

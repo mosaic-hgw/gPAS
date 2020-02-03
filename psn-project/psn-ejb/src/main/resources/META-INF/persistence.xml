@@ -41,7 +41,7 @@
 		<properties>
 			<property name="eclipselink.target-server" value="JBoss"/>
 			<property name="eclipselink.jdbc.batch-writing" value="JDBC"/>
-			<property name="eclipselink.target-database" value="MySQL" />
+			<property name="eclipselink.target-database" value="MySQL" /><!-- MySQL HANA PostgreSQL-->
 			<property name="eclipselink.ddl-generation" value="create-tables" />
 			<property name="eclipselink.ddl-generation.output-mode" value="database" />
 			<!-- logging -->
