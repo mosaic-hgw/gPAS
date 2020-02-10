@@ -68,12 +68,12 @@ https://dx.doi.org/10.1186/s12967-015-0545-6
 
 Domain Configuration
 
-![context](https://github.com/mosaic-hgw/Dockerbank/blob/master/gPAS/screenshots/add_domain.png)
+![context](https://github.com/mosaic-hgw/gPAS/master/docker/standard/screenshots/add_domain.png)
 
 List processing
 
-![context](https://github.com/mosaic-hgw/Dockerbank/blob/master/gPAS/screenshots/list-processing.png)
+![context](https://github.com/mosaic-hgw/gPAS/master/docker/standard/screenshots/list-processing.png)
 
 Show Pseudonym trees
 
-![context](https://github.com/mosaic-hgw/Dockerbank/blob/master/gPAS/screenshots/psn-tree.png)
+![context](https://github.com/mosaic-hgw/gPAS/master/docker/standard/screenshots/psn-tree.png)
