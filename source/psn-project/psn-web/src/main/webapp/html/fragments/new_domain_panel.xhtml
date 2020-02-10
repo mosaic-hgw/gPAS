@@ -1,0 +1,102 @@
+<!--
+  ###license-information-start###
+  gPAS - a Generic Pseudonym Administration Service
+  __
+  Copyright (C) 2013 - 2017 The MOSAIC Project - Institut fuer Community Medicine der
+  							Universitaetsmedizin Greifswald - mosaic-projekt@uni-greifswald.de
+  							concept and implementation
+  							l. geidel
+  							web client
+  							g. weiher
+  							a. blumentritt
+  							please cite our publications
+  							http://dx.doi.org/10.3414/ME14-01-0133
+  							http://dx.doi.org/10.1186/s12967-015-0545-6
+  __
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU Affero General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+  
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+  
+  You should have received a copy of the GNU Affero General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  ###license-information-end###
+  -->
+<ui:composition xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:jstl="http://java.sun.com/jsp/jstl/functions" xmlns:p="http://primefaces.org/ui">
+	<h:form id="new_domain_form" onkeypress="return event.keyCode != 13">
+		<p:panelGrid id="input_panel" style="width:100%;">
+			<f:facet name="header">
+				<p:row>
+					<p:column colspan="6">#{msgs['domain.label.createDomainHeader']}</p:column>
+				</p:row>
+				<p:row>
+					<p:column colspan="1">#{msgs['domain.label.table.domain']}</p:column>
+					<p:column colspan="1">#{msgs['domain.label.table.parentDomain']}</p:column>
+					<p:column colspan="1">#{msgs['domain.label.table.comment']}</p:column>
+					<p:column colspan="1">#{msgs['domain.label.table.alphabet']}</p:column>
+					<p:column colspan="1">#{msgs['domain.label.table.generator']}</p:column>
+					<p:column >#{msgs['domain.label.table.properties']}</p:column>
+					
+				</p:row>
+			</f:facet>
+			<p:row>
+				<p:column style="text-align:center">
+					<p:inputText id="domain_input" value="#{CreateDomainController.domain}" validator="#{domainValidator.validate}" />
+					<p:watermark for="domain_input" value="#{msgs['domain.label.table.domain']}"></p:watermark>
+				</p:column>
+				<p:column>
+					<p:inputText id="parent_domain" value="#{CreateDomainController.parentDomain}" validator="#{parentDomainValidator.validate}"/>
+					<p:watermark for="parent_domain" value="#{msgs['domain.label.table.parentDomain']}"></p:watermark>
+				</p:column>
+				<p:column>
+					<p:inputTextarea id="comment_input" value="#{CreateDomainController.comment}" />
+				</p:column>
+				<p:column>
+					<h:panelGrid columns="1" styleClass="hiddenGrid">
+						<p:selectOneMenu label="alphabet" widgetVar="alphabet_select" value="#{CreateDomainController.alphabet}">
+							<f:selectItem itemLabel="define custom alphabet" itemValue="" noSelectionOption="true" />
+							<f:selectItems value="#{CreateDomainController.generateAlphabetMap()}" />
+							<p:ajax process="@this" event="change" update=":new_domain_form:custom_alphabet_text" />
+						</p:selectOneMenu>
+						<p:inputText id="custom_alphabet_text" value="#{CreateDomainController.customAlphabet}" validator="#{alphabetValidator.validate}"
+							title="#{msgs['domain.tooltip.customAlphabet']}" disabled="#{!empty CreateDomainController.alphabet}">
+						</p:inputText>
+						<p:tooltip for="custom_alphabet_text" showEvent="focus" />
+					</h:panelGrid>
+				</p:column>
+				<p:column>
+					<p:selectOneMenu label="check digit generator" widgetVar="generator_select" id="checkDigitClass_select"
+						value="#{CreateDomainController.checkDigitClass}" required="true">
+						<f:selectItem itemLabel="select check digit generator" itemValue="" noSelectionOption="true" />
+						<f:selectItems value="#{CreateDomainController.generateGeneratorMap()}" />
+					</p:selectOneMenu>
+				</p:column>
+				<p:column>
+					<h:dataTable value="#{CreateDomainController.properties}" var="property" styleClass="propertiesTable">
+						<h:column>
+							<h:outputText value="#{property.label}" />
+						</h:column>
+						<h:column>
+							<p:inputText value="#{property.value}" />
+						</h:column>
+					</h:dataTable>
+				</p:column>
+				
+			</p:row>
+		</p:panelGrid>
+		<div align="right" style="margin-top: 2px;">
+			<p:commandButton actionListener="#{CreateDomainController.onNewDomainButtonClicked}" update="@form,:domain_table_form:"
+				value="#{msgs['domain.label.createDomainButton']}" />
+			<p:commandButton immediate="true" value="Reset" update="@form" actionListener="#{CreateDomainController.resetForm}"
+				onsuccess="PF('alphabet_select').selectValue('');PF('generator_select').selectValue('')">
+				<p:resetInput target="input_panel" />
+			</p:commandButton>
+		</div>
+	</h:form>
+</ui:composition>

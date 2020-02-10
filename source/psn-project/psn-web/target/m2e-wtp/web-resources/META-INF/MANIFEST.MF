@@ -1,0 +1,6 @@
+Manifest-Version: 1.0
+Built-By: bialkem
+Build-Jdk: 1.8.0_144
+Created-By: Maven Integration for Eclipse
+Dependencies: org.slf4j, deployment.gpas-1.7.10.ear
+
