@@ -49,6 +49,7 @@ The gPAS was developed by the University Medicine Greifswald  and published in 2
 
 ## Credits ##
 Concept and implementation: L. Geidel
+
 Web-Client: A. Blumentritt
 
 ## License ##
