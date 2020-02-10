@@ -8,7 +8,7 @@ To facilitate the generation and administration of appropriate pseudonyms the In
 
 The use of pseudonymization domains, the specification of individual alphabets and generator algorithms allow for the free generation of different pseudonyms per data source, application context or study site.
 
-![context](https://github.com/mosaic-hgw/Dockerbank/blob/master/gPAS/screenshots/psn-overview.png)
+![context](https://github.com/mosaic-hgw/gPAS/tree/master/docker/standard/screenshots/psn-overview.png)
 
 ## Live-Demo and more information ##
 
@@ -27,11 +27,11 @@ or visit https://ths-greifswald.de/gpas for more information.
 # Web-based interfaces
 All functionalities of the gPAS are provided for external use via SOAP-interfaces. 
 
-[gPAS DomainManager Interface-Description (JavaDoc)](https://www.ths-greifswald.de/wp-content/uploads/tools/gpas/doc/1-9-0/org/emau/icmvc/ganimed/ttp/psn/DomainManager.html)
+[DomainManager Interface-Description (JavaDoc)](https://www.ths-greifswald.de/wp-content/uploads/tools/gpas/doc/1-9-0/org/emau/icmvc/ganimed/ttp/psn/DomainManager.html)
 
 The WSDL URL is <strong>http://<YOUR IPADDRESS>:8080/gpas/DomainService?wsdl</strong>
 
-[gPAS PSNManager Service Interface-Description (JavaDoc)](https://www.ths-greifswald.de/wp-content/uploads/tools/gpas/doc/1-9-0/org/emau/icmvc/ganimed/ttp/psn/PSNManager.html "")
+[PSNManager Service Interface-Description (JavaDoc)](https://www.ths-greifswald.de/wp-content/uploads/tools/gpas/doc/1-9-0/org/emau/icmvc/ganimed/ttp/psn/PSNManager.html "")
 
 The WSDL URL is <strong>http://<YOUR IPADDRESS>:8080/gpas/gpasService?wsdl</strong>
 
@@ -68,12 +68,12 @@ https://dx.doi.org/10.1186/s12967-015-0545-6
 
 Domain Configuration
 
-![context](https://github.com/mosaic-hgw/gPAS/master/docker/standard/screenshots/add_domain.png)
+![context](https://github.com/mosaic-hgw/gPAS/tree/master/docker/standard/screenshots/add_domain.png)
 
 List processing
 
-![context](https://github.com/mosaic-hgw/gPAS/master/docker/standard/screenshots/list-processing.png)
+![context](https://github.com/mosaic-hgw/gPAS/tree/master/docker/standard/screenshots/list-processing.png)
 
 Show Pseudonym trees
 
-![context](https://github.com/mosaic-hgw/gPAS/master/docker/standard/screenshots/psn-tree.png)
+![context](https://github.com/mosaic-hgw/gPAS/tree/master/docker/standard/screenshots/psn-tree.png)
