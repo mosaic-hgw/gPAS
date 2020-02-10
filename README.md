@@ -8,7 +8,7 @@ To facilitate the generation and administration of appropriate pseudonyms the In
 
 The use of pseudonymization domains, the specification of individual alphabets and generator algorithms allow for the free generation of different pseudonyms per data source, application context or study site.
 
-![context](https://github.com/mosaic-hgw/gPAS/tree/master/docker/standard/screenshots/psn-overview.png)
+![context](https://raw.githubusercontent.com/mosaic-hgw/gPAS/master/docker/standard/screenshots/psn-overview.png)
 
 ## Live-Demo and more information ##
 
@@ -68,12 +68,12 @@ https://dx.doi.org/10.1186/s12967-015-0545-6
 
 Domain Configuration
 
-![context](https://github.com/mosaic-hgw/gPAS/tree/master/docker/standard/screenshots/add_domain.png)
+![context](https://raw.githubusercontent.com/mosaic-hgw/gPAS/master/docker/standard/screenshots/add_domain.png)
 
 List processing
 
-![context](https://github.com/mosaic-hgw/gPAS/tree/master/docker/standard/screenshots/list-processing.png)
+![context](https://raw.githubusercontent.com/mosaic-hgw/gPAS/master/docker/standard/screenshots/list-processing.png)
 
 Show Pseudonym trees
 
-![context](https://github.com/mosaic-hgw/gPAS/tree/master/docker/standard/screenshots/psn-tree.png)
+![context](https://raw.githubusercontent.com/mosaic-hgw/gPAS/master/docker/standard/screenshots/psn-tree.png)
