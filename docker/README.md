@@ -3,13 +3,13 @@
 
 Current Docker-Version of gPAS: 1.9.1 (Feb 2020)
 
-# Docker versions and documentation #
+# gPAS 1.9.1 Docker (Feb 2020)
 
-[Standard-Version](https://github.com/mosaic-hgw/gPAS/docker/standard "")
+### [Standard-Version](https://github.com/mosaic-hgw/gPAS/tree/master/docker/standard)
 
-[Web-Auth-Version](https://github.com/mosaic-hgw/gPAS/docker/web-auth "")
+### [Web-Auth-Version](https://github.com/mosaic-hgw/gPAS/tree/master/docker/web-auth)
 
-# Additional Information #
+## Additional Information #
 
 The gPAS was developed by the University Medicine Greifswald  and published in 2014 as part of the [MOSAIC-Project](https://ths-greifswald.de/mosaic "")  (funded by the DFG HO 1937/2-1).
 
