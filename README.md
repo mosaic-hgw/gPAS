@@ -20,9 +20,9 @@ or visit https://ths-greifswald.de/gpas for more information.
 
 [Source-Code](https://github.com/mosaic-hgw/gPAS/source "")
 
-[Docker-compose version of gPAS (Standard)](https://github.com/mosaic-hgw/gPAS/docker/standard "")
+[Docker-compose version of gPAS (Standard)](https://github.com/mosaic-hgw/gPAS/tree/master/docker/standard "")
 
-[Docker-compose version of gPAS (Web-Auth)](https://github.com/mosaic-hgw/gPAS/docker/web-auth "")
+[Docker-compose version of gPAS (Web-Auth)](https://github.com/mosaic-hgw/gPAS/tree/master/docker/web-auth "")
 
 # Web-based interfaces
 All functionalities of the gPAS are provided for external use via SOAP-interfaces. 
