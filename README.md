@@ -1,6 +1,8 @@
 
 ![context](https://user-images.githubusercontent.com/12081369/49164566-a5794200-f32f-11e8-8d3a-96244ea00832.png)
 
+[Current Docker-Compose Version: 1.10.3 (July 2021)](https://www.ths-greifswald.de/gpas/#_download "")
+
 # About #
 The use of pseudonyms is a privacy-enhancing technique supporting privacy-by-design and ensuring non-attribution. Pseudonymisation allows storing directly person identifying data separately and securely from medical data and supports the data controller to meet the GDPR’s data security requirements (Art. 32 lit. 1 EU GDPR).
 
@@ -16,15 +18,18 @@ Try out gPAS from https://demo.ths-greifswald.de
 
 or visit https://ths-greifswald.de/gpas for more information.
 
-# Versions and documentation #
+# Download #
 
-[Source-Code](https://github.com/mosaic-hgw/gPAS/source "")
+[Latest Docker-compose version of gPAS](https://www.ths-greifswald.de/gpas/#_download "")
 
-[Docker-compose version of gPAS (Standard)](https://github.com/mosaic-hgw/gPAS/tree/master/docker/standard "")
+# Source #
 
-[Docker-compose version of gPAS (Web-Auth)](https://github.com/mosaic-hgw/gPAS/tree/master/docker/web-auth "")
+https://github.com/mosaic-hgw/gPAS/tree/master/source
 
-# Web-based interfaces
+# API
+
+## SOAP
+
 All functionalities of the gPAS are provided for external use via SOAP-interfaces. 
 
 [DomainManager Interface-Description (JavaDoc)](https://www.ths-greifswald.de/wp-content/uploads/tools/gpas/doc/1-9-0/org/emau/icmvc/ganimed/ttp/psn/DomainManager.html)
@@ -37,8 +42,13 @@ The WSDL URL is <strong>http://<YOUR IPADDRESS>:8080/gpas/gpasService?wsdl</stro
 
 Use SOAP-UI to create sample requests.
 
+## FHIR
+
+More details from https://simplifier.net/guide/ttp-fhir-gateway-ig/Pseudonymmanagement
+
 # IT-Security Recommendations #
 For the operation of gPAS at least following IT-security measures are recommended:
+* use **integrated authentication and authorization mechanism (gRAS)** or **keycloak-support** to secure access and grant privileges to gics-web (see supplementary documentation for details)
 * operation in a separate network-zone
 * use of firewalls and IP-filters
 * access restriction to the gPAS-Servers with basic authentication (e.g. with nginx or apache)
@@ -52,10 +62,14 @@ Concept and implementation: L. Geidel
 
 Web-Client: A. Blumentritt
 
+Docker: R. Schuldt
+
+FHIR-API for gPAS: M. Bialke
+
 ## License ##
 License: AGPLv3, https://www.gnu.org/licenses/agpl-3.0.en.html
 
-Copyright: 2014 - 2020 University Medicine Greifswald
+Copyright: 2014 - 2021 University Medicine Greifswald
 
 Contact: https://www.ths-greifswald.de/kontakt/
 
