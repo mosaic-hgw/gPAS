@@ -78,16 +78,19 @@ https://dx.doi.org/10.3414/ME14-01-0133
 
 https://dx.doi.org/10.1186/s12967-015-0545-6
 
+# Supported languages #
+German, English
+
 # Screenshots #
 
-Domain Configuration
+Managing Pseudonyms
 
-![context](https://raw.githubusercontent.com/mosaic-hgw/gPAS/master/docker/standard/screenshots/add_domain.png)
+![context](https://www.ths-greifswald.de/wp-content/uploads/2019/01/gPAS-Screenshot-Pseudonymisieren.png)
 
 List processing
 
-![context](https://raw.githubusercontent.com/mosaic-hgw/gPAS/master/docker/standard/screenshots/list-processing.png)
+![context](https://www.ths-greifswald.de/wp-content/uploads/2019/01/gPAS-Screenshot-Listen-verarbeiten.png)
 
 Show Pseudonym trees
 
-![context](https://raw.githubusercontent.com/mosaic-hgw/gPAS/master/docker/standard/screenshots/psn-tree.png)
+![context](https://www.ths-greifswald.de/wp-content/uploads/2019/01/gPAS-Screenshot-Pseudonymbaum.png)
