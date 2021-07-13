@@ -48,7 +48,7 @@ More details from https://simplifier.net/guide/ttp-fhir-gateway-ig/Pseudonymmana
 
 # IT-Security Recommendations #
 For the operation of gPAS at least following IT-security measures are recommended:
-* use **integrated authentication and authorization mechanism (gRAS)** or **keycloak-support** to secure access and grant privileges to gics-web (see supplementary documentation for details)
+* use **integrated authentication and authorization mechanism (gRAS)** or **keycloak-support** to secure access and grant privileges to gpas-web (see supplementary documentation for details)
 * operation in a separate network-zone
 * use of firewalls and IP-filters
 * access restriction to the gPAS-Servers with basic authentication (e.g. with nginx or apache)
