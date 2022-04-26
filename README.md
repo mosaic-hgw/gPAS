@@ -1,7 +1,7 @@
 
 ![context](https://user-images.githubusercontent.com/12081369/49164566-a5794200-f32f-11e8-8d3a-96244ea00832.png)
 
-[Current Docker-Compose Version: 1.10.3 (July 2021)](https://www.ths-greifswald.de/gpas/#_download "")
+[Latest Docker-Compose Version](https://www.ths-greifswald.de/gpas/#_download "")
 
 # About #
 The use of pseudonyms is a privacy-enhancing technique supporting privacy-by-design and ensuring non-attribution. Pseudonymisation allows storing directly person identifying data separately and securely from medical data and supports the data controller to meet the GDPR’s data security requirements (Art. 32 lit. 1 EU GDPR).
