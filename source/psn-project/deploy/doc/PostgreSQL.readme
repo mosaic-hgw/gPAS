@@ -1,0 +1,50 @@
+@author Harald Aamot, SAP
+
+Set the datasource of your wildFly in standalone.xml:
+
+```xml
+<datasource jta="true" jndi-name="java:jboss/datasources/gpasDS" pool-name="gpasSqlDS" enabled="true" use-java-context="true" use-ccm="true">
+	<connection-url>jdbc:postgresql://localhost:5432/gpas?autoCommit=true</connection-url>
+	<driver>postgresql</driver>
+	<transaction-isolation>TRANSACTION_READ_COMMITTED</transaction-isolation>
+	<pool>
+		<min-pool-size>1</min-pool-size>
+		<max-pool-size>1</max-pool-size>
+		<prefill>true</prefill>
+		<use-strict-min>false</use-strict-min>
+		<flush-strategy>FailingConnectionOnly</flush-strategy>
+	</pool>
+	<security>
+		<user-name>gpas_user</user-name>
+		<password>[YOUR_PASSWORD_HERE]</password>
+	</security>
+	<statement>
+		<prepared-statement-cache-size>32</prepared-statement-cache-size>
+		<share-prepared-statements>true</share-prepared-statements>
+	</statement>
+</datasource>
+```
+
+```xml
+<driver name="postgresql" module="postgresql">
+	<driver-class>org.postgresql.Driver</driver-class>
+	<xa-datasource-class>org.postgresql.xa.PGXADataSource</xa-datasource-class>
+</driver>
+```
+
+and add the PostgreSQL JDBC Driver as a module in the modules/postgresql/main folder (module.xml):
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<module xmlns="urn:jboss:module:1.0" name="postgresql">
+  <resources>
+    <resource-root path="postgresql-8.2-504.jdbc4.jar"/>
+  </resources>
+   <dependencies>  
+      <module name="javax.api"/>  
+      <module name="javax.transaction.api"/>  
+   </dependencies>
+</module>
+```
+
+Also add the JDBC Driver to this Folder (postgresql-8.2-504.jdbc4.jar) (or whatever version you prefer for your database)

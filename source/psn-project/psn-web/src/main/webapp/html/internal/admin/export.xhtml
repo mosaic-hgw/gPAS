@@ -1,0 +1,81 @@
+<!--
+  ###license-information-start###
+  gPAS - a Generic Pseudonym Administration Service
+  __
+  Copyright (C) 2013 - 2022 Independent Trusted Third Party of the University Medicine Greifswald
+  							kontakt-ths@uni-greifswald.de
+  							concept and implementation
+  							l.geidel
+  							web client
+  							a.blumentritt
+  							docker
+  							r.schuldt
+  							please cite our publications
+  							http://dx.doi.org/10.3414/ME14-01-0133
+  							http://dx.doi.org/10.1186/s12967-015-0545-6
+  __
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU Affero General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+  
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+  
+  You should have received a copy of the GNU Affero General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  ###license-information-end###
+  -->
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://java.sun.com/jsf/html" xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:p="http://primefaces.org/ui">
+
+<body>
+	<ui:composition template="/resources/templates/gpas.xhtml">
+
+		<ui:define name="header_title">
+			<h:outputText value="#{msg['export.title']}" />
+		</ui:define>
+
+		<ui:define name="title">
+			<h:outputText value="#{msg['export.title']}" />
+		</ui:define>
+
+		<ui:define name="help">
+			<h:outputText value="#{msg['export.help']}" escape="false" />
+		</ui:define>
+
+		<ui:define name="content">
+			<h:form id="main">
+				<p:focus context="main" />
+
+				<p:panel>
+					<h4>
+						<h:outputText value="#{msg['export.chooseDomains']}" />
+					</h4>
+
+					<p:pickList value="#{exportController.domainLists}" var="_domain" itemLabel="#{_domain.label}" itemValue="#{_domain}"
+								converter="genericConverter" showTargetControls="false" addLabel="#{cmsg['ui.picklist.add']}" addAllLabel="#{cmsg['ui.picklist.addAll']}"
+								removeLabel="#{cmsg['ui.picklist.remove']}" removeAllLabel="#{cmsg['ui.picklist.removeAll']}" moveUpLabel="#{cmsg['ui.picklist.moveUp']}"
+								moveDownLabel="#{cmsg['ui.picklist.moveDown']}" moveTopLabel="#{cmsg['ui.picklist.moveTop']}" moveBottomLabel="#{cmsg['ui.picklist.moveBottom']}" responsive="true"
+								showSourceFilter="true" showTargetFilter="true" filterMatchMode="contains">
+						<p:ajax event="transfer" ignoreAutoUpdate="true" partialSubmit="true" update="downloadButton" />
+						<f:facet name="sourceCaption">#{msg['page.export.domains.available']}</f:facet>
+						<f:facet name="targetCaption">#{msg['page.export.domains.selected']}</f:facet>
+						<p:column>#{_domain.label}</p:column>
+						<p:column style="text-align: right;" styleClass="lightgrey">#{_domain.numberOfPseudonyms} #{msg['domain.psns']}</p:column>
+					</p:pickList>
+
+					<br />
+					<p:commandButton id="downloadButton" value="#{cmsg['ui.button.download.csv']}" icon="mdi mdi-file-excel" ajax="false"
+						actionListener="#{exportController.onExport}" disabled="#{empty exportController.domainLists.target}">
+						<p:fileDownload value="#{exportController.downloadFile}" />
+					</p:commandButton>
+				</p:panel>
+			</h:form>
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

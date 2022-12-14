@@ -1,16 +1,17 @@
 package org.emau.icmvc.ganimed.ttp.psn.exceptions;
 
-/*
+/*-
  * ###license-information-start###
  * gPAS - a Generic Pseudonym Administration Service
  * __
- * Copyright (C) 2013 - 2017 The MOSAIC Project - Institut fuer Community Medicine der
- * 							Universitaetsmedizin Greifswald - mosaic-projekt@uni-greifswald.de
+ * Copyright (C) 2013 - 2022 Independent Trusted Third Party of the University Medicine Greifswald
+ * 							kontakt-ths@uni-greifswald.de
  * 							concept and implementation
- * 							l. geidel
+ * 							l.geidel
  * 							web client
- * 							g. weiher
- * 							a. blumentritt
+ * 							a.blumentritt
+ * 							docker
+ * 							r.schuldt
  * 							please cite our publications
  * 							http://dx.doi.org/10.3414/ME14-01-0133
  * 							http://dx.doi.org/10.1186/s12967-015-0545-6
@@ -30,33 +31,30 @@ package org.emau.icmvc.ganimed.ttp.psn.exceptions;
  * ###license-information-end###
  */
 
-
 import javax.xml.bind.annotation.XmlType;
 
-/**
- * should be thrown whenever a psn-prject should be deleted or changed which is already in use (at least one pseudonym within the db belongs to that domain)
- * 
- * @author geidell
- * 
- */
 @XmlType(name = "DomainInUseExceptionType", namespace = "http://psn.ttp.ganimed.icmvc.emau.org/")
-public class DomainInUseException extends Exception {
-
+public class DomainInUseException extends Exception
+{
 	private static final long serialVersionUID = 7910742052674190269L;
 
-	public DomainInUseException() {
+	public DomainInUseException()
+	{
 		super();
 	}
 
-	public DomainInUseException(String message, Throwable cause) {
+	public DomainInUseException(String message, Throwable cause)
+	{
 		super(message, cause);
 	}
 
-	public DomainInUseException(String message) {
+	public DomainInUseException(String message)
+	{
 		super(message);
 	}
 
-	public DomainInUseException(Throwable cause) {
+	public DomainInUseException(Throwable cause)
+	{
 		super(cause);
 	}
 }

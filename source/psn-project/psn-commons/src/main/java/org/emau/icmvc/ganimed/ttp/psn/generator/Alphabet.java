@@ -1,16 +1,17 @@
 package org.emau.icmvc.ganimed.ttp.psn.generator;
 
-/*
+/*-
  * ###license-information-start###
  * gPAS - a Generic Pseudonym Administration Service
  * __
- * Copyright (C) 2013 - 2017 The MOSAIC Project - Institut fuer Community Medicine der
- * 							Universitaetsmedizin Greifswald - mosaic-projekt@uni-greifswald.de
+ * Copyright (C) 2013 - 2022 Independent Trusted Third Party of the University Medicine Greifswald
+ * 							kontakt-ths@uni-greifswald.de
  * 							concept and implementation
- * 							l. geidel
+ * 							l.geidel
  * 							web client
- * 							g. weiher
- * 							a. blumentritt
+ * 							a.blumentritt
+ * 							docker
+ * 							r.schuldt
  * 							please cite our publications
  * 							http://dx.doi.org/10.3414/ME14-01-0133
  * 							http://dx.doi.org/10.1186/s12967-015-0545-6
@@ -30,95 +31,148 @@ package org.emau.icmvc.ganimed.ttp.psn.generator;
  * ###license-information-end###
  */
 
-
 import java.util.HashMap;
 import java.util.Map;
 
 import org.emau.icmvc.ganimed.ttp.psn.exceptions.CharNotInAlphabetException;
 import org.emau.icmvc.ganimed.ttp.psn.exceptions.InvalidAlphabetException;
 
-public abstract class Alphabet {
-
+public abstract class Alphabet
+{
 	private final char[] symbols;
-	private final Map<Character, Integer> mapForFasterAccess = new HashMap<Character, Integer>();
+	private final Map<Character, Integer> mapForFasterAccess = new HashMap<>();
 
-	public Alphabet() {
+	public Alphabet()
+	{
 		symbols = getAlphabet();
-		for (int i = 0; i < symbols.length; i++) {
+		for (int i = 0; i < symbols.length; i++)
+		{
 			mapForFasterAccess.put(symbols[i], i);
 		}
 	}
 
-	protected Alphabet(String charString) throws InvalidAlphabetException {
+	protected Alphabet(String charString) throws InvalidAlphabetException
+	{
 		String[] chars = charString.split(",");
-		for (int i = 0; i < chars.length; i++) {
+		for (int i = 0; i < chars.length; i++)
+		{
 			chars[i] = chars[i].trim();
 		}
 		symbols = new char[chars.length];
-		for (int i = 0; i < chars.length; i++) {
-			if (chars[i].length() != 1) {
+		for (int i = 0; i < chars.length; i++)
+		{
+			if (chars[i].length() != 1)
+			{
 				throw new InvalidAlphabetException("invalid char: " + chars[i]);
 			}
-			for (int j = i + 1; j < chars.length; j++) {
-				if (chars[i].equals(chars[j])) {
+			for (int j = i + 1; j < chars.length; j++)
+			{
+				if (chars[i].equals(chars[j]))
+				{
 					throw new InvalidAlphabetException("duplicate char: " + chars[i]);
 				}
 			}
 			symbols[i] = chars[i].charAt(0);
 		}
-		for (int i = 0; i < symbols.length; i++) {
+		for (int i = 0; i < symbols.length; i++)
+		{
 			mapForFasterAccess.put(symbols[i], i);
 		}
 	}
 
 	protected abstract char[] getAlphabet();
 
-	/**
-	 * 
-	 * @return length of the alphabet
-	 */
-	public int length() {
+	public int length()
+	{
 		return symbols.length;
 	}
 
 	/**
-	 * 
 	 * @param pos
 	 *            position of the requested symbol (0 - length-1)
 	 * @return symbol at the given position
 	 * @throws IndexOutOfBoundsException
 	 *             if the given position is larger then {@link Alphabet#length()}
 	 */
-	public char getSymbol(int pos) throws IndexOutOfBoundsException {
-		if (pos >= symbols.length || pos < 0) {
+	public char getSymbol(int pos) throws IndexOutOfBoundsException
+	{
+		if (pos >= symbols.length || pos < 0)
+		{
 			throw new IndexOutOfBoundsException("requested pos: " + pos + " max pos: " + (symbols.length - 1));
 		}
 		return symbols[pos];
 	}
 
 	/**
-	 * 
 	 * @param symbol
 	 *            symbol for which the position is requested
 	 * @return position of the requested symbol
 	 * @throws CharNotInAlphabetException
 	 *             if the given symbol is not an element of this alphabet
 	 */
-	public int getPosForSymbol(char symbol) throws CharNotInAlphabetException {
+	public int getPosForSymbol(char symbol) throws CharNotInAlphabetException
+	{
 		Integer result = mapForFasterAccess.get(symbol);
-		if (result == null) {
+		if (result == null)
+		{
 			throw new CharNotInAlphabetException("char " + symbol + " is not an element of this alphabet");
 		}
 		return result;
 	}
 
+	/**
+	 * @param psn
+	 *            psn without pre-, suffix and checkdigits<br>
+	 * @param useLastCharAsDelimiter
+	 * @return
+	 * @throws ArithmeticException
+	 *             if this number exceeds int
+	 * @throws CharNotInAlphabetException
+	 */
+	public long getPosNumberForPSN(String psn, boolean useLastCharAsDelimiter) throws ArithmeticException, CharNotInAlphabetException
+	{
+		long result = 0;
+		int x = useLastCharAsDelimiter ? 1 : 0;
+		for (int i = psn.length() - 1; i >= 0; i--)
+		{
+			result = Math.multiplyExact(result, (long) symbols.length - x);
+			result = Math.addExact(result, getPosForSymbol(psn.charAt(i)));
+		}
+		return result;
+	}
+
+	/**
+	 * number of possible psn with this alphabet
+	 *
+	 * @param numberOfChars
+	 * @param useLastCharAsDelimiter
+	 * @return
+	 * @throws ArithmeticException
+	 *             if this number exceeds long
+	 */
+	public long getMaxNumberOfPSN(int numberOfChars, boolean useLastCharAsDelimiter) throws ArithmeticException
+	{
+		long result = 1;
+		int x = useLastCharAsDelimiter ? 1 : 0;
+		for (int i = 0; i++ < numberOfChars;)
+		{
+			result = Math.multiplyExact(result, (long) symbols.length - x);
+		}
+		return result;
+	}
+
 	@Override
-	public String toString() {
+	public String toString()
+	{
 		StringBuilder result = new StringBuilder();
-		for (int i = 0; i < symbols.length; i++) {
-			if (i + 1 == symbols.length) {
+		for (int i = 0; i < symbols.length; i++)
+		{
+			if (i + 1 == symbols.length)
+			{
 				result.append(symbols[i]);
-			} else {
+			}
+			else
+			{
 				result.append(symbols[i] + " ");
 			}
 		}

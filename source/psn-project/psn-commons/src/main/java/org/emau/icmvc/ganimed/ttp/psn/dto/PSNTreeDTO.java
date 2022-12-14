@@ -1,16 +1,17 @@
 package org.emau.icmvc.ganimed.ttp.psn.dto;
 
-/*
+/*-
  * ###license-information-start###
  * gPAS - a Generic Pseudonym Administration Service
  * __
- * Copyright (C) 2013 - 2017 The MOSAIC Project - Institut fuer Community Medicine der
- * 							Universitaetsmedizin Greifswald - mosaic-projekt@uni-greifswald.de
+ * Copyright (C) 2013 - 2022 Independent Trusted Third Party of the University Medicine Greifswald
+ * 							kontakt-ths@uni-greifswald.de
  * 							concept and implementation
- * 							l. geidel
+ * 							l.geidel
  * 							web client
- * 							g. weiher
- * 							a. blumentritt
+ * 							a.blumentritt
+ * 							docker
+ * 							r.schuldt
  * 							please cite our publications
  * 							http://dx.doi.org/10.3414/ME14-01-0133
  * 							http://dx.doi.org/10.1186/s12967-015-0545-6
@@ -30,72 +31,74 @@ package org.emau.icmvc.ganimed.ttp.psn.dto;
  * ###license-information-end###
  */
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlRootElement;
 
-/**
- * dto for PsnTreeNode
- * 
- * @author wolffr
- * 
- */
-public class PSNTreeDTO extends PSNDTO {
+@XmlRootElement
+@XmlAccessorType(XmlAccessType.FIELD)
+public class PSNTreeDTO extends PSNDTO
+{
+	private static final long serialVersionUID = -8910015687674779914L;
+	public static final String ROOT = "ROOT";
+	private int level;
+	private final Set<PSNTreeDTO> children = new HashSet<PSNTreeDTO>();
 
-	private static final long serialVersionUID = 82972503364950287L;
-	private List<PSNTreeDTO> children = new ArrayList<PSNTreeDTO>();
+	public PSNTreeDTO()
+	{}
 
-	public PSNTreeDTO() {
+	public PSNTreeDTO(String domain, String value, String pseudonym, int level)
+	{
+		super(domain, value, pseudonym);
+		this.level = level;
 	}
 
-	public PSNTreeDTO(String domain, String pseudonym) {
-		super(domain, null,pseudonym);
-	}
-	
-	public List<PSNTreeDTO> getChildren() {
+	public Set<PSNTreeDTO> getChildren()
+	{
 		return children;
 	}
 
-	public void setChildren(List<PSNTreeDTO> children) {
-		this.children = children;
-	}
-	
-	public void addChild(PSNTreeDTO child) {
+	public void addChild(PSNTreeDTO child)
+	{
 		children.add(child);
 	}
 
+	public int getLevel()
+	{
+		return level;
+	}
+
+	public void setLevel(int level)
+	{
+		this.level = level;
+	}
+
 	@Override
-	public int hashCode() {
-		final int prime = 31;
+	public int hashCode()
+	{
+		// ignore children and level because of possible infinite loops within psnnet
 		int result = super.hashCode();
-		result = prime * result + ((children == null) ? 0 : children.hashCode());
 		return result;
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(Object obj)
+	{
 		if (this == obj)
 			return true;
 		if (!super.equals(obj))
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		PSNTreeDTO other = (PSNTreeDTO) obj;
-		if (children == null) {
-			if (other.children != null)
-				return false;
-		} else if (!children.equals(other.children))
-			return false;
 		return true;
 	}
 
 	@Override
-	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		sb.append(super.toString());
-		sb.append(" with ");
-		sb.append(children.size());
-		sb.append(" children");
-		return sb.toString();
+	public String toString()
+	{
+		return "PSNTreeDTO [including: " + super.toString() + "; level=" + level + " and " + children.size() + " children]";
 	}
 }

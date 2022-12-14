@@ -1,16 +1,17 @@
 package org.emau.icmvc.ganimed.ttp.psn.exceptions;
 
-/*
+/*-
  * ###license-information-start###
  * gPAS - a Generic Pseudonym Administration Service
  * __
- * Copyright (C) 2013 - 2017 The MOSAIC Project - Institut fuer Community Medicine der
- * 							Universitaetsmedizin Greifswald - mosaic-projekt@uni-greifswald.de
+ * Copyright (C) 2013 - 2022 Independent Trusted Third Party of the University Medicine Greifswald
+ * 							kontakt-ths@uni-greifswald.de
  * 							concept and implementation
- * 							l. geidel
+ * 							l.geidel
  * 							web client
- * 							g. weiher
- * 							a. blumentritt
+ * 							a.blumentritt
+ * 							docker
+ * 							r.schuldt
  * 							please cite our publications
  * 							http://dx.doi.org/10.3414/ME14-01-0133
  * 							http://dx.doi.org/10.1186/s12967-015-0545-6
@@ -30,33 +31,30 @@ package org.emau.icmvc.ganimed.ttp.psn.exceptions;
  * ###license-information-end###
  */
 
-
 import javax.xml.bind.annotation.XmlType;
 
-/**
- * should be thrown if the generator can't be instantiated
- * 
- * @author geidell
- *
- */
 @XmlType(name = "InvalidGeneratorExceptionType", namespace = "http://psn.ttp.ganimed.icmvc.emau.org/")
-public class InvalidGeneratorException extends Exception {
-
+public class InvalidGeneratorException extends Exception
+{
 	private static final long serialVersionUID = -186470796814886810L;
 
-	public InvalidGeneratorException() {
+	public InvalidGeneratorException()
+	{
 		super();
 	}
 
-	public InvalidGeneratorException(String message, Throwable cause) {
+	public InvalidGeneratorException(String message, Throwable cause)
+	{
 		super(message, cause);
 	}
 
-	public InvalidGeneratorException(String message) {
+	public InvalidGeneratorException(String message)
+	{
 		super(message);
 	}
 
-	public InvalidGeneratorException(Throwable cause) {
+	public InvalidGeneratorException(Throwable cause)
+	{
 		super(cause);
 	}
 }

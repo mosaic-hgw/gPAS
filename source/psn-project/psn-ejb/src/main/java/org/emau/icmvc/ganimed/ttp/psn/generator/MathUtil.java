@@ -1,16 +1,16 @@
 package org.emau.icmvc.ganimed.ttp.psn.generator;
-
-/*
+/*-
  * ###license-information-start###
  * gPAS - a Generic Pseudonym Administration Service
  * __
- * Copyright (C) 2013 - 2017 The MOSAIC Project - Institut fuer Community Medicine der
- * 							Universitaetsmedizin Greifswald - mosaic-projekt@uni-greifswald.de
+ * Copyright (C) 2013 - 2022 Independent Trusted Third Party of the University Medicine Greifswald
+ * 							kontakt-ths@uni-greifswald.de
  * 							concept and implementation
- * 							l. geidel
+ * 							l.geidel
  * 							web client
- * 							g. weiher
- * 							a. blumentritt
+ * 							a.blumentritt
+ * 							docker
+ * 							r.schuldt
  * 							please cite our publications
  * 							http://dx.doi.org/10.3414/ME14-01-0133
  * 							http://dx.doi.org/10.1186/s12967-015-0545-6
@@ -30,51 +30,60 @@ package org.emau.icmvc.ganimed.ttp.psn.generator;
  * ###license-information-end###
  */
 
-/**
- * 
- * @author geidell
- *
- */
-public class MathUtil {
-
+public class MathUtil
+{
 	/**
 	 * returns an array with all prime factors of the given number
 	 * <p>
-	 * if factors appear more then once, they are returned ordered in their multiplicity, e.g. 180 -> [2,2,3,3,5]
-	 * 
+	 * if factors appear more then once, they are returned ordered in their multiplicity, e.g. 180
+	 * -> [2,2,3,3,5]
+	 *
 	 * @param number
 	 * @return
 	 */
-	public static int[] getPrimeFactors(int number) {
-		if (number < 2) {
+	public static int[] getPrimeFactors(int number)
+	{
+		if (number < 2)
+		{
 			return new int[0];
 		}
 		int maxFactors = getMaxPrimeFactorsFor(number);
 		int highestPossibleFactor = (int) Math.floor(Math.sqrt(number));
 		int[] result = new int[maxFactors];
 		int count = 0;
-		while (number % 2 == 0) {
+		while (number % 2 == 0)
+		{
 			result[count++] = 2;
 			number >>= 1;
 		}
-		for (int i = 3; i <= highestPossibleFactor;) {
-			if (number % i == 0) {
+		for (int i = 3; i <= highestPossibleFactor;)
+		{
+			if (number % i == 0)
+			{
 				result[count++] = i;
 				number /= i;
-			} else {
+			}
+			else
+			{
 				i += 2;
 			}
 		}
-		if (number != 1) {
+		if (number != 1)
+		{
 			result[count] = number;
 		}
 		return result;
 	}
 
-	private static int getMaxPrimeFactorsFor(int number) {
+	private static int getMaxPrimeFactorsFor(int number)
+	{
 		/*
-		 * da 2 der kleinstmoegliche primfaktor ist, ist die anzahl der primfaktoren immer kleiner gleich dem exponenten der naechst hoeheren zweierpotenz. also (x = anzahl primfaktoren): number <=
-		 * 2^x genauer: 2^(x-1) < number <= 2^x daraus folgt: log(2^(x-1)) < log(number) x-1 < log(number)/log(2) x < log(number)/log(2) + 1 da x ganzzahlig sein muss, reicht math.ceil statt "+1"
+		 * da 2 der kleinstmoegliche primfaktor ist, ist die anzahl der primfaktoren immer kleiner
+		 * gleich dem exponenten der naechst hoeheren zweierpotenz. also (x = anzahl primfaktoren):
+		 * number <=
+		 * 2^x genauer: 2^(x-1) < number <= 2^x daraus folgt: log(2^(x-1)) < log(number) x-1 <
+		 * log(number)/log(2) x < log(number)/log(2) + 1 da x ganzzahlig sein muss, reicht math.ceil
+		 * statt "+1"
 		 * (ueberschaetzt um 1, wenn log(2) teiler von log(number) ist)
 		 */
 		return (int) Math.ceil(Math.log10(number) / Math.log10(2));
@@ -82,20 +91,26 @@ public class MathUtil {
 
 	/**
 	 * returns true, if the given number is a prime power
-	 * 
+	 *
 	 * @param number
 	 * @return
 	 */
-	public static boolean isPrimePower(int number) {
+	public static boolean isPrimePower(int number)
+	{
 		boolean result = false;
 		int[] primeFactors = getPrimeFactors(number);
-		if (primeFactors.length > 0) {
+		if (primeFactors.length > 0)
+		{
 			int factor = primeFactors[0];
 			result = true;
-			for (int i = 1; i < primeFactors.length; i++) {
-				if (primeFactors[i] == 0) {
+			for (int i = 1; i < primeFactors.length; i++)
+			{
+				if (primeFactors[i] == 0)
+				{
 					break;
-				} else if (primeFactors[i] != factor) {
+				}
+				else if (primeFactors[i] != factor)
+				{
 					result = false;
 					break;
 				}
@@ -106,21 +121,28 @@ public class MathUtil {
 
 	/**
 	 * returns true, if the given number is a prime
+	 *
 	 * @param number
 	 * @return
 	 */
-	public static boolean isPrime(int number) {
-		if (number <= 1) {
+	public static boolean isPrime(int number)
+	{
+		if (number <= 1)
+		{
 			return false;
 		}
-		if (number == 2) {
+		if (number == 2)
+		{
 			return true;
 		}
-		if (number % 2 == 0) {
+		if (number % 2 == 0)
+		{
 			return false;
 		}
-		for (int i = 3; i <= Math.sqrt(number) + 1; i += 2) {
-			if (number % i == 0) {
+		for (int i = 3; i <= Math.sqrt(number) + 1; i += 2)
+		{
+			if (number % i == 0)
+			{
 				return false;
 			}
 		}

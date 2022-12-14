@@ -1,16 +1,17 @@
 package org.emau.icmvc.ganimed.ttp.psn;
 
-/*
+/*-
  * ###license-information-start###
  * gPAS - a Generic Pseudonym Administration Service
  * __
- * Copyright (C) 2013 - 2017 The MOSAIC Project - Institut fuer Community Medicine der
- * 							Universitaetsmedizin Greifswald - mosaic-projekt@uni-greifswald.de
+ * Copyright (C) 2013 - 2022 Independent Trusted Third Party of the University Medicine Greifswald
+ * 							kontakt-ths@uni-greifswald.de
  * 							concept and implementation
- * 							l. geidel
+ * 							l.geidel
  * 							web client
- * 							g. weiher
- * 							a. blumentritt
+ * 							a.blumentritt
+ * 							docker
+ * 							r.schuldt
  * 							please cite our publications
  * 							http://dx.doi.org/10.3414/ME14-01-0133
  * 							http://dx.doi.org/10.1186/s12967-015-0545-6
@@ -30,636 +31,356 @@ package org.emau.icmvc.ganimed.ttp.psn;
  * ###license-information-end###
  */
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map.Entry;
+import java.util.Map;
 import java.util.Set;
 
-import javax.ejb.EJB;
+import javax.ejb.ConcurrencyManagement;
+import javax.ejb.ConcurrencyManagementType;
 import javax.ejb.Remote;
 import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
 import javax.jws.WebService;
 import javax.jws.soap.SOAPBinding;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 
-import org.apache.log4j.Logger;
-import org.emau.icmvc.ganimed.ttp.psn.dto.HashMapWrapper;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.emau.icmvc.ganimed.ttp.psn.dto.InsertPairExceptionDTO;
+import org.emau.icmvc.ganimed.ttp.psn.dto.PSNNetDTO;
 import org.emau.icmvc.ganimed.ttp.psn.dto.PSNTreeDTO;
-import org.emau.icmvc.ganimed.ttp.psn.exceptions.CharNotInAlphabetException;
+import org.emau.icmvc.ganimed.ttp.psn.enums.AnonymisationResult;
+import org.emau.icmvc.ganimed.ttp.psn.enums.DeletionResult;
 import org.emau.icmvc.ganimed.ttp.psn.exceptions.DBException;
 import org.emau.icmvc.ganimed.ttp.psn.exceptions.DeletionForbiddenException;
-import org.emau.icmvc.ganimed.ttp.psn.exceptions.InvalidAlphabetException;
-import org.emau.icmvc.ganimed.ttp.psn.exceptions.InvalidCheckDigitClassException;
-import org.emau.icmvc.ganimed.ttp.psn.exceptions.InvalidGeneratorException;
+import org.emau.icmvc.ganimed.ttp.psn.exceptions.DomainIsFullException;
+import org.emau.icmvc.ganimed.ttp.psn.exceptions.InsertPairException;
 import org.emau.icmvc.ganimed.ttp.psn.exceptions.InvalidPSNException;
+import org.emau.icmvc.ganimed.ttp.psn.exceptions.InvalidParameterException;
 import org.emau.icmvc.ganimed.ttp.psn.exceptions.PSNNotFoundException;
 import org.emau.icmvc.ganimed.ttp.psn.exceptions.UnknownDomainException;
 import org.emau.icmvc.ganimed.ttp.psn.exceptions.UnknownValueException;
 import org.emau.icmvc.ganimed.ttp.psn.exceptions.ValueIsAnonymisedException;
-import org.emau.icmvc.ganimed.ttp.psn.generator.Generator;
-import org.emau.icmvc.ganimed.ttp.psn.generator.GeneratorProperties;
 import org.emau.icmvc.ganimed.ttp.psn.internal.AnonymDomain;
-import org.emau.icmvc.ganimed.ttp.psn.internal.PSNTreeNode;
-import org.emau.icmvc.ganimed.ttp.psn.model.PSN;
-import org.emau.icmvc.ganimed.ttp.psn.model.PSNKey;
-import org.emau.icmvc.ganimed.ttp.psn.model.PSNKey_;
-import org.emau.icmvc.ganimed.ttp.psn.model.PSNProject;
-import org.emau.icmvc.ganimed.ttp.psn.model.PSN_;
 
-/**
- * webservice for pseudonyms
- * 
- * @author geidell
- * 
- */
 @WebService(name = "gpasService")
 @SOAPBinding(style = SOAPBinding.Style.RPC)
 @Stateless
 @Remote(PSNManager.class)
-@PersistenceContext(name = "psn")
-public class PSNManagerBean implements PSNManager {
-
-	private static final String PSN_NOT_FOUND = "*** PSN NOT FOUND ***";
-	private static final String VALUE_NOT_FOUND = "*** VALUE NOT FOUND ***";
-	private static final String VALUE_IS_ANONYMISED = "*** VALUE IS ANONYMISED ***";
-	private static final Logger logger = Logger.getLogger(PSNManagerBean.class);
-	@PersistenceContext
-	private EntityManager em;
-	private static final Object emSynchronizerDummy = new Object();
-	@EJB
-	private DomainManagerLocal domainManager;
-	private static final int MAX_ATTEMPS_BEFORE_RESEED = 10;
-	private static final int MAX_RESEEDS = 5;
+@ConcurrencyManagement(ConcurrencyManagementType.BEAN)
+public class PSNManagerBean extends GPASServiceBase implements PSNManager
+{
+	private static final Logger LOGGER = LogManager.getLogger(PSNManagerBean.class);
 
 	@Override
-	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-	public String getOrCreatePseudonymFor(String value, String domain) throws DBException, InvalidGeneratorException, UnknownDomainException {
-		PSN result = null;
-		if (logger.isDebugEnabled()) {
-			logger.debug("pseudonym requested for value " + value + " within domain " + domain);
+	public String getOrCreatePseudonymFor(String value, String domainName) throws DBException, DomainIsFullException, InvalidParameterException, UnknownDomainException
+	{
+		if (LOGGER.isDebugEnabled())
+		{
+			LOGGER.debug("getOrCreatePseudonymFor for value " + value + " within domain " + domainName);
 		}
-		try {
-			result = getPSN(value, domain);
-			if (logger.isDebugEnabled()) {
-				logger.debug("pseudonym for value '" + value + "' within domain '" + domain + "' found in db");
-			}
-		} catch (UnknownValueException maybe) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("pseudonym for value " + value + " within domain " + domain + " not found - generate new");
-			}
-			PSNProject parent = getPSNProject(domain);
-			result = createPSN(parent, value, null);
-		}
-		return result.getPseudonym();
-	}
-
-	private PSNProject getPSNProject(String domain) throws UnknownDomainException {
-		PSNProject parent = em.find(PSNProject.class, domain);
-		if (parent == null) {
-			String message = "psn-project for domain '" + domain + "' not found";
-			logger.error(message);
-			throw new UnknownDomainException(message);
-		}
-		return parent;
-	}
-
-	private Generator getGeneratorFor(String domain) throws InvalidGeneratorException, UnknownDomainException {
-		try {
-			return domainManager.getGeneratorFor(domain);
-		} catch (InvalidAlphabetException | InvalidCheckDigitClassException e) {
-			String message = "exception while instanciating generator for domain '" + domain + "'";
-			logger.fatal(message, e);
-			throw new InvalidGeneratorException(message, e);
-		}
-	}
-
-	/**
-	 * 
-	 * @param parent
-	 * @param value
-	 * @param existingPseudonyms
-	 *            can be null - check is then performed against the db
-	 * @return
-	 * @throws DBException
-	 * @throws InvalidGeneratorException
-	 * @throws UnknownDomainException
-	 */
-	private PSN createPSN(PSNProject parent, String value, HashSet<String> existingPseudonyms)
-			throws DBException, InvalidGeneratorException, UnknownDomainException {
-		PSN result;
-		// countCollisions - zaehler fuer kollisionen generiertes pseudonym -
-		// vorhandene pseudonyme (domain+pseudonym muss unique sein)
-		int countCollisions = 0;
-		// countReseeds - zaehler fuer generator.randomize() - sonst droht eine
-		// endlosschleife
-		int countReseeds = 0;
-		boolean done = false;
-		String pseudonym;
-		synchronized (emSynchronizerDummy) {
-			do {
-				pseudonym = getGeneratorFor(parent.getDomain()).getNewPseudonym();
-				if ((existingPseudonyms != null && existingPseudonyms.contains(pseudonym))
-						|| (existingPseudonyms == null && existsPseudonym(parent.getDomain(), pseudonym))) {
-					if (logger.isDebugEnabled()) {
-						logger.debug("duplicate pseudonym generated - attemp " + countCollisions + " of " + MAX_ATTEMPS_BEFORE_RESEED);
-					}
-					countCollisions++;
-					// sollte zu oft ein schon vorhandener psn generiert worden
-					// sein, den generator neu initialisieren
-					if (countCollisions > MAX_ATTEMPS_BEFORE_RESEED) {
-						countReseeds++;
-						if (countReseeds > MAX_RESEEDS) {
-							// der generator wurde mehrfach neu initialisiert,
-							// abbruch
-							String message = "generator reseeded " + MAX_RESEEDS + " times but the generated pseudonym is still duplicate";
-							logger.error(message);
-							throw new DBException(message);
-						}
-						countCollisions = 0;
-						if (logger.isInfoEnabled()) {
-							logger.info("max attemps (" + MAX_ATTEMPS_BEFORE_RESEED + ") for generating a pseudonym expended - reseed the generator");
-						}
-						getGeneratorFor(parent.getDomain()).randomize();
-					}
-				} else {
-					done = true;
-				}
-			} while (!done);
-			result = new PSN(parent, value, pseudonym);
-			em.persist(result);
-			parent.getPsnList().add(result);
-		}
-		return result;
-	}
-
-	private boolean existsPseudonym(String domain, String pseudonym) {
-		return !getPSNObjects(domain, pseudonym).isEmpty();
-	}
-
-	private List<PSN> getPSNObjects(String domain, String pseudonym) {
-		CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
-		CriteriaQuery<PSN> criteriaQuery = criteriaBuilder.createQuery(PSN.class);
-		Root<PSN> root = criteriaQuery.from(PSN.class);
-		Predicate predicate = criteriaBuilder.and(criteriaBuilder.equal(root.get(PSN_.pseudonym), pseudonym),
-				criteriaBuilder.equal(root.get(PSN_.key).get(PSNKey_.domain), domain));
-		criteriaQuery.select(root).where(predicate);
-		return em.createQuery(criteriaQuery).getResultList();
-	}
-
-	private List<PSN> getAllPSNObjects(String domain) {
-		if (logger.isDebugEnabled()) {
-			logger.debug("get all entries for domain " + domain);
-		}
-		CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
-		CriteriaQuery<PSN> criteriaQuery = criteriaBuilder.createQuery(PSN.class);
-		Root<PSN> root = criteriaQuery.from(PSN.class);
-		Predicate predicate = criteriaBuilder.equal(root.get(PSN_.key).get(PSNKey_.domain), domain);
-		criteriaQuery.select(root).where(predicate);
-		List<PSN> result = em.createQuery(criteriaQuery).getResultList();
-		if (logger.isDebugEnabled()) {
-			logger.debug("found " + result.size() + " entries for domain " + domain);
-		}
-		return result;
-	}
-
-	private List<PSN> getAllPSNObjectsForValuePrefix(String domain, String valuePrefix) {
-		if (logger.isDebugEnabled()) {
-			logger.debug("get all entries for domain '" + domain + "' where the value starts with '" + valuePrefix + "'");
-		}
-		CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
-		CriteriaQuery<PSN> criteriaQuery = criteriaBuilder.createQuery(PSN.class);
-		Root<PSN> root = criteriaQuery.from(PSN.class);
-		Predicate predicate = criteriaBuilder.and(criteriaBuilder.equal(root.get(PSN_.key).get(PSNKey_.domain), domain),
-				criteriaBuilder.like(root.get(PSN_.key).get(PSNKey_.originalValue), valuePrefix + '%'));
-		criteriaQuery.select(root).where(predicate);
-		List<PSN> result = em.createQuery(criteriaQuery).getResultList();
-		if (logger.isDebugEnabled()) {
-			logger.debug("found " + result.size() + " entries for domain '" + domain + "' where the value starts with '" + valuePrefix + "'");
+		checkParameter(value, "value");
+		checkParameter(domainName, "domainName");
+		String result = cache.getOrCreatePseudonymFor(value, domainName);
+		if (LOGGER.isDebugEnabled())
+		{
+			LOGGER.debug("getOrCreatePseudonymFor for value " + value + " within domain " + domainName + " succeed");
 		}
 		return result;
 	}
 
 	@Override
-	public String getPseudonymFor(String value, String domain) throws UnknownValueException {
-		if (logger.isDebugEnabled()) {
-			logger.debug("pseudonym requested for value " + value + " within domain " + domain);
+	public String getPseudonymFor(String value, String domainName) throws InvalidParameterException, UnknownDomainException, UnknownValueException
+	{
+		if (LOGGER.isDebugEnabled())
+		{
+			LOGGER.debug("getPseudonymFor for value " + value + " within domain " + domainName);
 		}
-		PSN result = getPSN(value, domain);
-		return result.getPseudonym();
-	}
-
-	private PSN getPSN(String value, String domain) throws UnknownValueException {
-		// zusammengesetzter primary key
-		PSNKey key = new PSNKey(value, domain);
-		PSN result = em.find(PSN.class, key);
-		if (result == null) {
-			String message = "value '" + value + "' for domain '" + domain + "' not found";
-			logger.error(message);
-			throw new UnknownValueException(message);
+		checkParameter(value, "value");
+		checkParameter(domainName, "domainName");
+		String result = cache.getPseudonymFor(value, domainName);
+		if (LOGGER.isDebugEnabled())
+		{
+			LOGGER.debug("getPseudonymFor for value " + value + " within domain " + domainName + " succeed");
 		}
 		return result;
 	}
 
 	@Override
-	public void anonymiseEntry(String value, String domain) throws DBException, UnknownValueException, ValueIsAnonymisedException {
-		if (logger.isDebugEnabled()) {
-			logger.debug("anonymising a pseudonym for domain '" + domain + "'");
+	public void anonymiseEntry(String value, String domainName) throws DBException, InvalidParameterException, UnknownDomainException, UnknownValueException, ValueIsAnonymisedException
+	{
+		if (LOGGER.isDebugEnabled())
+		{
+			LOGGER.debug("anonymiseEntry for domain " + domainName);
 		}
-		if (AnonymDomain.NAME.equals(domain)) {
-			logger.warn("it's not possible to anonymise values for the intern domain '" + AnonymDomain.NAME + "'");
-			return;
+		checkParameter(value, "value");
+		checkParameter(domainName, "domainName");
+		if (AnonymDomain.NAME.equals(domainName))
+		{
+			String message = "it's not possible to anonymise values for the intern domain " + AnonymDomain.NAME;
+			LOGGER.error(message);
+			throw new InvalidParameterException(message);
 		}
-		if (isAnonymised(value)) {
-			String message = "value " + value + " is already anonymised";
-			logger.info(message);
-			throw new ValueIsAnonymisedException(message);
-		}
-		synchronized (emSynchronizerDummy) {
-			PSN origEntity = getPSN(value, domain);
-			if (origEntity != null) {
-				try {
-					String anonym = getOrCreatePseudonymFor(domain + AnonymDomain.DELIMITER + origEntity.getPseudonym(), AnonymDomain.NAME);
-
-					PSNProject parent = origEntity.getPSNProject();
-					em.remove(origEntity);
-					parent.getPsnList().remove(origEntity);
-					em.flush();
-
-					insertValuePseudonymPair(anonym, origEntity.getPseudonym(), parent.getDomain());
-
-					if (logger.isInfoEnabled()) {
-						logger.info("pseudonym '" + origEntity.getPseudonym() + "' within domain '" + domain + "' anonymised");
-					}
-				} catch (Exception e) {
-					logger.error("error while anonymising psn entry", e);
-					throw new DBException(e);
-				}
-			} else {
-				String message = "pseudonym for value '" + value + "' not found within domain '" + domain + "'";
-				logger.warn(message);
-				throw new DBException(message);
-			}
+		cache.anonymiseEntry(value, domainName);
+		if (LOGGER.isDebugEnabled())
+		{
+			LOGGER.debug("entry for domain " + domainName + " anonymised");
 		}
 	}
 
 	@Override
-	public void deleteEntry(String value, String domain) throws DeletionForbiddenException, UnknownDomainException, UnknownValueException {
-		if (logger.isDebugEnabled()) {
-			logger.debug("removing value-pseudonym-pair for value '" + value + "' from domain '" + domain + "'");
+	public Map<String, AnonymisationResult> anonymiseEntries(Set<String> values, String domainName) throws DBException, InvalidParameterException, UnknownDomainException
+	{
+		if (LOGGER.isDebugEnabled())
+		{
+			LOGGER.debug("anonymiseEntries for " + values.size() + " for domain " + domainName);
 		}
-		if (!deletablePSNsForDomain(domain)) {
-			String message = "the domain '" + domain + "' does not allow deletion of value-pseudonym-pairs";
-			logger.warn(message);
-			throw new DeletionForbiddenException(message);
-		} else {
-			PSN psn = getPSN(value, domain);
-			synchronized (emSynchronizerDummy) {
-				psn.getPSNProject().getPsnList().remove(psn);
-				em.remove(psn);
-			}
+		checkParameter(values, "values");
+		checkParameter(domainName, "domainName");
+		if (AnonymDomain.NAME.equals(domainName))
+		{
+			String message = "it's not possible to anonymise values for the intern domain " + AnonymDomain.NAME;
+			LOGGER.error(message);
+			throw new InvalidParameterException(message);
 		}
-		logger.warn("value-pseudonym-pair for value '" + value + "' removed from domain '" + domain + "'");
-	}
-
-	private boolean deletablePSNsForDomain(String domain) throws UnknownDomainException {
-		PSNProject project = getPSNProject(domain);
-		String property = project.getProperties().getOrDefault(GeneratorProperties.PSNS_DELETABLE, "");
-		return "true".equalsIgnoreCase(property);
-	}
-
-	@Override
-	public void validatePSN(String psn, String domain) throws InvalidPSNException, InvalidGeneratorException, UnknownDomainException {
-		if (logger.isDebugEnabled()) {
-			logger.debug("validate pseudonym '" + psn + "' within domain '" + domain + "'");
-		}
-		try {
-			getGeneratorFor(domain).check(psn);
-		} catch (CharNotInAlphabetException e) {
-			throw new InvalidPSNException(e);
-		}
-	}
-
-	@Override
-	public String getValueFor(String psn, String domain)
-			throws InvalidPSNException, PSNNotFoundException, InvalidGeneratorException, UnknownDomainException, ValueIsAnonymisedException {
-		String result = "";
-		if (logger.isDebugEnabled()) {
-			logger.debug("find value for pseudonym '" + psn + "' within domain '" + domain + "'");
-		}
-		validatePSN(psn, domain);
-		List<PSN> resultList = getPSNObjects(domain, psn);
-		if (resultList.size() == 1) {
-			result = resultList.get(0).getKey().getOriginValue();
-		} else if (resultList.isEmpty()) {
-			String message = "value for pseudonym '" + psn + "' not found within domain '" + domain + "'";
-			logger.warn(message);
-			throw new PSNNotFoundException(message);
-		} else {
-			String message = "found multiple values for pseudonym '" + psn + "' within domain '" + domain + "' - may be a jpa-caching problem";
-			logger.fatal(message);
-			throw new InvalidPSNException(message);
-		}
-		if (isAnonymised(result)) {
-			String message = "requested value for pseudonym " + psn + " can't be retrieved - it is anonymised";
-			logger.info(message);
-			throw new ValueIsAnonymisedException(message);
+		Map<String, AnonymisationResult> result = cache.anonymiseEntries(values, domainName);
+		if (LOGGER.isDebugEnabled())
+		{
+			LOGGER.debug(values.size() + " entries for domain " + domainName + " anonymised");
 		}
 		return result;
 	}
 
-	private boolean isAnonymised(String value) {
-		return value.startsWith(AnonymDomain.PREFIX) && value.endsWith(AnonymDomain.SUFFIX);
+	@Override
+	public boolean isAnonym(String value) throws InvalidParameterException
+	{
+		if (LOGGER.isDebugEnabled())
+		{
+			LOGGER.debug("isAnonym for value " + value);
+		}
+		checkParameter(value, "value");
+		boolean result = cache.isAnonym(value);
+		if (LOGGER.isDebugEnabled())
+		{
+			LOGGER.debug(value + " is " + (result ? "an" : "no") + " anonym");
+		}
+		return result;
 	}
 
 	@Override
-	public HashMapWrapper<String, String> getOrCreatePseudonymForList(Set<String> values, String domain)
-			throws DBException, InvalidGeneratorException, UnknownDomainException {
-		if (values == null) {
-			logger.warn("parameter 'values' must not be null");
-			values = new HashSet<String>();
+	public boolean isAnonymised(String psn, String domainName) throws InvalidParameterException, InvalidPSNException, UnknownDomainException, PSNNotFoundException
+	{
+		if (LOGGER.isDebugEnabled())
+		{
+			LOGGER.debug("isAnonymised for psn " + psn + " within domain " + domainName);
 		}
-		if (logger.isInfoEnabled()) {
-			logger.info("get or create pseudonyms for " + values.size() + " values within domain '" + domain + "'");
+		checkParameter(psn, "psn");
+		checkParameter(domainName, "domainName");
+		boolean result = cache.isAnonymised(psn, domainName);
+		if (LOGGER.isDebugEnabled())
+		{
+			LOGGER.debug(psn + " is " + (result ? "" : "not") + " anonymised within " + domainName);
 		}
-		HashMap<String, String> result = new HashMap<String, String>((int) Math.ceil(values.size() / 0.75));
-		if (values.size() < 100) {
-			// wenig eintraege - einzeln generieren
-			for (String value : values) {
-				result.put(value, getOrCreatePseudonymFor(value, domain));
-			}
-		} else {
-			// viele eintraege - alle holen und cachen
-			if (logger.isDebugEnabled()) {
-				logger.debug("many entries requested - using cache");
-			}
-			PSNProject parent = getPSNProject(domain);
-			List<PSN> psns = parent.getPsnList();
-			// genug platz, damit kein rehash passiert
-			HashSet<String> allPseudonyms = new HashSet<String>((int) Math.ceil((psns.size() + values.size()) / 0.75));
-			HashMap<String, String> valuePsnMap = new HashMap<String, String>((int) Math.ceil((psns.size() + values.size()) / 0.75));
-			for (PSN psn : psns) {
-				valuePsnMap.put(psn.getKey().getOriginValue(), psn.getPseudonym());
-				allPseudonyms.add(psn.getPseudonym());
-			}
-			int count = 0;
-			int countForBeep = values.size() / 50;
-			int beepNumber = 1;
-			for (String value : values) {
-				String pseudonym = valuePsnMap.get(value);
-				if (pseudonym != null) {
-					result.put(value, pseudonym);
-				} else {
-					pseudonym = createPSN(parent, value, allPseudonyms).getPseudonym();
-					result.put(value, pseudonym);
-					valuePsnMap.put(value, pseudonym);
-					allPseudonyms.add(pseudonym);
-				}
-				count++;
-				if (count == countForBeep) {
-					if (logger.isInfoEnabled()) {
-						logger.info("proceeded " + beepNumber * count + " of " + values.size() + " values");
-					}
-					beepNumber++;
-					count = 0;
-				}
-			}
-		}
-		return new HashMapWrapper<String, String>(result);
+		return result;
 	}
 
 	@Override
-	public HashMapWrapper<String, String> getValueForList(Set<String> psnList, String domain)
-			throws InvalidGeneratorException, InvalidPSNException, UnknownDomainException {
-		if (psnList == null) {
-			logger.warn("parameter 'psnList' must not be null");
-			psnList = new HashSet<String>();
+	public void deleteEntry(String value, String domainName) throws DeletionForbiddenException, InvalidParameterException, UnknownDomainException, UnknownValueException
+	{
+		if (LOGGER.isDebugEnabled())
+		{
+			LOGGER.debug("deleteEntry for value " + value + " from domain " + domainName);
 		}
-		if (logger.isDebugEnabled()) {
-			logger.debug("get original values for " + psnList.size() + " pseudonyms within domain '" + domain + "'");
-		}
-		HashMap<String, String> result = new HashMap<String, String>((int) Math.ceil(psnList.size() / 0.75));
-		if (psnList.size() < 100) {
-			// wenig eintraege - einzeln holen
-			for (String pseudonym : psnList) {
-				try {
-					result.put(pseudonym, getValueFor(pseudonym, domain));
-				} catch (PSNNotFoundException e) {
-					result.put(pseudonym, PSN_NOT_FOUND);
-				} catch (ValueIsAnonymisedException e) {
-					result.put(pseudonym, VALUE_IS_ANONYMISED);
-				}
-			}
-		} else {
-			// viele eintraege - alle holen und cachen
-			if (logger.isDebugEnabled()) {
-				logger.debug("many entries requested - using cache");
-			}
-			List<PSN> psns = getAllPSNObjects(domain);
-			// genug platz, damit kein rehash passiert
-			HashMap<String, String> psnValueMap = new HashMap<String, String>((int) Math.ceil(psns.size() / 0.75));
-			for (PSN psn : psns) {
-				psnValueMap.put(psn.getPseudonym(), psn.getKey().getOriginValue());
-			}
-			for (String pseudonym : psnList) {
-				String value = psnValueMap.get(pseudonym);
-				if (value == null) {
-					logger.warn("value for pseudonym '" + pseudonym + "' not found within domain '" + domain + "'");
-					result.put(pseudonym, PSN_NOT_FOUND);
-				} else if (isAnonymised(value)) {
-					if (logger.isInfoEnabled()) {
-						logger.info("requested value for pseudonym " + pseudonym + " can't be retrieved - it is anonymised");
-					}
-					result.put(pseudonym, VALUE_IS_ANONYMISED);
-				} else {
-					result.put(pseudonym, value);
-				}
-			}
-		}
-		return new HashMapWrapper<String, String>(result);
-	}
-
-	@Override
-	public HashMapWrapper<String, String> getPseudonymForList(Set<String> values, String domain) {
-		if (values == null) {
-			logger.warn("parameter 'psnList' must not be null");
-			values = new HashSet<String>();
-		}
-		if (logger.isInfoEnabled()) {
-			logger.info("get pseudonyms for " + values.size() + " values within domain '" + domain + "'");
-		}
-		HashMap<String, String> result = new HashMap<String, String>((int) Math.ceil(values.size() / 0.75));
-		if (values.size() < 100) {
-			for (String value : values) {
-				try {
-					result.put(value, getPseudonymFor(value, domain));
-				} catch (UnknownValueException e) {
-					result.put(value, VALUE_NOT_FOUND);
-				}
-			}
-		} else {
-			// viele eintraege - alle holen und cachen
-			if (logger.isDebugEnabled()) {
-				logger.debug("many entries requested - using cache");
-			}
-			List<PSN> psns = getAllPSNObjects(domain);
-			// genug platz, damit kein rehash passiert
-			HashMap<String, String> valuePsnMap = new HashMap<String, String>((int) Math.ceil(psns.size() / 0.75));
-			for (PSN psn : psns) {
-				valuePsnMap.put(psn.getKey().getOriginValue(), psn.getPseudonym());
-			}
-			for (String value : values) {
-				String pseudonym = valuePsnMap.get(value);
-				if (pseudonym == null) {
-					logger.warn("pseudonym for value '" + value + "' not found within domain '" + domain + "'");
-					result.put(value, VALUE_NOT_FOUND);
-				} else {
-					result.put(value, pseudonym);
-				}
-			}
-		}
-		return new HashMapWrapper<String, String>(result);
-	}
-
-	@Override
-	public HashMapWrapper<String, String> getPseudonymForValuePrefix(String valuePrefix, String domain) {
-		if (logger.isInfoEnabled()) {
-			logger.info("get pseudonyms for values which starts with '" + valuePrefix + "' within domain '" + domain + "'");
-		}
-		HashMap<String, String> result = new HashMap<String, String>();
-		List<PSN> psnList = getAllPSNObjectsForValuePrefix(domain, valuePrefix);
-		for (PSN psn : psnList) {
-			result.put(psn.getKey().getOriginValue(), psn.getPseudonym());
-		}
-		return new HashMapWrapper<String, String>(result);
-	}
-
-	@Override
-	public void insertValuePseudonymPair(String value, String pseudonym, String domain)
-			throws DBException, InvalidGeneratorException, InvalidPSNException, UnknownDomainException {
-		if (logger.isInfoEnabled()) {
-			logger.info("insert pseudonym for '" + value + "' in domain '" + domain + "'");
-		}
-		PSNProject parent = getPSNProject(domain);
-		validatePSN(pseudonym, domain);
-		PSNKey key = new PSNKey(value, domain);
-		PSN psn = em.find(PSN.class, key);
-		if (psn != null) {
-			if (psn.getPseudonym().equals(pseudonym)) {
-				logger.warn("pseudonym for value '" + value + "' already exists within domain '" + domain + "'");
-				return;
-			} else {
-				String message = "a different pseudonym for value '" + value + "' already exists within domain '" + domain + "'";
-				logger.error(message);
-				throw new DBException(message);
-			}
-		} else if (existsPseudonym(domain, pseudonym)) {
-			// erst nach der pruefung auf value, da nur eine warnung
-			// kommen soll, wenn das paar genau so schon exisitert
-			String message = "pseudonym '" + pseudonym + "' already exists within domain '" + domain + "'";
-			logger.error(message);
-			throw new DBException(message);
-		}
-		synchronized (emSynchronizerDummy) {
-			psn = new PSN(parent, value, pseudonym);
-			em.persist(psn);
-			parent.getPsnList().add(psn);
-		}
-		if (logger.isInfoEnabled()) {
-			logger.info("pseudonym for '" + value + "' in domain '" + domain + "' inserted");
+		checkParameter(value, "value");
+		checkParameter(domainName, "domainName");
+		cache.deleteEntry(value, domainName);
+		if (LOGGER.isDebugEnabled())
+		{
+			LOGGER.debug("value-pseudonym-pair for value " + value + " removed from domain " + domainName);
 		}
 	}
 
 	@Override
-	public void insertValuePseudonymPairs(HashMapWrapper<String, String> pairs, String domain)
-			throws DBException, InvalidGeneratorException, InvalidPSNException, UnknownDomainException {
-		if (pairs == null) {
-			logger.warn("parameter 'pairs' should not be null");
-			pairs = new HashMapWrapper<String, String>();
+	public Map<String, DeletionResult> deleteEntries(Set<String> values, String domainName) throws DeletionForbiddenException, InvalidParameterException, UnknownDomainException
+	{
+		if (LOGGER.isDebugEnabled())
+		{
+			LOGGER.debug("deleteEntries for " + values.size() + " values from domain " + domainName);
 		}
-		if (logger.isInfoEnabled()) {
-			logger.info("insert " + pairs.getMap().size() + " values-pseudonym pairs in domain '" + domain + "'");
+		Map<String, DeletionResult> result = cache.deleteEntries(values, domainName);
+		if (LOGGER.isDebugEnabled())
+		{
+			LOGGER.debug("deleted " + values.size() + " entries from domain " + domainName);
 		}
-		PSNProject parent = getPSNProject(domain);
-		synchronized (emSynchronizerDummy) {
-			List<String> duplicates = new ArrayList<String>();
-			for (Entry<String, String> entry : pairs.getMap().entrySet()) {
-				validatePSN(entry.getValue(), domain);
-				PSNKey key = new PSNKey(entry.getKey(), domain);
-				PSN psn = em.find(PSN.class, key);
-				if (psn != null) {
-					if (psn.getPseudonym().equals(entry.getValue())) {
-						logger.warn("pseudonym for value '" + entry.getKey() + "' already exists within domain '" + domain + "'");
-						duplicates.add(entry.getKey());
-					} else {
-						String message = "a different pseudonym for value '" + entry.getKey() + "' already exists within domain '" + domain + "'";
-						logger.error(message);
-						throw new DBException(message);
-					}
-				} else if (existsPseudonym(domain, entry.getValue())) {
-					// erst nach der pruefung auf value, da nur eine warnung
-					// kommen soll, wenn das paar genau so schon exisitert
-					String message = "pseudonym '" + entry.getValue() + "' already exists within domain '" + domain + "'";
-					logger.error(message);
-					throw new DBException(message);
-				}
-			}
-			for (String duplicate : duplicates) {
-				pairs.getMap().remove(duplicate);
-			}
-			synchronized (emSynchronizerDummy) {
-				for (Entry<String, String> entry : pairs.getMap().entrySet()) {
-					PSN psn = new PSN(parent, entry.getKey(), entry.getValue());
-					em.persist(psn);
-					parent.getPsnList().add(psn);
-				}
-			}
+		return result;
+	}
+
+	@Override
+	public void validatePSN(String psn, String domainName) throws InvalidParameterException, InvalidPSNException, UnknownDomainException
+	{
+		if (LOGGER.isDebugEnabled())
+		{
+			LOGGER.debug("validatePSN " + psn + " within domain " + domainName);
 		}
-		if (logger.isInfoEnabled()) {
-			logger.info("inserted " + pairs.getMap().size() + " values-pseudonym pairs in domain '" + domain + "'");
+		checkParameter(psn, "psn");
+		checkParameter(domainName, "domainName");
+		cache.validatePSN(psn, domainName);
+		if (LOGGER.isDebugEnabled())
+		{
+			LOGGER.debug(psn + " within domain " + domainName + " is valid");
 		}
 	}
 
 	@Override
-	public PSNTreeDTO getPSNTreeForPSN(String psn, String domain) throws DBException, UnknownDomainException, InvalidPSNException,
-			PSNNotFoundException, InvalidGeneratorException, ValueIsAnonymisedException {
-		PSNProject currentProject = getPSNProject(domain);
-		String currentPSN = psn;
-
-		// Zum Root Projekt zurueckiterieren
-		while (currentProject.getParent() != null) {
-			currentPSN = getValueFor(currentPSN, currentProject.getDomain());
-			currentProject = getPSNProject(currentProject.getParent().getDomain());
+	public String getValueFor(String psn, String domainName)
+			throws InvalidPSNException, PSNNotFoundException, InvalidParameterException, UnknownDomainException, ValueIsAnonymisedException
+	{
+		if (LOGGER.isDebugEnabled())
+		{
+			LOGGER.debug("getValueFor for pseudonym " + psn + " within domain " + domainName);
 		}
-		// Initiales hinzufuegen des Root Nodes. Bei diesem wird der originalValue des aktuellen Projektes verwendet und nicht das Pseudonym
-		PSNTreeNode rootNode = new PSNTreeNode("ROOT", getValueFor(currentPSN, currentProject.getDomain()));
-		rootNode.getChildren().add(createPSNTree(currentPSN, currentProject));
-		return rootNode.toDTO();
+		checkParameter(psn, "psn");
+		checkParameter(domainName, "domainName");
+		String result = cache.getValueFor(psn, domainName);
+		if (LOGGER.isDebugEnabled())
+		{
+			LOGGER.debug("found value for pseudonym " + psn + " within domain " + domainName);
+		}
+		return result;
 	}
 
-	/**
-	 * Recursively traverse deeper into psn_projects until all projects related to the passed originalValue and project are found
-	 * 
-	 * @return a PSNTreeNode containing child nodes, child child nodes and so on
-	 */
-	private PSNTreeNode createPSNTree(String originalValue, PSNProject project) {
-		PSNTreeNode currentNode = new PSNTreeNode(project.getDomain(), originalValue);
-		for (PSNProject child : project.getChildren()) {
-			try {
-				String nextPSN = getPseudonymFor(originalValue, child.getDomain());
-				currentNode.getChildren().add(createPSNTree(nextPSN, child));
-			} catch (UnknownValueException e) {
-				logger.warn("Unexpected exception: no pseudonym available in domain: " + child.getDomain() + " for originalValue: " + originalValue);
-			}
+	@Override
+	public Map<String, String> getOrCreatePseudonymForList(Set<String> values, String domainName)
+			throws DBException, DomainIsFullException, InvalidParameterException, UnknownDomainException
+	{
+		if (LOGGER.isDebugEnabled())
+		{
+			LOGGER.debug("getOrCreatePseudonymForList for " + values.size() + " values within domain " + domainName);
 		}
-		return currentNode;
+		checkParameter(values, "values");
+		checkParameter(domainName, "domainName");
+		Map<String, String> result = cache.getOrCreatePseudonymForList(values, domainName);
+		if (LOGGER.isDebugEnabled())
+		{
+			LOGGER.debug("proceeded " + result.size() + " values");
+		}
+		return result;
+	}
+
+	@Override
+	public Map<String, String> getValueForList(Set<String> psnList, String domainName) throws InvalidParameterException, UnknownDomainException
+	{
+		if (LOGGER.isDebugEnabled())
+		{
+			LOGGER.debug("getValueForList for " + psnList.size() + " pseudonyms within domain " + domainName);
+		}
+		checkParameter(psnList, "psnList");
+		checkParameter(domainName, "domainName");
+		Map<String, String> result = cache.getValueForList(psnList, domainName);
+		if (LOGGER.isDebugEnabled())
+		{
+			LOGGER.debug("proceeded " + result.size() + " pseudonyms");
+		}
+		return result;
+	}
+
+	@Override
+	public Map<String, String> getPseudonymForList(Set<String> values, String domainName) throws InvalidParameterException, UnknownDomainException
+	{
+		if (LOGGER.isDebugEnabled())
+		{
+			LOGGER.debug("getPseudonymForList for " + values.size() + " values within domain " + domainName);
+		}
+		checkParameter(values, "values");
+		checkParameter(domainName, "domainName");
+		Map<String, String> result = cache.getPseudonymForList(values, domainName);
+		if (LOGGER.isDebugEnabled())
+		{
+			LOGGER.debug("proceeded " + result.size() + " values");
+		}
+		return result;
+	}
+
+	@Override
+	public Map<String, String> getPseudonymForValuePrefix(String valuePrefix, String domainName) throws InvalidParameterException, UnknownDomainException
+	{
+		if (LOGGER.isDebugEnabled())
+		{
+			LOGGER.debug("getPseudonymForValuePrefix for " + valuePrefix + " within domain " + domainName);
+		}
+		checkParameter(valuePrefix, "valuePrefix");
+		checkParameter(domainName, "domainName");
+		Map<String, String> result = cache.getPseudonymForValuePrefix(valuePrefix, domainName);
+		if (LOGGER.isDebugEnabled())
+		{
+			LOGGER.debug("found " + result.size() + " pseudonyms");
+		}
+		return result;
+	}
+
+	@Override
+	public void insertValuePseudonymPair(String value, String pseudonym, String domainName) throws InsertPairException, InvalidParameterException, UnknownDomainException
+	{
+		if (LOGGER.isDebugEnabled())
+		{
+			LOGGER.debug("insertValuePseudonymPair for value " + value + " in domain " + domainName);
+		}
+		checkParameter(value, "value");
+		checkParameter(pseudonym, "pseudonym");
+		checkParameter(domainName, "domainName");
+		cache.insertValuePseudonymPair(value, pseudonym, domainName);
+		if (LOGGER.isDebugEnabled())
+		{
+			LOGGER.debug("persisted pseudonym for " + value + " in domain " + domainName);
+		}
+	}
+
+	@Override
+	public List<InsertPairExceptionDTO> insertValuePseudonymPairs(Map<String, String> pairs, String domainName) throws InvalidParameterException, UnknownDomainException
+	{
+		if (LOGGER.isDebugEnabled())
+		{
+			LOGGER.debug("insertValuePseudonymPairs for " + pairs.size() + " value-pseudonym pairs in domain " + domainName);
+		}
+		checkParameter(pairs, "pairs");
+		checkParameter(domainName, "domainName");
+		List<InsertPairExceptionDTO> result = cache.insertValuePseudonymPairs(pairs, domainName);
+		if (LOGGER.isDebugEnabled())
+		{
+			LOGGER.debug("inserted " + (pairs.size() - result.size()) + " value-pseudonym pairs in domain " + domainName + ". " + result.size() + " errors occurred");
+		}
+		return result;
+	}
+
+	@Override
+	public PSNTreeDTO getPSNTreeForPSN(String psn, String domainName)
+			throws InvalidParameterException, InvalidPSNException, PSNNotFoundException, UnknownDomainException, ValueIsAnonymisedException
+	{
+		if (LOGGER.isDebugEnabled())
+		{
+			LOGGER.debug("getPSNTreeForPSN for " + psn + " within domain " + domainName);
+		}
+		checkParameter(psn, "psn");
+		checkParameter(domainName, "domainName");
+		PSNTreeDTO result = cache.getPSNTreeForPSN(psn, domainName);
+		if (LOGGER.isDebugEnabled())
+		{
+			LOGGER.debug("psn tree created");
+		}
+		return result;
+	}
+
+	@Override
+	public PSNNetDTO getPSNNetFor(String valueOrPSN) throws InvalidParameterException
+	{
+		if (LOGGER.isDebugEnabled())
+		{
+			LOGGER.debug("getPSNNetFor for value or psn " + valueOrPSN);
+		}
+		checkParameter(valueOrPSN, "valueOrPSN");
+		PSNNetDTO result = cache.getPSNNetFor(valueOrPSN);
+		if (LOGGER.isDebugEnabled())
+		{
+			LOGGER.debug("psn net created");
+		}
+		return result;
 	}
 }

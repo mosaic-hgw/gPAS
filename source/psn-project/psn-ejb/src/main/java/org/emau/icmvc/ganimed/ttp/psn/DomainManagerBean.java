@@ -1,16 +1,17 @@
 package org.emau.icmvc.ganimed.ttp.psn;
 
-/*
+/*-
  * ###license-information-start###
  * gPAS - a Generic Pseudonym Administration Service
  * __
- * Copyright (C) 2013 - 2017 The MOSAIC Project - Institut fuer Community Medicine der
- * 							Universitaetsmedizin Greifswald - mosaic-projekt@uni-greifswald.de
+ * Copyright (C) 2013 - 2022 Independent Trusted Third Party of the University Medicine Greifswald
+ * 							kontakt-ths@uni-greifswald.de
  * 							concept and implementation
- * 							l. geidel
+ * 							l.geidel
  * 							web client
- * 							g. weiher
- * 							a. blumentritt
+ * 							a.blumentritt
+ * 							docker
+ * 							r.schuldt
  * 							please cite our publications
  * 							http://dx.doi.org/10.3414/ME14-01-0133
  * 							http://dx.doi.org/10.1186/s12967-015-0545-6
@@ -30,381 +31,281 @@ package org.emau.icmvc.ganimed.ttp.psn;
  * ###license-information-end###
  */
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
-import javax.ejb.Local;
+import javax.ejb.ConcurrencyManagement;
+import javax.ejb.ConcurrencyManagementType;
 import javax.ejb.Remote;
 import javax.ejb.Stateless;
 import javax.jws.WebService;
 import javax.jws.soap.SOAPBinding;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
 
-import org.apache.log4j.Logger;
-import org.emau.icmvc.ganimed.ttp.psn.alphabets.GenericAlphabet;
-import org.emau.icmvc.ganimed.ttp.psn.dto.DomainDTO;
-import org.emau.icmvc.ganimed.ttp.psn.dto.DomainLightDTO;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.emau.icmvc.ganimed.ttp.psn.config.PaginationConfig;
+import org.emau.icmvc.ganimed.ttp.psn.dto.DomainInDTO;
+import org.emau.icmvc.ganimed.ttp.psn.dto.DomainOutDTO;
 import org.emau.icmvc.ganimed.ttp.psn.dto.PSNDTO;
+import org.emau.icmvc.ganimed.ttp.psn.enums.GeneratorAlphabetRestriction;
 import org.emau.icmvc.ganimed.ttp.psn.exceptions.DomainInUseException;
 import org.emau.icmvc.ganimed.ttp.psn.exceptions.InvalidAlphabetException;
 import org.emau.icmvc.ganimed.ttp.psn.exceptions.InvalidCheckDigitClassException;
-import org.emau.icmvc.ganimed.ttp.psn.exceptions.InvalidDomainNameException;
 import org.emau.icmvc.ganimed.ttp.psn.exceptions.InvalidGeneratorException;
+import org.emau.icmvc.ganimed.ttp.psn.exceptions.InvalidParameterException;
+import org.emau.icmvc.ganimed.ttp.psn.exceptions.InvalidParentDomainException;
 import org.emau.icmvc.ganimed.ttp.psn.exceptions.UnknownDomainException;
-import org.emau.icmvc.ganimed.ttp.psn.generator.Alphabet;
-import org.emau.icmvc.ganimed.ttp.psn.generator.CheckDigits;
-import org.emau.icmvc.ganimed.ttp.psn.generator.Generator;
-import org.emau.icmvc.ganimed.ttp.psn.generator.GeneratorProperties;
-import org.emau.icmvc.ganimed.ttp.psn.internal.AnonymDomain;
-import org.emau.icmvc.ganimed.ttp.psn.internal.Cache;
-import org.emau.icmvc.ganimed.ttp.psn.model.PSN;
-import org.emau.icmvc.ganimed.ttp.psn.model.PSNKey_;
-import org.emau.icmvc.ganimed.ttp.psn.model.PSNProject;
-import org.emau.icmvc.ganimed.ttp.psn.model.PSN_;
 
-/**
- * webservice for domains (psn-projects)
- * <p>
- * including a cache for the generator classes
- * 
- * @author geidell
- * 
- */
 @WebService(name = "DomainService")
 @SOAPBinding(style = SOAPBinding.Style.RPC)
 @Stateless
-@Local(DomainManagerLocal.class)
 @Remote(DomainManager.class)
-@PersistenceContext(name = "psn")
-public class DomainManagerBean implements DomainManagerLocal, DomainManager {
-
-	private static final Logger logger = Logger.getLogger(DomainManagerBean.class);
-	@PersistenceContext
-	private EntityManager em;
-	private static final Object emSynchronizerDummy = new Object();
+@ConcurrencyManagement(ConcurrencyManagementType.BEAN)
+public class DomainManagerBean extends GPASServiceBase implements DomainManager
+{
+	private static final Logger LOGGER = LogManager.getLogger(DomainManagerBean.class);
 
 	@Override
-	public Generator getGeneratorFor(String domain)
-			throws InvalidAlphabetException, InvalidCheckDigitClassException, InvalidGeneratorException, UnknownDomainException {
-		Generator result = null;
-		if (logger.isDebugEnabled()) {
-			logger.debug("requested generator for domain '" + domain + "'");
+	public void addDomain(DomainInDTO domainDTO)
+			throws DomainInUseException, InvalidAlphabetException, InvalidCheckDigitClassException, InvalidGeneratorException, InvalidParameterException, InvalidParentDomainException,
+			UnknownDomainException
+	{
+		String domainName = domainDTO.getName();
+		if (LOGGER.isInfoEnabled())
+		{
+			LOGGER.info("addDomain with name " + domainName);
 		}
-		result = Cache.getGenerator(domain);
-		if (result == null) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("generator not found within cache - create a new one");
-			}
-			PSNProject project = getPSNProject(domain);
-			result = createGenerator(project);
+		checkParameter(domainName, "domainName");
+		cache.addDomain(domainDTO);
+		if (LOGGER.isInfoEnabled())
+		{
+			LOGGER.info("new domain " + domainName + " persisted");
 		}
-		return result;
 	}
 
-	private Generator createGenerator(PSNProject project)
-			throws InvalidCheckDigitClassException, InvalidAlphabetException, InvalidGeneratorException {
-		Generator result;
-		if (logger.isInfoEnabled()) {
-			logger.info("create new generator for domain '" + project.getDomain() + "' with check digit class '" + project.getGeneratorClass()
-					+ "' and alphabet '" + project.getAlphabet() + "'");
+	@Override
+	public void updateDomain(DomainInDTO domainDTO)
+			throws DomainInUseException, InvalidAlphabetException, InvalidCheckDigitClassException, InvalidGeneratorException, InvalidParameterException, UnknownDomainException,
+			InvalidParentDomainException
+	{
+		String domainName = domainDTO.getName();
+		if (LOGGER.isInfoEnabled())
+		{
+			LOGGER.info("updateDomain with name " + domainName);
 		}
-		Class<? extends CheckDigits> checkDigitClass = createCheckDigitClass(project.getGeneratorClass());
-		Alphabet alphabet = createAlphabet(project.getDomain(), project.getAlphabet());
-		if (logger.isDebugEnabled()) {
-			logger.debug("creating generator");
+		checkParameter(domainName, "domainName");
+		cache.updateDomain(domainDTO);
+		if (LOGGER.isInfoEnabled())
+		{
+			LOGGER.info("domain " + domainName + " updated");
 		}
-		result = new Generator(checkDigitClass, alphabet, project.getProperties());
-		Cache.cacheGenerator(project.getDomain(), result);
-		return result;
 	}
 
-	private Alphabet createAlphabet(String domain, String alphabetString) throws InvalidAlphabetException {
-		Alphabet result;
-		if (alphabetString == null) {
-			String message = "alphabet is null";
-			logger.error(message);
-			throw new InvalidAlphabetException(message);
+	@Override
+	public void updateDomainInUse(String domainName, String label, String comment) throws InvalidParameterException, UnknownDomainException
+	{
+		if (LOGGER.isInfoEnabled())
+		{
+			LOGGER.info("updateDomainInUse with name " + domainName);
 		}
-		if (alphabetString.contains(",")) {
-			try {
-				if (logger.isDebugEnabled()) {
-					logger.debug("creating generic alphabet with following chars: " + alphabetString);
-				}
-				result = new GenericAlphabet(alphabetString);
-			} catch (Exception e) {
-				String message = "exception while creating alphabet '" + alphabetString + "' - " + e
-						+ (e.getCause() != null ? "(" + e.getCause() + ")" : "");
-				logger.error(message, e);
-				throw new InvalidAlphabetException(message, e);
-			}
-		} else {
-			Class<? extends Alphabet> alphabetClass;
-			try {
-				logger.debug("creating alphabet class");
-				Class<?> temp = Class.forName(alphabetString);
-				alphabetClass = temp.asSubclass(Alphabet.class);
-				result = alphabetClass.newInstance();
-			} catch (Exception e) {
-				String message = "exception while creating alphabet class '" + alphabetString + "' - " + e
-						+ (e.getCause() != null ? "(" + e.getCause() + ")" : "");
-				logger.error(message, e);
-				throw new InvalidAlphabetException(message, e);
-			}
+		checkParameter(domainName, "domainName");
+		cache.updateDomainInUse(domainName, label, comment);
+		if (LOGGER.isInfoEnabled())
+		{
+			LOGGER.info("domain " + domainName + " updated");
 		}
-		return result;
 	}
 
-	private Class<? extends CheckDigits> createCheckDigitClass(String checkDigitClass) throws InvalidCheckDigitClassException {
-		Class<? extends CheckDigits> result;
-		if (checkDigitClass == null) {
-			String message = "check digit class is null";
-			logger.error(message);
-			throw new InvalidCheckDigitClassException(message);
+	@Override
+	public void deleteDomain(String domainName) throws DomainInUseException, InvalidParameterException, UnknownDomainException
+	{
+		if (LOGGER.isInfoEnabled())
+		{
+			LOGGER.info("deleteDomain with name " + domainName);
 		}
-		try {
-			if (logger.isDebugEnabled()) {
-				logger.debug("loading check digit class");
-			}
-			Class<?> temp = Class.forName(checkDigitClass);
-			result = temp.asSubclass(CheckDigits.class);
-		} catch (Exception e) {
-			String message = "exception while loading check digit class '" + checkDigitClass + "' - " + e
-					+ (e.getCause() != null ? "(" + e.getCause() + ")" : "");
-			logger.error(message, e);
-			throw new InvalidCheckDigitClassException(message, e);
+		checkParameter(domainName, "domainName");
+		cache.deleteDomain(domainName);
+		if (LOGGER.isInfoEnabled())
+		{
+			LOGGER.info("domain " + domainName + " deleted");
+		}
+	}
+
+	@Override
+	public DomainOutDTO getDomain(String domainName) throws InvalidParameterException, UnknownDomainException
+	{
+		if (LOGGER.isDebugEnabled())
+		{
+			LOGGER.debug("getDomainObject with name " + domainName);
+		}
+		checkParameter(domainName, "domainName");
+		DomainOutDTO result = cache.getDomainDTO(domainName);
+		if (LOGGER.isDebugEnabled())
+		{
+			LOGGER.debug("domain found");
 		}
 		return result;
 	}
 
 	@Override
-	public void addDomain(DomainLightDTO domainDTO) throws InvalidDomainNameException, InvalidAlphabetException, InvalidCheckDigitClassException,
-			InvalidGeneratorException, DomainInUseException, UnknownDomainException {
-		if (logger.isInfoEnabled()) {
-			logger.info("try to create a new PSNProject for domain " + domainDTO.getDomain());
+	public List<DomainOutDTO> listDomains()
+	{
+		if (LOGGER.isDebugEnabled())
+		{
+			LOGGER.debug("listDomains");
 		}
-		if (domainDTO.getDomain() == null || domainDTO.getDomain().isEmpty()) {
-			String message = "the given domain name is invalid (null or empty)";
-			logger.error(message);
-			throw new InvalidDomainNameException(message);
-		}
-		if (Cache.getGenerator(domainDTO.getDomain()) != null) {
-			String message = "object for domain '" + domainDTO.getDomain() + "' exists within cache";
-			logger.error(message);
-			throw new DomainInUseException(message);
-		}
-		synchronized (emSynchronizerDummy) {
-			PSNProject duplicate = em.find(PSNProject.class, domainDTO.getDomain());
-			if (duplicate != null) {
-				String message = "psn-project with domain '" + domainDTO.getDomain() + "' already exists";
-				logger.error(message);
-				throw new DomainInUseException(message);
-			}
-			String parentDomainName = domainDTO.getParentDomain();
-			PSNProject parentDomain = null;
-			if (parentDomainName != null && !parentDomainName.isEmpty()) {
-				parentDomain = getPSNProject(parentDomainName);
-			}
-			PSNProject project = new PSNProject(domainDTO, parentDomain);
-			if (logger.isDebugEnabled()) {
-				logger.debug("new PSNProject created: " + project);
-			}
-			createGenerator(project); // einstellungen testen und generator in cache legen
-			em.persist(project);
-			if (parentDomain != null) {
-				parentDomain.getChildren().add(project);
-			}
-		}
-		if (logger.isInfoEnabled()) {
-			logger.info("new PSNProject for domain '" + domainDTO.getDomain() + "' persisted");
-		}
-	}
-
-	@Override
-	public void deleteDomain(String domain) throws DomainInUseException, UnknownDomainException {
-		if (logger.isDebugEnabled()) {
-			logger.debug("trying to delete psn-project for domain: " + domain);
-		}
-		synchronized (emSynchronizerDummy) {
-			PSNProject project = getPSNProject(domain);
-			if (project.getPsnList().size() > 0) {
-				String message = "at least one pseudonym belongs to domain '" + domain + "' which therefore can't be deleted";
-				logger.warn(message);
-				throw new DomainInUseException(message);
-			}
-			if (project.getChildren().size() > 0) {
-				String message = "at least one domain is a child of domain '" + domain + "' which therefore can't be deleted";
-				logger.warn(message);
-				throw new DomainInUseException(message);
-			}
-			PSNProject parent = project.getParent();
-			em.remove(project);
-			Cache.removeGenerator(domain);
-			if (parent != null) {
-				parent.getChildren().remove(project);
-			}
-			if (logger.isInfoEnabled()) {
-				logger.info("psn-project for domain '" + domain + "' deleted");
-			}
-		}
-	}
-
-	@Override
-	public DomainDTO getDomainObject(String domain) throws UnknownDomainException {
-		return getPSNProject(domain).toDTO(countPseudonymsForDomain(domain));
-	}
-
-	@Override
-	public DomainLightDTO getDomainLightObject(String domain) throws UnknownDomainException {
-		return getPSNProject(domain).toLightDTO();
-	}
-
-	private PSNProject getPSNProject(String domain) throws UnknownDomainException {
-		PSNProject result = em.find(PSNProject.class, domain);
-		if (result == null) {
-			String message = "psn-project for domain '" + domain + "' not found";
-			logger.error(message);
-			throw new UnknownDomainException(message);
-		}
-		return result;
-	}
-
-	private Long countPseudonymsForDomain(String domain) {
-		CriteriaBuilder cb = em.getCriteriaBuilder();
-		CriteriaQuery<Long> cq = cb.createQuery(Long.class);
-		Root<PSN> root = cq.from(PSN.class);
-		cq.select(cb.count(root));
-		cq.where(cb.equal(root.get(PSN_.key).get(PSNKey_.domain), domain));
-		return em.createQuery(cq).getSingleResult();
-	}
-
-	@Override
-	public List<DomainDTO> listDomains() {
-		List<DomainDTO> result = new ArrayList<DomainDTO>();
-		if (logger.isDebugEnabled()) {
-			logger.debug("listDomains called");
-		}
-		CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
-		CriteriaQuery<PSNProject> criteriaQuery = criteriaBuilder.createQuery(PSNProject.class);
-		Root<PSNProject> root = criteriaQuery.from(PSNProject.class);
-		criteriaQuery.select(root);
-		List<PSNProject> projects = em.createQuery(criteriaQuery).getResultList();
-		for (PSNProject project : projects) {
-			if (!AnonymDomain.NAME.equals(project.getDomain())) {
-				result.add(project.toDTO(countPseudonymsForDomain(project.getDomain())));
-			}
-		}
-		if (logger.isDebugEnabled()) {
-			logger.debug("listDomains returns " + result.size() + " results");
+		List<DomainOutDTO> result = cache.listDomains();
+		if (LOGGER.isDebugEnabled())
+		{
+			LOGGER.debug("listDomains found " + result.size() + " domains");
 		}
 		return result;
 	}
 
 	@Override
-	public List<DomainLightDTO> listDomainsLight() {
-		List<DomainLightDTO> result = new ArrayList<DomainLightDTO>();
-		if (logger.isDebugEnabled()) {
-			logger.debug("listDomainsLight called");
+	public List<PSNDTO> listPSNs(String domainName) throws InvalidParameterException, UnknownDomainException
+	{
+		if (LOGGER.isDebugEnabled())
+		{
+			LOGGER.debug("listPSNs for domain " + domainName);
 		}
-		CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
-		CriteriaQuery<PSNProject> criteriaQuery = criteriaBuilder.createQuery(PSNProject.class);
-		Root<PSNProject> root = criteriaQuery.from(PSNProject.class);
-		criteriaQuery.select(root);
-		List<PSNProject> projects = em.createQuery(criteriaQuery).getResultList();
-		for (PSNProject project : projects) {
-			if (!AnonymDomain.NAME.equals(project.getDomain())) {
-				result.add(project.toLightDTO());
-			}
-		}
-		if (logger.isDebugEnabled()) {
-			logger.debug("listDomainsLight returns " + result.size() + " results");
+		checkParameter(domainName, "domainName");
+		List<PSNDTO> result = cache.listPSNs(domainName);
+		if (LOGGER.isDebugEnabled())
+		{
+			LOGGER.debug("listPSNs found " + result.size() + " pseudonyms");
 		}
 		return result;
 	}
 
 	@Override
-	public List<String> listPossibleProperties() {
-		if (logger.isDebugEnabled()) {
-			logger.debug("listPossibleProperties called");
+	public List<PSNDTO> listPSNsPaginated(String domainName, PaginationConfig config) throws InvalidParameterException, UnknownDomainException
+	{
+		if (LOGGER.isDebugEnabled())
+		{
+			LOGGER.debug("listPSNsPaginated for domain " + domainName + " with " + config);
 		}
-		List<String> result = Cache.getPossibleGeneratorProperties();
-		if (logger.isDebugEnabled()) {
-			logger.debug("listPossibleProperties returns " + result.size() + " results");
-		}
-		return result;
-	}
-
-	@Override
-	public List<PSNDTO> listPseudonymsFor(String domain) throws UnknownDomainException {
-		List<PSNDTO> result = new ArrayList<PSNDTO>();
-		if (logger.isDebugEnabled()) {
-			logger.debug("listPseudonyms called for domain '" + domain + "'");
-		}
-		PSNProject parent = getPSNProject(domain);
-		for (PSN psn : parent.getPsnList()) {
-			result.add(psn.toPSNDTO());
-		}
-		if (logger.isDebugEnabled()) {
-			logger.debug("listPseudonyms returns " + result.size() + " results");
+		checkParameter(domainName, "domainName");
+		checkParameter(config, "config");
+		List<PSNDTO> result = cache.listPSNsForDomainsPaginated(Collections.singletonList(domainName), config);
+		if (LOGGER.isDebugEnabled())
+		{
+			LOGGER.debug("listPSNsPaginated found " + result.size() + " pseudonyms for given pagination config");
 		}
 		return result;
 	}
 
 	@Override
-	public List<DomainLightDTO> getDomainsForPrefix(String prefix) {
-		List<DomainLightDTO> result = new ArrayList<DomainLightDTO>();
-		if (logger.isDebugEnabled()) {
-			logger.debug("getDomainsForPrefix called with prefix '" + prefix + "'");
+	public long countPSNs(String domainName, PaginationConfig config) throws InvalidParameterException, UnknownDomainException
+	{
+		if (LOGGER.isDebugEnabled())
+		{
+			LOGGER.debug("countPSNs for domain " + domainName + " with " + config);
 		}
-		if (prefix == null) {
-			logger.error("prefix must not be null");
-		} else {
-			CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
-			CriteriaQuery<PSNProject> criteriaQuery = criteriaBuilder.createQuery(PSNProject.class);
-			Root<PSNProject> root = criteriaQuery.from(PSNProject.class);
-			criteriaQuery.select(root);
-			List<PSNProject> projects = em.createQuery(criteriaQuery).getResultList();
-			for (PSNProject project : projects) {
-				if (!AnonymDomain.NAME.equals(project.getDomain()) && prefix.equals(project.getProperties().get(GeneratorProperties.PSN_PREFIX))) {
-					result.add(project.toLightDTO());
-				} else if (prefix.isEmpty() && project.getProperties().get(GeneratorProperties.PSN_PREFIX) == null) {
-					result.add(project.toLightDTO());
-				}
-			}
-			if (logger.isDebugEnabled()) {
-				logger.debug("getDomainsForPrefix returns " + result.size() + " results");
-			}
+		checkParameter(domainName, "domainName");
+		checkParameter(config, "config");
+		long count = cache.countPSNsForDomainsPaginated(Collections.singletonList(domainName), config);
+		if (LOGGER.isDebugEnabled())
+		{
+			LOGGER.debug("countPSNs found " + count + " pseudonyms for given pagination filter");
+		}
+		return count;
+	}
+
+	@Override
+	public List<PSNDTO> listPSNsForDomainsPaginated(List<String> domainNames, PaginationConfig config) throws InvalidParameterException, UnknownDomainException
+	{
+		if (LOGGER.isDebugEnabled())
+		{
+			LOGGER.debug("listPSNsForDomainsPaginated for domains " + domainNames + " with " + config);
+		}
+		checkParameter(domainNames, "domainName");
+		checkParameter(config, "config");
+		List<PSNDTO> result = cache.listPSNsForDomainsPaginated(domainNames, config);
+		if (LOGGER.isDebugEnabled())
+		{
+			LOGGER.debug("listPSNsForDomainsPaginated found " + result.size() + " pseudonyms for given pagination config");
 		}
 		return result;
 	}
 
 	@Override
-	public List<DomainLightDTO> getDomainsForSuffix(String suffix) {
-		List<DomainLightDTO> result = new ArrayList<DomainLightDTO>();
-		if (logger.isDebugEnabled()) {
-			logger.debug("getDomainsForSuffix called with suffix '" + suffix + "'");
+	public long countPSNsForDomains(List<String> domainNames, PaginationConfig config) throws InvalidParameterException, UnknownDomainException
+	{
+		if (LOGGER.isDebugEnabled())
+		{
+			LOGGER.debug("countPSNsForDomains for domain " + domainNames + " with " + config);
 		}
-		if (suffix == null) {
-			logger.error("prefix must not be null");
-		} else {
-			CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
-			CriteriaQuery<PSNProject> criteriaQuery = criteriaBuilder.createQuery(PSNProject.class);
-			Root<PSNProject> root = criteriaQuery.from(PSNProject.class);
-			criteriaQuery.select(root);
-			List<PSNProject> projects = em.createQuery(criteriaQuery).getResultList();
-			for (PSNProject project : projects) {
-				if (!AnonymDomain.NAME.equals(project.getDomain()) && suffix.equals(project.getProperties().get(GeneratorProperties.PSN_SUFFIX))) {
-					result.add(project.toLightDTO());
-				} else if (suffix.isEmpty() && project.getProperties().get(GeneratorProperties.PSN_SUFFIX) == null) {
-					result.add(project.toLightDTO());
-				}
-			}
-			if (logger.isDebugEnabled()) {
-				logger.debug("getDomainsForSuffix returns " + result.size() + " results");
-			}
+		checkParameter(domainNames, "domainName");
+		checkParameter(config, "config");
+		long count = cache.countPSNsForDomainsPaginated(domainNames, config);
+		if (LOGGER.isDebugEnabled())
+		{
+			LOGGER.debug("countPSNsForDomains found " + count + " pseudonyms for given pagination filter");
+		}
+		return count;
+	}
+
+	@Override
+	public List<DomainOutDTO> getDomainsForPrefix(String prefix) throws InvalidParameterException
+	{
+		if (LOGGER.isDebugEnabled())
+		{
+			LOGGER.debug("getDomainsForPrefix with prefix " + prefix);
+		}
+		checkParameter(prefix, "prefix");
+		List<DomainOutDTO> result = cache.getDomainsForPrefix(prefix);
+		if (LOGGER.isDebugEnabled())
+		{
+			LOGGER.debug("getDomainsForPrefix found " + result.size() + " domains");
+		}
+		return result;
+	}
+
+	@Override
+	public List<DomainOutDTO> getDomainsForSuffix(String suffix) throws InvalidParameterException
+	{
+		if (LOGGER.isDebugEnabled())
+		{
+			LOGGER.debug("getDomainsForSuffix with suffix " + suffix);
+		}
+		checkParameter(suffix, "suffix");
+		List<DomainOutDTO> result = cache.getDomainsForSuffix(suffix);
+		if (LOGGER.isDebugEnabled())
+		{
+			LOGGER.debug("getDomainsForSuffix found " + result.size() + " domains");
+		}
+		return result;
+	}
+
+	@Override
+	public GeneratorAlphabetRestriction getRestrictionForCheckDigitClass(String checkDigitClassName) throws InvalidCheckDigitClassException, InvalidParameterException
+	{
+		if (LOGGER.isDebugEnabled())
+		{
+			LOGGER.debug("getRestrictionForCheckDigitClass for class " + checkDigitClassName);
+		}
+		checkParameter(checkDigitClassName, "checkDigitClassName");
+		GeneratorAlphabetRestriction result = cache.getRestrictionForCheckDigitClass(checkDigitClassName);
+		if (LOGGER.isDebugEnabled())
+		{
+			LOGGER.debug("alphabet restrition for class " + checkDigitClassName + " is " + result.toString());
+		}
+		return result;
+	}
+
+	@Override
+	public boolean arePSNDeletable(String domainName) throws InvalidParameterException, UnknownDomainException
+	{
+		if (LOGGER.isDebugEnabled())
+		{
+			LOGGER.debug("arePSNDeletable for domain " + domainName);
+		}
+		checkParameter(domainName, "domainName");
+		boolean result = cache.arePSNDeletable(domainName);
+		if (LOGGER.isDebugEnabled())
+		{
+			LOGGER.debug("arePSNDeletable for domain " + domainName + " is " + result);
 		}
 		return result;
 	}

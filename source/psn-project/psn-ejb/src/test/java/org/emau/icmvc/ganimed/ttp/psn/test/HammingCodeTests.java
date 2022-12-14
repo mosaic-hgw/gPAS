@@ -1,16 +1,17 @@
 package org.emau.icmvc.ganimed.ttp.psn.test;
 
-/*
+/*-
  * ###license-information-start###
  * gPAS - a Generic Pseudonym Administration Service
  * __
- * Copyright (C) 2013 - 2017 The MOSAIC Project - Institut fuer Community Medicine der
- * 							Universitaetsmedizin Greifswald - mosaic-projekt@uni-greifswald.de
+ * Copyright (C) 2013 - 2022 Independent Trusted Third Party of the University Medicine Greifswald
+ * 							kontakt-ths@uni-greifswald.de
  * 							concept and implementation
- * 							l. geidel
+ * 							l.geidel
  * 							web client
- * 							g. weiher
- * 							a. blumentritt
+ * 							a.blumentritt
+ * 							docker
+ * 							r.schuldt
  * 							please cite our publications
  * 							http://dx.doi.org/10.3414/ME14-01-0133
  * 							http://dx.doi.org/10.1186/s12967-015-0545-6
@@ -30,25 +31,26 @@ package org.emau.icmvc.ganimed.ttp.psn.test;
  * ###license-information-end###
  */
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.emau.icmvc.ganimed.ttp.psn.alphabets.Symbol32;
-import org.emau.icmvc.ganimed.ttp.psn.generator.GeneratorProperties;
+import org.emau.icmvc.ganimed.ttp.psn.config.DomainConfig;
 import org.emau.icmvc.ganimed.ttp.psn.generator.HammingCode;
-import org.junit.Test;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
-public class HammingCodeTests extends CheckDigitTests {
-
-	public HammingCodeTests() throws Exception {
+@Tag("CheckDigit")
+public class HammingCodeTests extends CheckDigitTests
+{
+	public HammingCodeTests() throws Exception
+	{
 		alphabet = new Symbol32();
-		Map<GeneratorProperties, String> properties = new HashMap<GeneratorProperties, String>();
-		properties.put(GeneratorProperties.PSN_LENGTH, "8");
-		checkDigits = new HammingCode(alphabet, properties);
+		DomainConfig config = new DomainConfig();
+		config.setPsnLength(8);
+		checkDigits = new HammingCode(alphabet, config);
 	}
 
 	@Test
-	public void test() throws Exception {
+	public void test() throws Exception
+	{
 		checkOneExampleForEveryLength(true);
 	}
 }

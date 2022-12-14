@@ -1,16 +1,17 @@
 package org.emau.icmvc.ganimed.ttp.psn.generator;
 
-/*
+/*-
  * ###license-information-start###
  * gPAS - a Generic Pseudonym Administration Service
  * __
- * Copyright (C) 2013 - 2017 The MOSAIC Project - Institut fuer Community Medicine der
- * 							Universitaetsmedizin Greifswald - mosaic-projekt@uni-greifswald.de
+ * Copyright (C) 2013 - 2022 Independent Trusted Third Party of the University Medicine Greifswald
+ * 							kontakt-ths@uni-greifswald.de
  * 							concept and implementation
- * 							l. geidel
+ * 							l.geidel
  * 							web client
- * 							g. weiher
- * 							a. blumentritt
+ * 							a.blumentritt
+ * 							docker
+ * 							r.schuldt
  * 							please cite our publications
  * 							http://dx.doi.org/10.3414/ME14-01-0133
  * 							http://dx.doi.org/10.1186/s12967-015-0545-6
@@ -30,42 +31,39 @@ package org.emau.icmvc.ganimed.ttp.psn.generator;
  * ###license-information-end###
  */
 
-
-import java.util.Map;
-
+import org.emau.icmvc.ganimed.ttp.psn.config.DomainConfig;
+import org.emau.icmvc.ganimed.ttp.psn.enums.GeneratorAlphabetRestriction;
 import org.emau.icmvc.ganimed.ttp.psn.exceptions.CharNotInAlphabetException;
 import org.emau.icmvc.ganimed.ttp.psn.exceptions.InvalidPSNException;
-import org.emau.icmvc.ganimed.ttp.psn.exceptions.MessageTooLargeException;
+import org.emau.icmvc.ganimed.ttp.psn.exceptions.InvalidParameterException;
 
-/**
- * stores the alphabet and provides methods to generate and validate check digits
- * 
- * @author geidell
- * 
- */
-public abstract class CheckDigits {
-
+public abstract class CheckDigits
+{
 	private final Alphabet alphabet;
-	private final Map<GeneratorProperties, String> properties;
 
-	public CheckDigits(Alphabet alphabet, Map<GeneratorProperties, String> properties) {
+	public CheckDigits()
+	{
+		super();
+		this.alphabet = null;
+	}
+
+	public CheckDigits(Alphabet alphabet, DomainConfig config)
+	{
 		super();
 		this.alphabet = alphabet;
-		this.properties = properties;
 	}
 
 	/**
-	 * 
 	 * @param message
 	 *            string for which check digits should be generated
 	 * @return check digits
 	 * @throws CharNotInAlphabetException
 	 * @throws MessageTooLargeException
+	 * @throws InvalidParameterException
 	 */
-	public abstract String generateCheckDigits(String message) throws CharNotInAlphabetException, MessageTooLargeException;
+	public abstract String generateCheckDigits(String message) throws CharNotInAlphabetException, InvalidParameterException;
 
 	/**
-	 * 
 	 * @param value
 	 *            string (including check digits) to be checked
 	 * @param messageLength
@@ -76,23 +74,17 @@ public abstract class CheckDigits {
 	public abstract void check(String value, int messageLength) throws CharNotInAlphabetException, InvalidPSNException;
 
 	/**
-	 * 
 	 * @return the alphabet for this instance
 	 */
-	public Alphabet getAlphabet() {
+	public Alphabet getAlphabet()
+	{
 		return alphabet;
 	}
 
 	/**
-	 * 
-	 * @param key
-	 * @return the property for this check digit instance with the given key
+	 * gives the restriction for the number of chars within the alphabet
+	 *
+	 * @return
 	 */
-	public String getProperty(GeneratorProperties key) {
-		if (properties == null) {
-			return "";
-		}
-		String result = properties.get(key);
-		return result != null ? result : "";
-	}
+	public abstract GeneratorAlphabetRestriction getAlphabetRestriction();
 }

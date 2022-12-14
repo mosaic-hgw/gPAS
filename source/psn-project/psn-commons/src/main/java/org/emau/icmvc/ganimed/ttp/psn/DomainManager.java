@@ -1,16 +1,17 @@
 package org.emau.icmvc.ganimed.ttp.psn;
 
-/*
+/*-
  * ###license-information-start###
  * gPAS - a Generic Pseudonym Administration Service
  * __
- * Copyright (C) 2013 - 2017 The MOSAIC Project - Institut fuer Community Medicine der
- * 							Universitaetsmedizin Greifswald - mosaic-projekt@uni-greifswald.de
+ * Copyright (C) 2013 - 2022 Independent Trusted Third Party of the University Medicine Greifswald
+ * 							kontakt-ths@uni-greifswald.de
  * 							concept and implementation
- * 							l. geidel
+ * 							l.geidel
  * 							web client
- * 							g. weiher
- * 							a. blumentritt
+ * 							a.blumentritt
+ * 							docker
+ * 							r.schuldt
  * 							please cite our publications
  * 							http://dx.doi.org/10.3414/ME14-01-0133
  * 							http://dx.doi.org/10.1186/s12967-015-0545-6
@@ -35,113 +36,233 @@ import java.util.List;
 import javax.jws.WebParam;
 import javax.jws.WebService;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
 
-import org.emau.icmvc.ganimed.ttp.psn.dto.DomainDTO;
-import org.emau.icmvc.ganimed.ttp.psn.dto.DomainLightDTO;
+import org.emau.icmvc.ganimed.ttp.psn.config.DomainProperties;
+import org.emau.icmvc.ganimed.ttp.psn.config.PaginationConfig;
+import org.emau.icmvc.ganimed.ttp.psn.dto.DomainInDTO;
+import org.emau.icmvc.ganimed.ttp.psn.dto.DomainOutDTO;
 import org.emau.icmvc.ganimed.ttp.psn.dto.PSNDTO;
+import org.emau.icmvc.ganimed.ttp.psn.enums.GeneratorAlphabetRestriction;
 import org.emau.icmvc.ganimed.ttp.psn.exceptions.DomainInUseException;
 import org.emau.icmvc.ganimed.ttp.psn.exceptions.InvalidAlphabetException;
 import org.emau.icmvc.ganimed.ttp.psn.exceptions.InvalidCheckDigitClassException;
-import org.emau.icmvc.ganimed.ttp.psn.exceptions.InvalidDomainNameException;
 import org.emau.icmvc.ganimed.ttp.psn.exceptions.InvalidGeneratorException;
+import org.emau.icmvc.ganimed.ttp.psn.exceptions.InvalidParameterException;
+import org.emau.icmvc.ganimed.ttp.psn.exceptions.InvalidParentDomainException;
 import org.emau.icmvc.ganimed.ttp.psn.exceptions.UnknownDomainException;
 
 @WebService
-public interface DomainManager {
-
+public interface DomainManager
+{
 	/**
-	 * creates a new domain
-	 * 
+	 * adds a new domain
+	 *
 	 * @param domainDTO
-	 *            see {@link DomainDTO}
-	 * @throws InvalidDomainNameException
-	 *             if the given domain name is invalid (null or empty)
+	 *            see {@link DomainInDTO}
+	 * @throws DomainInUseException
+	 *             if the given domain already exists
 	 * @throws InvalidAlphabetException
-	 *             if the given alphabet name (entry for the given domain within the psn_projects table) is not a valid alphabet or the length of the alphabet is not valid for the given check digit
-	 *             class
+	 *             if the given alphabet name (attribute of the given domain) is not a valid alphabet or the length of the alphabet is not valid for the
+	 *             given check digit class
 	 * @throws InvalidCheckDigitClassException
-	 *             if the given check digit class name (entry for the given domain within the psn_projects table) is not a valid check digit class
+	 *             if the given check digit class name (attribute of the given domain) is not a valid check digit class
 	 * @throws InvalidGeneratorException
 	 *             if the generator can't be instantiated
-	 * @throws DomainInUseException
-	 *             if a domain with that name already exists
+	 * @throws InvalidParameterException
+	 *             if domainName is null or empty
 	 * @throws UnknownDomainException
-	 *             if the given parentDomain doesn't exists
+	 *             if the given parentDomain can't be found
 	 */
-	public void addDomain(@XmlElement(required = true) @WebParam(name = "domainDTO") DomainLightDTO domainDTO) throws InvalidDomainNameException,
-			InvalidAlphabetException, InvalidCheckDigitClassException, InvalidGeneratorException, DomainInUseException, UnknownDomainException;
+	void addDomain(@XmlElement(required = true) @WebParam(name = "domainDTO") DomainInDTO domainDTO) throws DomainInUseException,
+			InvalidAlphabetException, InvalidCheckDigitClassException, InvalidGeneratorException, InvalidParameterException, InvalidParentDomainException, UnknownDomainException;
+
+	/**
+	 * updates a existing domain
+	 *
+	 * @param domainDTO
+	 *            see {@link DomainInDTO}
+	 * @throws DomainInUseException
+	 *             if there's at least one pseudonym within that domain
+	 * @throws InvalidAlphabetException
+	 *             if the given alphabet name (attribute of the given domain) is not a valid alphabet or the length of the alphabet is not valid for the
+	 *             given check digit class
+	 * @throws InvalidCheckDigitClassException
+	 *             if the given check digit class name (attribute of the given domain) is not a valid check digit class
+	 * @throws InvalidGeneratorException
+	 *             if the generator can't be instantiated
+	 * @throws InvalidParameterException
+	 *             if domainName is null or empty
+	 * @throws UnknownDomainException
+	 *             if the given domain or parentDomain doesn't exists
+	 */
+	void updateDomain(@XmlElement(required = true) @WebParam(name = "domainDTO") DomainInDTO domainDTO) throws DomainInUseException,
+			InvalidAlphabetException, InvalidCheckDigitClassException, InvalidGeneratorException, InvalidParameterException, UnknownDomainException, InvalidParentDomainException;
+
+	/**
+	 * updates a existing domain which is in use (contains psns)
+	 *
+	 * @param domainName the name of the domain
+	 * @param label the new label
+	 * @param comment the new comment
+	 * @throws InvalidParameterException
+	 *             if domainName is null or empty
+	 * @throws UnknownDomainException
+	 *             if the given domain or parentDomain doesn't exists
+	 */
+	void updateDomainInUse(@XmlElement(required = true) @WebParam(name = "domainName") String domainName,
+			@XmlElement(required = true) @WebParam(name = "label") String label,
+			@XmlElement(required = true) @WebParam(name = "comment") String comment) throws InvalidParameterException, UnknownDomainException;
 
 	/**
 	 * deletes the given domain
-	 * 
-	 * @param domain
+	 *
+	 * @param domainName
 	 *            identifier
 	 * @throws DomainInUseException
 	 *             if there's at least one pseudonym within that domain
+	 * @throws InvalidParameterException
+	 *             if domainName is null or empty
 	 * @throws UnknownDomainException
 	 *             if the given domain is not found
 	 */
-	public void deleteDomain(@XmlElement(required = true) @WebParam(name = "domain") String domain)
-			throws DomainInUseException, UnknownDomainException;
+	void deleteDomain(@XmlElement(required = true) @WebParam(name = "domainName") String domainName)
+			throws DomainInUseException, InvalidParameterException, UnknownDomainException;
 
 	/**
 	 * returns all information for the given domain
-	 * 
-	 * @param domain
-	 * @return see {@link DomainDTO}
+	 *
+	 * @param domainName the name of the domain
+	 * @return see {@link DomainOutDTO}
+	 * @throws InvalidParameterException
+	 *             if domainName is null or empty
 	 * @throws UnknownDomainException
 	 *             if the given domain is not found
 	 */
-	public @XmlElement(required = true) DomainDTO getDomainObject(@XmlElement(required = true) @WebParam(name = "domain") String domain)
-			throws UnknownDomainException;
+	@XmlElement(name = "domain")
+	DomainOutDTO getDomain(@XmlElement(required = true) @WebParam(name = "domainName") String domainName)
+			throws InvalidParameterException, UnknownDomainException;
 
 	/**
-	 * returns all information for the given domain besides the number of pseudonyms
-	 * 
-	 * @param domain
-	 * @return see {@link DomainLightDTO}
-	 * @throws UnknownDomainException
-	 *             if the given domain is not found
+	 * @return list of all domains within the database; see {@link DomainOutDTO}
 	 */
-	public @XmlElement(required = true) DomainLightDTO getDomainLightObject(@XmlElement(required = true) @WebParam(name = "domain") String domain)
-			throws UnknownDomainException;
+	@XmlElementWrapper(nillable = true, name = "return")
+	@XmlElement(name = "domainList")
+	List<DomainOutDTO> listDomains();
 
 	/**
-	 * @return list of all domains within the database; see {@link DomainDTO}
+	 * @param prefix the domain prefix
+	 * @return list of all domains with the given prefix; see {@link DomainOutDTO}
+	 * @throws InvalidParameterException
+	 *             if prefix is null or empty
 	 */
-	public @XmlElement(required = true) List<DomainDTO> listDomains();
+	@XmlElementWrapper(nillable = true, name = "return")
+	@XmlElement(name = "domainList")
+	List<DomainOutDTO> getDomainsForPrefix(
+			@XmlElement(required = true) @WebParam(name = "prefix") String prefix) throws InvalidParameterException;
 
 	/**
-	 * @return list of all domains within the database; see {@link DomainLightDTO}
+	 * @param suffix the domain suffix
+	 * @return list of all domains with the given suffix; see {@link DomainOutDTO}
+	 * @throws InvalidParameterException
+	 *             if suffix is null or empty
 	 */
-	public @XmlElement(required = true) List<DomainLightDTO> listDomainsLight();
+	@XmlElementWrapper(nillable = true, name = "return")
+	@XmlElement(name = "domainList")
+	List<DomainOutDTO> getDomainsForSuffix(
+			@XmlElement(required = true) @WebParam(name = "suffix") String suffix) throws InvalidParameterException;
 
 	/**
-	 * @param prefix
-	 * @return list of all domains with the given prefix; see {@link DomainLightDTO}
-	 */
-	public @XmlElement(required = true) List<DomainLightDTO> getDomainsForPrefix(
-			@XmlElement(required = true) @WebParam(name = "prefix") String prefix);
-
-	/**
-	 * @param suffix
-	 * @return list of all domains with the given suffix; see {@link DomainLightDTO}
-	 */
-	public @XmlElement(required = true) List<DomainLightDTO> getDomainsForSuffix(
-			@XmlElement(required = true) @WebParam(name = "suffix") String suffix);
-
-	/**
-	 * @return list of all possible properties; is used by the web client
-	 */
-	public @XmlElement(required = true) List<String> listPossibleProperties();
-
-	/**
-	 * @param domain
+	 * @param domainName
 	 *            domain for which all pseudonyms should be retrieved
 	 * @return all pseudonyms for that domain
+	 * @throws InvalidParameterException
+	 *             if domainName is null or empty
 	 * @throws UnknownDomainException
 	 *             if the given domain is not found
 	 */
-	public @XmlElement(required = true) List<PSNDTO> listPseudonymsFor(@XmlElement(required = true) @WebParam(name = "domain") String domain)
-			throws UnknownDomainException;
+	@XmlElementWrapper(nillable = true, name = "return")
+	@XmlElement(name = "psnList")
+	List<PSNDTO> listPSNs(
+			@XmlElement(required = true) @WebParam(name = "domainName") String domainName) throws InvalidParameterException, UnknownDomainException;
+
+	/**
+	 * lists all matching psns for the given domain paginated w.r.t. the filter in the pagination config
+	 *
+	 * @param domainName domain for which all pseudonyms should be retrieved
+	 * @param config see {@link PaginationConfig}
+	 * @return all pseudonyms for that domain
+	 * @throws InvalidParameterException if domainName is null or empty
+	 * @throws UnknownDomainException if the given domain is not found
+	 */
+	@XmlElementWrapper(nillable = true, name = "return")
+	@XmlElement(name = "psnList")
+	List<PSNDTO> listPSNsPaginated(
+			@XmlElement(required = true) @WebParam(name = "domainName") String domainName,
+			@XmlElement(required = true) @WebParam(name = "config") PaginationConfig config) throws InvalidParameterException, UnknownDomainException;
+
+	/**
+	 * counts matching for the given domain w.r.t. the filter in the pagination config
+	 *
+	 * @param domainName domain for which all pseudonyms should be retrieved
+	 * @param config see {@link PaginationConfig} (page size and first entry will be ignored)
+	 * @return the number of all matching pseudonyms for that domain
+	 * @throws InvalidParameterException if domainName is null or empty
+	 * @throws UnknownDomainException if the given domain is not found
+	 */
+	@XmlElement(name = "psnCount")
+	long countPSNs(
+			@XmlElement(required = true) @WebParam(name = "domainName") String domainName,
+			@XmlElement(required = true) @WebParam(name = "config") PaginationConfig config) throws InvalidParameterException, UnknownDomainException;
+
+	/**
+	 * lists all matching psns for the given domains paginated w.r.t. the filter in the pagination config
+	 *
+	 * @param domainNames domains for which all pseudonyms should be retrieved
+	 * @param config see {@link PaginationConfig}
+	 * @return all pseudonyms for that domain
+	 * @throws InvalidParameterException if domainName is null or empty
+	 * @throws UnknownDomainException if the given domain is not found
+	 */
+	@XmlElementWrapper(nillable = true, name = "return")
+	@XmlElement(name = "psnListForDomains")
+	List<PSNDTO> listPSNsForDomainsPaginated(
+			@XmlElement(required = true) @WebParam(name = "domainNames") List<String> domainNames,
+			@XmlElement(required = true) @WebParam(name = "config") PaginationConfig config) throws InvalidParameterException, UnknownDomainException;
+
+	/**
+	 * counts matching for the given domain w.r.t. the filter in the pagination config
+	 *
+	 * @param domainNames domain for which all pseudonyms should be retrieved
+	 * @param config see {@link PaginationConfig} (page size and first entry will be ignored)
+	 * @return the number of all matching pseudonyms for that domain
+	 * @throws InvalidParameterException if domainName is null or empty
+	 * @throws UnknownDomainException if the given domain is not found
+	 */
+	@XmlElement(name = "psnCountForDomains")
+	long countPSNsForDomains(
+			@XmlElement(required = true) @WebParam(name = "domainNames") List<String> domainNames,
+			@XmlElement(required = true) @WebParam(name = "config") PaginationConfig config) throws InvalidParameterException, UnknownDomainException;
+
+	/**
+	 * gives the restriction for the number of chars within the alphabet for the given check digit class
+	 *
+	 * @throws InvalidCheckDigitClassException
+	 * @throws InvalidParameterException
+	 */
+	@XmlElement(name = "alphabetRestriction")
+	GeneratorAlphabetRestriction getRestrictionForCheckDigitClass(
+			@XmlElement(required = true) @WebParam(name = "checkDigitClass") String checkDigitClass)
+			throws InvalidCheckDigitClassException, InvalidParameterException;
+
+	/**
+	 *
+	 * @param domainName
+	 *            returns true if the property {@link DomainProperties#PSNS_DELETABLE} is set
+	 * @throws InvalidParameterException
+	 *             if domainName is null or empty
+	 * @throws UnknownDomainException
+	 *             if the given domain is not found
+	 */
+	boolean arePSNDeletable(String domainName) throws InvalidParameterException, UnknownDomainException;
 }

@@ -1,16 +1,16 @@
 package org.emau.icmvc.ganimed.ttp.psn.factories;
-
-/*
+/*-
  * ###license-information-start###
  * gPAS - a Generic Pseudonym Administration Service
  * __
- * Copyright (C) 2013 - 2017 The MOSAIC Project - Institut fuer Community Medicine der
- * 							Universitaetsmedizin Greifswald - mosaic-projekt@uni-greifswald.de
+ * Copyright (C) 2013 - 2022 Independent Trusted Third Party of the University Medicine Greifswald
+ * 							kontakt-ths@uni-greifswald.de
  * 							concept and implementation
- * 							l. geidel
+ * 							l.geidel
  * 							web client
- * 							g. weiher
- * 							a. blumentritt
+ * 							a.blumentritt
+ * 							docker
+ * 							r.schuldt
  * 							please cite our publications
  * 							http://dx.doi.org/10.3414/ME14-01-0133
  * 							http://dx.doi.org/10.1186/s12967-015-0545-6
@@ -30,26 +30,19 @@ package org.emau.icmvc.ganimed.ttp.psn.factories;
  * ###license-information-end###
  */
 
-
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.InjectionPoint;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-/**
- * just a little experiment - enables the use of injection in conjunction with logger<p>
- * -> no more copy-paste-problems with Logger.getLogger(XYZ.class) :-)
- * 
- * @author geidell
- *
- */
 @ApplicationScoped
 public class LogFactory
 {
 	@Produces
 	Logger createLogger(InjectionPoint injectionPoint)
 	{
-		return Logger.getLogger(injectionPoint.getMember().getDeclaringClass().getName());
+		return LogManager.getLogger(injectionPoint.getMember().getDeclaringClass().getName());
 	}
 }

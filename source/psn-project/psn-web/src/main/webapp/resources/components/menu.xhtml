@@ -1,0 +1,67 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+		"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!--
+  ###license-information-start###
+  gPAS - a Generic Pseudonym Administration Service
+  __
+  Copyright (C) 2013 - 2022 Independent Trusted Third Party of the University Medicine Greifswald
+  							kontakt-ths@uni-greifswald.de
+  							concept and implementation
+  							l.geidel
+  							web client
+  							a.blumentritt
+  							docker
+  							r.schuldt
+  							please cite our publications
+  							http://dx.doi.org/10.3414/ME14-01-0133
+  							http://dx.doi.org/10.1186/s12967-015-0545-6
+  __
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU Affero General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+  
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+  
+  You should have received a copy of the GNU Affero General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  ###license-information-end###
+  -->
+
+
+<!-- author: Arne Blumentritt -->
+
+<html xmlns:p="http://primefaces.org/ui" xmlns:composite="http://java.sun.com/jsf/composite">
+
+<composite:interface>
+</composite:interface>
+
+<composite:implementation>
+	<p:menu>
+		<p:submenu style="border-top: none; margin-top: -2px !important;">
+			<p:menuitem value="#{msg['menu.dashboard']}" outcome="/html/internal/dashboard.xhtml" icon="mdi mdi-home-analytics"
+						class="#{view.viewId eq '/html/internal/dashboard.xhtml' ? 'active' : ''}" />
+		</p:submenu>
+		<p:submenu label="#{msg['menu.pseudonyms']}">
+			<p:menuitem value="#{msg['menu.pseudonyms.edit']}" outcome="/html/internal/edit.xhtml" icon="mdi mdi-database-search"
+						class="#{view.viewId eq '/html/internal/edit.xhtml' ? 'active' : ''}" />
+			<p:menuitem value="#{msg['menu.settings.export']}" outcome="/html/internal/admin/export.xhtml" icon="mdi mdi-database-export"
+						class="#{view.viewId eq '/html/internal/admin/export.xhtml' ? 'active' : ''}" />
+		</p:submenu>
+		<p:submenu label="#{msg['menu.lists']}">
+			<p:menuitem value="#{msg['menu.lists.batch']}" outcome="/html/internal/admin/batch.xhtml" icon="mdi mdi-file-excel"
+						class="#{view.viewId eq '/html/internal/admin/batch.xhtml' ? 'active' : ''}" />
+		</p:submenu>
+		<p:submenu label="#{msg['menu.settings']}">
+			<p:menuitem value="#{msg['menu.settings.domains']}" outcome="/html/internal/admin/domains.xhtml" icon="mdi mdi-cog"
+						class="#{view.viewId eq '/html/internal/admin/domains.xhtml' ? 'active' : ''}" />
+			<p:menuitem value="#{msg['menu.settings.about']}" outcome="/html/public/about.xhtml" icon="mdi mdi-information-outline"
+						class="#{view.viewId eq '/html/public/about.xhtml' ? 'active' : ''}" />
+		</p:submenu>
+	</p:menu>
+</composite:implementation>
+
+</html>

@@ -1,16 +1,17 @@
 package org.emau.icmvc.ganimed.ttp.psn.test;
 
-/*
+/*-
  * ###license-information-start###
  * gPAS - a Generic Pseudonym Administration Service
  * __
- * Copyright (C) 2013 - 2017 The MOSAIC Project - Institut fuer Community Medicine der
- * 							Universitaetsmedizin Greifswald - mosaic-projekt@uni-greifswald.de
+ * Copyright (C) 2013 - 2022 Independent Trusted Third Party of the University Medicine Greifswald
+ * 							kontakt-ths@uni-greifswald.de
  * 							concept and implementation
- * 							l. geidel
+ * 							l.geidel
  * 							web client
- * 							g. weiher
- * 							a. blumentritt
+ * 							a.blumentritt
+ * 							docker
+ * 							r.schuldt
  * 							please cite our publications
  * 							http://dx.doi.org/10.3414/ME14-01-0133
  * 							http://dx.doi.org/10.1186/s12967-015-0545-6
@@ -30,58 +31,73 @@ package org.emau.icmvc.ganimed.ttp.psn.test;
  * ###license-information-end###
  */
 
-
+import java.security.SecureRandom;
 import java.util.Random;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.emau.icmvc.ganimed.ttp.psn.generator.MathUtil;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class MathUtilTests {
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-	private static final Logger logger = Logger.getLogger(MathUtilTests.class);
-	private final Random rand = new Random();
+public class MathUtilTests
+{
+	private static final Logger logger = LogManager.getLogger(MathUtilTests.class);
+	private static final Random rand = new SecureRandom();
 
 	@Test
-	public void checkPrimFactors() {
-		Assert.assertTrue(checkPrimFactorsFor(1));
-		Assert.assertTrue(checkPrimFactorsFor(2));
-		Assert.assertTrue(checkPrimFactorsFor(11));
-		Assert.assertTrue(checkPrimFactorsFor(54));
-		Assert.assertTrue(checkPrimFactorsFor(1024));
-		for(int i=0; i<10; i++) {
-			Assert.assertTrue(checkPrimFactorsFor(rand.nextInt(Integer.MAX_VALUE)));
+	public void checkPrimFactors()
+	{
+		assertTrue(checkPrimFactorsFor(1));
+		assertTrue(checkPrimFactorsFor(2));
+		assertTrue(checkPrimFactorsFor(11));
+		assertTrue(checkPrimFactorsFor(54));
+		assertTrue(checkPrimFactorsFor(1024));
+		for (int i = 0; i < 10; i++)
+		{
+			assertTrue(checkPrimFactorsFor(rand.nextInt(Integer.MAX_VALUE)));
 		}
-		Assert.assertTrue(MathUtil.isPrimePower(2));
-		Assert.assertTrue(MathUtil.isPrimePower(11));
-		Assert.assertTrue(MathUtil.isPrimePower(4));
-		Assert.assertTrue(MathUtil.isPrimePower(1024));
-		Assert.assertFalse(MathUtil.isPrimePower(6));
-		Assert.assertFalse(MathUtil.isPrimePower(36));
-		Assert.assertFalse(MathUtil.isPrimePower(54));
+		assertTrue(MathUtil.isPrimePower(2));
+		assertTrue(MathUtil.isPrimePower(11));
+		assertTrue(MathUtil.isPrimePower(4));
+		assertTrue(MathUtil.isPrimePower(1024));
+		assertFalse(MathUtil.isPrimePower(6));
+		assertFalse(MathUtil.isPrimePower(36));
+		assertFalse(MathUtil.isPrimePower(54));
 	}
 
-	private boolean checkPrimFactorsFor(int number) {
+	private boolean checkPrimFactorsFor(int number)
+	{
 		int[] primFactors = MathUtil.getPrimeFactors(number);
 		logger.info(getPrimString(number, primFactors));
 		int test = 1;
-		for(int i=0; i<primFactors.length; i++) {
-			if(primFactors[i] != 0) {
-				test *= primFactors[i];
-			} else {
+		for (int primFactor : primFactors)
+		{
+			if (primFactor != 0)
+			{
+				test *= primFactor;
+			}
+			else
+			{
 				break;
 			}
 		}
 		return test == number;
 	}
 
-	private String getPrimString(int number, int[] primFactors) {
+	private String getPrimString(int number, int[] primFactors)
+	{
 		StringBuilder result = new StringBuilder(number + " = ");
-		for(int i=0; i<primFactors.length; i++) {
-			if(i == 0) {
+		for (int i = 0; i < primFactors.length; i++)
+		{
+			if (i == 0)
+			{
 				result.append(primFactors[i]);
-			} else {
+			}
+			else
+			{
 				result.append(" * " + primFactors[i]);
 			}
 		}

@@ -1,16 +1,17 @@
 package org.emau.icmvc.ganimed.ttp.psn.exceptions;
 
-/*
+/*-
  * ###license-information-start###
  * gPAS - a Generic Pseudonym Administration Service
  * __
- * Copyright (C) 2013 - 2017 The MOSAIC Project - Institut fuer Community Medicine der
- * 							Universitaetsmedizin Greifswald - mosaic-projekt@uni-greifswald.de
+ * Copyright (C) 2013 - 2022 Independent Trusted Third Party of the University Medicine Greifswald
+ * 							kontakt-ths@uni-greifswald.de
  * 							concept and implementation
- * 							l. geidel
+ * 							l.geidel
  * 							web client
- * 							g. weiher
- * 							a. blumentritt
+ * 							a.blumentritt
+ * 							docker
+ * 							r.schuldt
  * 							please cite our publications
  * 							http://dx.doi.org/10.3414/ME14-01-0133
  * 							http://dx.doi.org/10.1186/s12967-015-0545-6
@@ -30,33 +31,30 @@ package org.emau.icmvc.ganimed.ttp.psn.exceptions;
  * ###license-information-end###
  */
 
-
 import javax.xml.bind.annotation.XmlType;
 
-/**
- * should be thrown, when the given pseudonym isn't found in the db
- * 
- * @author geidell
- *
- */
 @XmlType(name = "ValueIsAnonymisedException", namespace = "http://psn.ttp.ganimed.icmvc.emau.org/")
-public class ValueIsAnonymisedException extends Exception {
-
+public class ValueIsAnonymisedException extends Exception
+{
 	private static final long serialVersionUID = 1457435201622345146L;
 
-	public ValueIsAnonymisedException() {
+	public ValueIsAnonymisedException()
+	{
 		super();
 	}
 
-	public ValueIsAnonymisedException(final String message, final Throwable cause) {
+	public ValueIsAnonymisedException(final String message, final Throwable cause)
+	{
 		super(message, cause);
 	}
 
-	public ValueIsAnonymisedException(final String message) {
+	public ValueIsAnonymisedException(final String message)
+	{
 		super(message);
 	}
 
-	public ValueIsAnonymisedException(final Throwable cause) {
+	public ValueIsAnonymisedException(final Throwable cause)
+	{
 		super(cause);
 	}
 }

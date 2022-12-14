@@ -1,16 +1,17 @@
 package org.emau.icmvc.ganimed.ttp.psn.exceptions;
 
-/*
+/*-
  * ###license-information-start###
  * gPAS - a Generic Pseudonym Administration Service
  * __
- * Copyright (C) 2013 - 2017 The MOSAIC Project - Institut fuer Community Medicine der
- * 							Universitaetsmedizin Greifswald - mosaic-projekt@uni-greifswald.de
+ * Copyright (C) 2013 - 2022 Independent Trusted Third Party of the University Medicine Greifswald
+ * 							kontakt-ths@uni-greifswald.de
  * 							concept and implementation
- * 							l. geidel
+ * 							l.geidel
  * 							web client
- * 							g. weiher
- * 							a. blumentritt
+ * 							a.blumentritt
+ * 							docker
+ * 							r.schuldt
  * 							please cite our publications
  * 							http://dx.doi.org/10.3414/ME14-01-0133
  * 							http://dx.doi.org/10.1186/s12967-015-0545-6
@@ -30,33 +31,30 @@ package org.emau.icmvc.ganimed.ttp.psn.exceptions;
  * ###license-information-end###
  */
 
-
 import javax.xml.bind.annotation.XmlType;
 
-/**
- * should be thrown, if the length of the given alphabet is not valid for the hamming-code algorithm (needs to be a power of a prime)
- * 
- * @author geidell
- *
- */
 @XmlType(name = "InvalidPSNExceptionType", namespace = "http://psn.ttp.ganimed.icmvc.emau.org/")
-public class InvalidPSNException extends Exception {
-
+public class InvalidPSNException extends Exception
+{
 	private static final long serialVersionUID = 9049957235690186823L;
 
-	public InvalidPSNException() {
+	public InvalidPSNException()
+	{
 		super();
 	}
 
-	public InvalidPSNException(String message, Throwable cause) {
+	public InvalidPSNException(String message, Throwable cause)
+	{
 		super(message, cause);
 	}
 
-	public InvalidPSNException(String message) {
+	public InvalidPSNException(String message)
+	{
 		super(message);
 	}
 
-	public InvalidPSNException(Throwable cause) {
+	public InvalidPSNException(Throwable cause)
+	{
 		super(cause);
 	}
 }

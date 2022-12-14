@@ -1,16 +1,17 @@
 package org.emau.icmvc.ganimed.ttp.psn.exceptions;
 
-/*
+/*-
  * ###license-information-start###
  * gPAS - a Generic Pseudonym Administration Service
  * __
- * Copyright (C) 2013 - 2017 The MOSAIC Project - Institut fuer Community Medicine der
- * 							Universitaetsmedizin Greifswald - mosaic-projekt@uni-greifswald.de
+ * Copyright (C) 2013 - 2022 Independent Trusted Third Party of the University Medicine Greifswald
+ * 							kontakt-ths@uni-greifswald.de
  * 							concept and implementation
- * 							l. geidel
+ * 							l.geidel
  * 							web client
- * 							g. weiher
- * 							a. blumentritt
+ * 							a.blumentritt
+ * 							docker
+ * 							r.schuldt
  * 							please cite our publications
  * 							http://dx.doi.org/10.3414/ME14-01-0133
  * 							http://dx.doi.org/10.1186/s12967-015-0545-6
@@ -32,33 +33,28 @@ package org.emau.icmvc.ganimed.ttp.psn.exceptions;
 
 import javax.xml.bind.annotation.XmlType;
 
-import org.emau.icmvc.ganimed.ttp.psn.generator.GeneratorProperties;
-
-/**
- * should be thrown, when it's not allowed to delete value-pseudonym-assignments within a domain<br>
- * see {@link GeneratorProperties#PSNS_DELETABLE}
- * 
- * @author geidell
- *
- */
 @XmlType(name = "DeletionForbiddenException", namespace = "http://psn.ttp.ganimed.icmvc.emau.org/")
-public class DeletionForbiddenException extends Exception {
-
+public class DeletionForbiddenException extends Exception
+{
 	private static final long serialVersionUID = 6890350649114203258L;
 
-	public DeletionForbiddenException() {
+	public DeletionForbiddenException()
+	{
 		super();
 	}
 
-	public DeletionForbiddenException(final String message, final Throwable cause) {
+	public DeletionForbiddenException(final String message, final Throwable cause)
+	{
 		super(message, cause);
 	}
 
-	public DeletionForbiddenException(final String message) {
+	public DeletionForbiddenException(final String message)
+	{
 		super(message);
 	}
 
-	public DeletionForbiddenException(final Throwable cause) {
+	public DeletionForbiddenException(final Throwable cause)
+	{
 		super(cause);
 	}
 }

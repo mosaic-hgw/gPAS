@@ -1,0 +1,132 @@
+# add datasource for gpas
+set gpasDbHost=${GPAS_DB_HOST}
+if (outcome != "success") of :resolve-expression(expression=${env.GPAS_DB_HOST})
+	set gpasDbHost=mysql
+end-if
+set gpasDbPort=${GPAS_DB_PORT}
+if (outcome != "success") of :resolve-expression(expression=${env.GPAS_DB_PORT})
+	set gpasDbPort=3306
+end-if
+set gpasDbName=${GPAS_DB_NAME}
+if (outcome != "success") of :resolve-expression(expression=${env.GPAS_DB_NAME})
+	set gpasDbName=gpas
+end-if
+set gpasDbUser=${GPAS_DB_USER}
+if (outcome != "success") of :resolve-expression(expression=${env.GPAS_DB_USER})
+	set gpasDbUser=gpas_user
+end-if
+set gPasDbPass=${GPAS_DB_PASS}
+if (outcome != "success") of :resolve-expression(expression=${env.GPAS_DB_PASS})
+	set gPasDbPass=gpas_password
+end-if
+
+if (outcome != "success") of /subsystem=datasources/data-source=gpasDS:read-resource
+	try
+		echo \>\>\> add datasources gpasDS
+		data-source add \
+			--name=gpasDS \
+			--driver-name=mysql \
+			--jndi-name=java:jboss/datasources/gpasDS \
+			--connection-url=jdbc:mysql://$gpasDbHost:$gpasDbPort/$gpasDbName?useSSL=false&allowPublicKeyRetrieval=true&rewriteBatchedStatements=true \
+			--user-name=$gpasDbUser \
+			--password=$gPasDbPass \
+			--use-ccm=true \
+			--min-pool-size=0 \
+			--max-pool-size=20 \
+			--flush-strategy=FailingConnectionOnly \
+			--use-java-context=true \
+			--jta=true \
+			--enabled=true
+	catch
+		echo \<\<\< FAILED add datasources gpasDS
+		data-source remove --name=gpasDS
+	end-try
+end-if
+
+
+# add logger for gpas
+set gpasLogLevel=${GPAS_LOG_LEVEL}
+if (result ~= "(TRACE|DEBUG|INFO|WARN|ERROR|FATAL)") of :resolve-expression(expression=$gpasLogLevel)
+	echo \>\>\> set gpas-log-level to $gpasLogLevel
+else
+	set gpasLogLevel="INFO"
+end-if
+set gpasFileLog=${GPAS_FILE_LOG}
+if (result ~= "(?i)(on|true|yes|1)") of :resolve-expression(expression=$gpasFileLog)
+	echo \>\>\> add gpas-logger as separate file
+	/subsystem=logging/size-rotating-file-handler=gpas-handler:add(file={"relative-to"=>"jboss.server.log.dir", "path"=>"gpas.log"})
+	/subsystem=logging/logger=org.emau.icmvc.ttp.psn:add(use-parent-handlers=false,handlers=["gpas-handler"])
+	/subsystem=logging/logger=org.emau.icmvc.ttp.psn:write-attribute(name=level,value=$gpasLogLevel)
+	/subsystem=logging/logger=org.emau.icmvc.ganimed.ttp.psn:add(use-parent-handlers=false,handlers=["gpas-handler"])
+	/subsystem=logging/logger=org.emau.icmvc.ganimed.ttp.psn:write-attribute(name=level,value=$gpasLogLevel)
+else
+	echo \>\>\> add gpas-logger to console-logger
+	/subsystem=logging/logger=org.emau.icmvc.ttp.psn:add(use-parent-handlers=false,handlers=["CONSOLE"])
+	/subsystem=logging/logger=org.emau.icmvc.ttp.psn:write-attribute(name=level,value=$gpasLogLevel)
+	/subsystem=logging/logger=org.emau.icmvc.ganimed.ttp.psn:add(use-parent-handlers=false,handlers=["CONSOLE"])
+	/subsystem=logging/logger=org.emau.icmvc.ganimed.ttp.psn:write-attribute(name=level,value=$gpasLogLevel)
+end-if
+
+
+set authMode=${GPAS_AUTH_MODE}
+# gRAS-Authentication
+if (result ~= "(?i)(gras)") of :resolve-expression(expression=$authMode)
+	try
+		echo \>\>\> install gpas-Authentication for $authMode-Authentication
+		deployment-overlay add \
+			--name=gpasGrasAuth \
+			--content=/WEB-INF/web.xml=${docker.wildfly.jboss}/gpas_gras_web.xml,/WEB-INF/jboss-web.xml=${docker.wildfly.jboss}/gpas_gras_jboss-web.xml \
+			--deployments=gpas-web-*.war \
+			--redeploy-affected
+	catch
+		echo \<\<\< FAILED install gpas-Authentication for $authMode-Authentication
+		deployment-overlay remove \
+			--name=gpasGrasAuth \
+			--redeploy-affected
+	end-try
+end-if
+
+# KeyCloak-Authentication
+if (result ~= "(?i)(keycloak-json)") of :resolve-expression(expression=$authMode)
+	try
+		echo \>\>\> install gpas-Authentication for $authMode-Authentication
+		deployment-overlay add \
+			--name=gpasKeycloakAuth \
+			--content=/WEB-INF/web.xml=${docker.wildfly.jboss}/gpas_keycloak_web.xml,/WEB-INF/keycloak.json=${docker.wildfly.jboss}/keycloak.json \
+			--deployments=gpas-web-*.war \
+			--redeploy-affected
+	catch
+		echo \<\<\< FAILED install gpas-Authentication for $authMode-Authentication
+		deployment-overlay remove \
+			--name=gpasKeycloakAuth \
+			--redeploy-affected
+	end-try
+end-if
+
+# KeyCloak-Authentication (alternative Methode)
+if (result ~= "(?i)(keycloak)") of :resolve-expression(expression=$authMode)
+	try
+		echo \>\>\> install gpas-Authentication for $authMode-Authentication
+		deployment-overlay add \
+			--name=gpasKeycloakAuth \
+			--content=/WEB-INF/web.xml=${docker.wildfly.jboss}/gpas_keycloak_web.xml \
+			--deployments=gpas-web-*.war \
+			--redeploy-affected
+		set gpasVersion=${GPAS_VERSION}
+		/subsystem=keycloak/secure-deployment=gpas-web-$gpasVersion.war:add( \
+			realm=${env.KEYCLOAK_REALM}, \
+			resource=${env.KEYCLOAK_RESOURCE}, \
+			auth-server-url=${env.KEYCLOAK_SERVER_URL}, \
+			ssl-required=${env.KEYCLOAK_SSL_REQUIRED}, \
+			confidential-port=${env.KEYCLOAK_CONFIDENTIAL_PORT}, \
+			use-resource-role-mappings=${env.KEYCLOAK_USE_RESOURCE_ROLE_MAPPINGS} \
+		)
+		/subsystem=keycloak/secure-deployment=gpas-web-$gpasVersion.war/credential=secret:add(value=${env.KEYCLOAK_CLIENT_SECRET})
+		
+	catch
+		echo \<\<\< FAILED install gpas-Authentication for $authMode-Authentication
+		deployment-overlay remove \
+			--name=gpasKeycloakAuth \
+			--redeploy-affected
+	end-try
+end-if

@@ -1,16 +1,16 @@
 package org.emau.icmvc.ganimed.ttp.psn.model;
-
-/*
+/*-
  * ###license-information-start###
  * gPAS - a Generic Pseudonym Administration Service
  * __
- * Copyright (C) 2013 - 2017 The MOSAIC Project - Institut fuer Community Medicine der
- * 							Universitaetsmedizin Greifswald - mosaic-projekt@uni-greifswald.de
+ * Copyright (C) 2013 - 2022 Independent Trusted Third Party of the University Medicine Greifswald
+ * 							kontakt-ths@uni-greifswald.de
  * 							concept and implementation
- * 							l. geidel
+ * 							l.geidel
  * 							web client
- * 							g. weiher
- * 							a. blumentritt
+ * 							a.blumentritt
+ * 							docker
+ * 							r.schuldt
  * 							please cite our publications
  * 							http://dx.doi.org/10.3414/ME14-01-0133
  * 							http://dx.doi.org/10.1186/s12967-015-0545-6
@@ -32,67 +32,74 @@ package org.emau.icmvc.ganimed.ttp.psn.model;
 
 import java.io.Serializable;
 
+import javax.persistence.Cacheable;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.MapsId;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import org.emau.icmvc.ganimed.ttp.psn.dto.PSNDTO;
 
-/**
- * the persistence class for a pseudonym
- * 
- * @author geidell
- * 
- */
 @Entity
 @Table(name = "psn", uniqueConstraints = @UniqueConstraint(columnNames = { "domain", "pseudonym" }, name = "domain_pseudonym"))
-public class PSN implements Serializable {
-
-	private static final long serialVersionUID = -4303062729589967516L;
+@NamedQueries({
+		@NamedQuery(name = "PSN.findByValues", query = "select psn from PSN psn where psn.key.domain = :domainName and psn.key.originalValue in :values"),
+		@NamedQuery(name = "PSN.findByPSNs", query = "select psn from PSN psn where psn.key.domain = :domainName and psn.pseudonym in :psns") })
+@Cacheable(false)
+public class PSN implements Serializable
+{
+	private static final long serialVersionUID = -8436376242959982100L;
 	@EmbeddedId
 	private PSNKey key;
 	@ManyToOne(fetch = FetchType.EAGER)
-	@JoinColumn(name = "domain", referencedColumnName = "domain")
+	@JoinColumn(name = "domain", referencedColumnName = "name")
 	@MapsId("domain")
-	private PSNProject psnProject;
+	private Domain domain;
 	private String pseudonym;
 
 	/**
 	 * this constructor is only for reflection-based instantiation - do not use in other cases!
 	 */
-	public PSN() {
-	}
+	public PSN()
+	{}
 
-	public PSN(PSNProject parent, String originalValue, String pseudonym) {
+	public PSN(Domain domain, String originalValue, String pseudonym)
+	{
 		super();
-		this.key = new PSNKey(originalValue, parent.getDomain());
+		this.key = new PSNKey(originalValue, domain.getName());
 		this.pseudonym = pseudonym;
-		this.psnProject = parent;
+		this.domain = domain;
 	}
 
-	public PSNKey getKey() {
+	public PSNKey getKey()
+	{
 		return key;
 	}
 
-	public String getPseudonym() {
+	public String getPseudonym()
+	{
 		return pseudonym;
 	}
 
-	public PSNProject getPSNProject() {
-		return psnProject;
+	public Domain getDomain()
+	{
+		return domain;
 	}
 
-	public PSNDTO toPSNDTO() {
+	public PSNDTO toPSNDTO()
+	{
 		return new PSNDTO(key.getDomain(), key.getOriginValue(), pseudonym);
 	}
 
 	@Override
-	public int hashCode() {
+	public int hashCode()
+	{
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + (key == null ? 0 : key.hashCode());
@@ -100,33 +107,45 @@ public class PSN implements Serializable {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
+	public boolean equals(Object obj)
+	{
+		if (this == obj)
+		{
 			return true;
 		}
-		if (obj == null) {
+		if (obj == null)
+		{
 			return false;
 		}
-		if (getClass() != obj.getClass()) {
+		if (getClass() != obj.getClass())
+		{
 			return false;
 		}
 		PSN other = (PSN) obj;
-		if (key == null) {
-			if (other.key != null) {
+		if (key == null)
+		{
+			if (other.key != null)
+			{
 				return false;
 			}
-		} else if (!key.equals(other.key)) {
+		}
+		else if (!key.equals(other.key))
+		{
 			return false;
 		}
 		return true;
 	}
 
 	@Override
-	public String toString() {
+	public String toString()
+	{
 		String result;
-		if (key == null) {
+		if (key == null)
+		{
 			result = "domain and original value are null for this PSN object";
-		} else {
+		}
+		else
+		{
 			StringBuilder sb = new StringBuilder();
 			sb.append("PSN for domain '");
 			sb.append(key.getDomain());

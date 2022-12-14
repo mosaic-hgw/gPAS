@@ -1,16 +1,17 @@
 package org.emau.icmvc.ganimed.ttp.psn.exceptions;
 
-/*
+/*-
  * ###license-information-start###
  * gPAS - a Generic Pseudonym Administration Service
  * __
- * Copyright (C) 2013 - 2017 The MOSAIC Project - Institut fuer Community Medicine der
- * 							Universitaetsmedizin Greifswald - mosaic-projekt@uni-greifswald.de
+ * Copyright (C) 2013 - 2022 Independent Trusted Third Party of the University Medicine Greifswald
+ * 							kontakt-ths@uni-greifswald.de
  * 							concept and implementation
- * 							l. geidel
+ * 							l.geidel
  * 							web client
- * 							g. weiher
- * 							a. blumentritt
+ * 							a.blumentritt
+ * 							docker
+ * 							r.schuldt
  * 							please cite our publications
  * 							http://dx.doi.org/10.3414/ME14-01-0133
  * 							http://dx.doi.org/10.1186/s12967-015-0545-6
@@ -30,33 +31,30 @@ package org.emau.icmvc.ganimed.ttp.psn.exceptions;
  * ###license-information-end###
  */
 
-
 import javax.xml.bind.annotation.XmlType;
 
-/**
- * should be thrown if the length of the given alphabet is not valid for the corresponding check digit class or the given class is not found
- * 
- * @author geidell
- * 
- */
 @XmlType(name = "InvalidAlphabetExceptionType", namespace = "http://psn.ttp.ganimed.icmvc.emau.org/")
-public class InvalidAlphabetException extends Exception {
-
+public class InvalidAlphabetException extends Exception
+{
 	private static final long serialVersionUID = 828074545197204849L;
 
-	public InvalidAlphabetException() {
+	public InvalidAlphabetException()
+	{
 		super();
 	}
 
-	public InvalidAlphabetException(String message, Throwable cause) {
+	public InvalidAlphabetException(String message, Throwable cause)
+	{
 		super(message, cause);
 	}
 
-	public InvalidAlphabetException(String message) {
+	public InvalidAlphabetException(String message)
+	{
 		super(message);
 	}
 
-	public InvalidAlphabetException(Throwable cause) {
+	public InvalidAlphabetException(Throwable cause)
+	{
 		super(cause);
 	}
 }
