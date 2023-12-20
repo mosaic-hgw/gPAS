@@ -4,7 +4,7 @@ package org.emau.icmvc.ttp.psn.frontend.controller;
  * ###license-information-start###
  * gPAS - a Generic Pseudonym Administration Service
  * __
- * Copyright (C) 2013 - 2022 Independent Trusted Third Party of the University Medicine Greifswald
+ * Copyright (C) 2013 - 2023 Independent Trusted Third Party of the University Medicine Greifswald
  * 							kontakt-ths@uni-greifswald.de
  * 							concept and implementation
  * 							l.geidel
@@ -109,17 +109,16 @@ public class DashboardController extends AbstractGPASBean
 		List<Number> values = new ArrayList<>();
 		List<String> labels = new ArrayList<>();
 		List<String> colors = new ArrayList<>();
-		PieChartModel pieChartModel = Chart.initPieChart(values, labels, colors, mobile ? "top" : "left", themeBean.getDarkMode());
 
 		for (DomainOutDTO domain : domains.values().stream().sorted().collect(Collectors.toList()))
 		{
 			long value = latestStats.getMappedStatValue().getOrDefault(StatisticKeys.PSEUDONYMS_PER_DOMAIN + domain.getName(), 0L);
 			values.add(value);
-			labels.add(domain.getLabel());
+			labels.add(getDomainLabel(domain));
 			colors.add(domainColors.get(domain.getName()));
 		}
 
-		return pieChartModel;
+		return Chart.initPieChart(values, labels, colors, mobile ? "top" : "left", themeBean.getDarkMode());
 	}
 
 	/* History Line Charts */
@@ -139,7 +138,7 @@ public class DashboardController extends AbstractGPASBean
 		for (DomainOutDTO domain : domains.values().stream().sorted().collect(Collectors.toList()))
 		{
 			domainMap.put(domain.getName(), new ArrayList<>());
-			dataSetLabels.add(domain.getLabel());
+			dataSetLabels.add(getDomainLabel(domain));
 			dataSetColors.add(domainColors.get(domain.getName()));
 		}
 

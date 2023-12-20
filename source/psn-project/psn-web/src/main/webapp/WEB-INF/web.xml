@@ -2,7 +2,7 @@
 <!-- ###license-information-start###
   gPAS - a Generic Pseudonym Administration Service
   __
-  Copyright (C) 2013 - 2022 Independent Trusted Third Party of the University Medicine Greifswald
+  Copyright (C) 2013 - 2023 Independent Trusted Third Party of the University Medicine Greifswald
   							kontakt-ths@uni-greifswald.de
   							concept and implementation
   							l.geidel
@@ -37,7 +37,7 @@
 	</context-param>
 	<context-param>
 		<param-name>primefaces.UPLOADER</param-name>
-		<param-value>commons</param-value>
+		<param-value>native</param-value>
 	</context-param>
 	<context-param>
 		<param-name>primefaces.FONT_AWESOME</param-name>
@@ -47,14 +47,6 @@
 		<param-name>javax.faces.DATETIMECONVERTER_DEFAULT_TIMEZONE_IS_SYSTEM_TIMEZONE</param-name>
 		<param-value>true</param-value>
 	</context-param>
-	<filter>
-		<filter-name>PrimeFaces FileUpload Filter</filter-name>
-		<filter-class>org.primefaces.webapp.filter.FileUploadFilter</filter-class>
-	</filter>
-	<filter-mapping>
-		<filter-name>PrimeFaces FileUpload Filter</filter-name>
-		<servlet-name>Faces Servlet</servlet-name>
-	</filter-mapping>
 
 	<!-- Error pages -->
 	<error-page>
@@ -127,12 +119,11 @@
 		<role-name>role.gpas.user</role-name>
 	</security-role>
 
-	<!-- ${keycloak-login.enable.start}
+	<!-- ${oidc-login.enable.start}
 	<login-config>
-		<auth-method>KEYCLOAK</auth-method>
-		<realm-name>ignored</realm-name>
+		<auth-method>OIDC</auth-method>
 	</login-config>
-	${keycloak-login.enable.end} -->
+	${oidc-login.enable.end} -->
 
 	<!-- ${gras-login.enable.start}
 	<login-config>

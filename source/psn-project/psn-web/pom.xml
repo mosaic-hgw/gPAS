@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.emau.icmvc.ganimed.ttp</groupId>
 		<artifactId>psn-project</artifactId>
-		<version>1.12.1</version>
+		<version>2023.1.2</version>
 	</parent>
 	<artifactId>psn-web</artifactId>
 	<packaging>war</packaging>
@@ -22,11 +22,6 @@
 		<dependency>
 			<groupId>org.primefaces</groupId>
 			<artifactId>primefaces</artifactId>
-		</dependency>
-		<!-- Primefaces Fileupload -->
-		<dependency>
-			<groupId>commons-fileupload</groupId>
-			<artifactId>commons-fileupload</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.emau.icmvc.ttp</groupId>

@@ -6,7 +6,7 @@
 	<parent>
 		<artifactId>psn-project</artifactId>
 		<groupId>org.emau.icmvc.ganimed.ttp</groupId>
-		<version>1.12.1</version>
+		<version>2023.1.2</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
@@ -36,9 +36,9 @@
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.8.6</version>
+				<version>0.8.7</version>
 				<executions>
-					<!-- aggregated overallall test coverage report -->
+					<!-- aggregated overall test coverage report -->
 					<execution>
 						<id>aggregate-reports-all</id>
 						<phase>verify</phase>

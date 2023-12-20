@@ -4,7 +4,7 @@ package org.emau.icmvc.ttp.psn.frontend.controller;
  * ###license-information-start###
  * gPAS - a Generic Pseudonym Administration Service
  * __
- * Copyright (C) 2013 - 2022 Independent Trusted Third Party of the University Medicine Greifswald
+ * Copyright (C) 2013 - 2023 Independent Trusted Third Party of the University Medicine Greifswald
  * 							kontakt-ths@uni-greifswald.de
  * 							concept and implementation
  * 							l.geidel
@@ -72,8 +72,12 @@ public class DomainController extends AbstractGPASBean
 {
 	private TreeNode selectedDomainNode;
 	private DomainOutDTO selectedDomain;
+	private boolean deleteConfirmation;
 	private String customAlphabet;
 	private Mode mode = Mode.READ;
+	private String psnPrefix;
+	private String psnSuffix;
+	private int psnLength;
 
 	@ManagedProperty(value = "#{ClassPathProvider}")
 	private PsnClassPathProvider provider;
@@ -106,6 +110,10 @@ public class DomainController extends AbstractGPASBean
 		selectedDomain.setAlphabet("org.emau.icmvc.ganimed.ttp.psn.alphabets.Numbers");
 		selectedDomain.setCheckDigitClass("org.emau.icmvc.ganimed.ttp.psn.generator.Verhoeff");
 		mode = Mode.NEW;
+		psnPrefix = null;
+		psnSuffix = null;
+		psnLength = DomainConfig.DEFAULT_PSN_LENGTH;
+
 	}
 
 	public void onNewChild()
@@ -161,11 +169,31 @@ public class DomainController extends AbstractGPASBean
 
 		try
 		{
+			logger.debug("prefix '{}, suffix '{}', length '{}'", psnPrefix, psnSuffix, psnLength);
+			// validate psnPrefix, psnSuffix, and psnLength and throw an InvalidArgumentException,
+			// if (psnLength + psnPrefix.length + psnSuffix.length) > DomainConfig.getMaxNumberOfCharactersInFullyQualifiedPsn()
+			DomainConfig.checkLength(psnPrefix, psnSuffix, psnLength);
+			// reset PSN config to avoid InvalidArgumentException triggered by parts which have not yet been set to smaller values
+			selectedDomain.getConfig().setPsnPrefix("");
+			selectedDomain.getConfig().setPsnSuffix("");
+			selectedDomain.getConfig().setPsnLength(0);
+			// now set PSN config to current values
+			selectedDomain.getConfig().setPsnPrefix(getPsnPrefix());
+			selectedDomain.getConfig().setPsnSuffix(getPsnSuffix());
+			selectedDomain.getConfig().setPsnLength(getPsnLength());
 			selectedDomain.setAlphabet(customAlphabet == null ? selectedDomain.getAlphabet() : String.join(",", Arrays.asList(customAlphabet.split(""))));
-			Object[] args = { selectedDomain.getLabel() };
+			Object[] args = { getDomainLabel(selectedDomain) };
 			if (mode == Mode.EDIT)
 			{
-				domainService.updateDomain(selectedDomain);
+				if (selectedDomain.getNumberOfPseudonyms() == 0)
+				{
+					domainService.updateDomain(selectedDomain);
+				}
+				else
+				{
+					domainService.updateDomainInUse(selectedDomain.getName(), selectedDomain.getLabel(), selectedDomain.getComment(), selectedDomain.getConfig()
+							.isSendNotificationsWeb(), selectedDomain.getConfig().isPsnsDeletable());
+				}
 				logMessage(new MessageFormat(getBundle().getString("domains.message.info.updated")).format(args), Severity.INFO);
 			}
 			else
@@ -196,7 +224,7 @@ public class DomainController extends AbstractGPASBean
 		try
 		{
 			Object[] args = { getDomainLabel(selectedDomain.getName()) };
-			domainService.deleteDomain(selectedDomain.getName());
+			domainService.deleteDomainWithPSNs(selectedDomain.getName());
 			logMessage(new MessageFormat(getBundle().getString("domains.message.info.deleted")).format(args), Severity.INFO);
 			loadDomains();
 		}
@@ -261,30 +289,28 @@ public class DomainController extends AbstractGPASBean
 		parent.getChildren().addAll(children.stream().sorted(Comparator.comparing(c -> (DomainOutDTO) c.getData())).collect(Collectors.toList()));
 
 		// Get children for each child
-		parent.getChildren().forEach(this::searchChildren);
+		parent.getChildren().forEach(c -> searchChildren((TreeNode) c));
 	}
 
 	public Boolean getEditable()
 	{
-		return selectedDomainNode != null
-				&& selectedDomainNode.getData() != null
-				&& ((DomainOutDTO) selectedDomainNode.getData()).getNumberOfPseudonyms() == 0;
+		return selectedDomainNode == null || (selectedDomainNode.getData() != null && ((DomainOutDTO) selectedDomainNode.getData()).getNumberOfPseudonyms() == 0);
 	}
 
 	public Boolean getDeletable()
 	{
-		return getEditable()
+		return selectedDomainNode != null && getEditable()
 				&& selectedDomainNode.getChildCount() == 0;
 	}
 
 	public List<String> getAlphabets()
 	{
-		return provider.getAlphabetMap().values().stream().map(a -> (String) a).sorted().collect(Collectors.toList());
+		return provider.getAlphabetMap().values().stream().map(String.class::cast).sorted().collect(Collectors.toList());
 	}
 
 	public List<String> getCheckDigitGenerators()
 	{
-		return provider.getGeneratorMap().values().stream().map(g -> (String) g).sorted().collect(Collectors.toList());
+		return provider.getGeneratorMap().values().stream().map(String.class::cast).sorted().collect(Collectors.toList());
 	}
 
 	public List<String> getCheckDigitGeneratorsForAlphabet(String alphabet)
@@ -321,7 +347,7 @@ public class DomainController extends AbstractGPASBean
 	{
 		// match by label ignoring case, filter out current domain, filter out existing parents, sort by label
 		return super.getDomains().stream()
-				.filter(d -> d.getLabel().toLowerCase().contains(s.toLowerCase()) && (selectedDomain == null || !d.getName().equals(selectedDomain.getName())))
+				.filter(d -> getDomainLabel(d).toLowerCase().contains(s.toLowerCase()) && (selectedDomain == null || !d.getName().equals(selectedDomain.getName())))
 				.filter(d -> selectedDomain == null || !selectedDomain.getParentDomainNames().contains(d.getName()))
 				.sorted().map(DomainOutDTO::getName).collect(Collectors.toList());
 	}
@@ -370,6 +396,20 @@ public class DomainController extends AbstractGPASBean
 	public void setSelectedDomainFromNode()
 	{
 		selectedDomain = (DomainOutDTO) selectedDomainNode.getData();
+		psnPrefix = selectedDomain.getConfig().getPsnPrefix();
+		psnSuffix = selectedDomain.getConfig().getPsnSuffix();
+		psnLength = selectedDomain.getConfig().getPsnLength();
+		deleteConfirmation = false;
+	}
+
+	public boolean isDeleteConfirmation()
+	{
+		return deleteConfirmation;
+	}
+
+	public void setDeleteConfirmation(boolean deleteConfirmation)
+	{
+		this.deleteConfirmation = deleteConfirmation;
 	}
 
 	public String getCustomAlphabet()
@@ -395,6 +435,90 @@ public class DomainController extends AbstractGPASBean
 	public Mode getMode()
 	{
 		return mode;
+	}
+
+	public String getPsnPrefix()
+	{
+		return psnPrefix;
+	}
+
+	public void setPsnPrefix(String psnPrefix)
+	{
+		logger.debug("set PSN prefix '{}'", psnPrefix);
+		this.psnPrefix = psnPrefix;
+	}
+
+	public String getPsnSuffix()
+	{
+		return psnSuffix;
+	}
+
+	public void setPsnSuffix(String psnSuffix)
+	{
+		logger.debug("set PSN suffix '{}'", psnSuffix);
+		this.psnSuffix = psnSuffix;
+	}
+
+	public int getPsnLength()
+	{
+		return psnLength;
+	}
+
+	public void setPsnLength(int psnLength)
+	{
+		logger.debug("set PSN length '{}'", psnLength);
+		this.psnLength = psnLength;
+	}
+
+	public static final boolean DYNAMIC_MAX_PSN_LENGTH = true;
+
+	public int getMaxPsnTotalLength()
+	{
+		return DomainConfig.getMaxNumberOfCharactersInFullyQualifiedPsn();
+	}
+
+	public int getMaxPsnPrefixLength()
+	{
+		if (DYNAMIC_MAX_PSN_LENGTH)
+		{
+			return Math.max(0, getMaxPsnTotalLength() -
+					(psnLength + (psnSuffix != null ? psnSuffix.length() : 0)));
+		}
+		return getMaxPsnTotalLength();
+	}
+
+	public int getMaxPsnSuffixLength()
+	{
+		if (DYNAMIC_MAX_PSN_LENGTH)
+		{
+			return Math.max(0, getMaxPsnTotalLength() -
+					(psnLength + (psnPrefix != null ? psnPrefix.length() : 0)));
+		}
+		return getMaxPsnTotalLength();
+	}
+
+	public int getMaxPsnValueLength()
+	{
+		if (DYNAMIC_MAX_PSN_LENGTH)
+		{
+			return Math.max(1, getMaxPsnTotalLength() -
+					((psnPrefix != null ? psnPrefix.length() : 0) + (psnSuffix != null ? psnSuffix.length() : 0)));
+		}
+		return getMaxPsnTotalLength();
+	}
+
+	public int getRemainingPsnTotalLength()
+	{
+		return getMaxPsnTotalLength() - (psnLength +
+				(psnPrefix != null ? psnPrefix.length() : 0) +
+				(psnSuffix != null ? psnSuffix.length() : 0));
+	}
+
+	public int getPsnLengthSum()
+	{
+		return psnLength +
+				(psnPrefix != null ? psnPrefix.length() : 0) +
+				(psnSuffix != null ? psnSuffix.length() : 0);
 	}
 
 	public enum Mode

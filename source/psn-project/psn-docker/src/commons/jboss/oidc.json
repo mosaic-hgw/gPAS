@@ -1,8 +1,7 @@
 {
-  "auth-server-url": "<PROTOCOL://HOST_OR_IP:PORT/auth/>",
+  "client-id": "ths",
+  "provider-url": "<PROTOCOL>://<HOST_OR_IP>:<PORT>/realms/ttp",
   "ssl-required": "<none|external|all>",
-  "realm": "<REALM>",
-  "resource": "<RESOURCE>",
   "verify-token-audience": true,
   "credentials": {
     "secret": "<CLIENT_SECRET>"

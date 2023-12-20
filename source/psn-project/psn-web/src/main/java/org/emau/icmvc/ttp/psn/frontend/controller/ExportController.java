@@ -4,7 +4,7 @@ package org.emau.icmvc.ttp.psn.frontend.controller;
  * ###license-information-start###
  * gPAS - a Generic Pseudonym Administration Service
  * __
- * Copyright (C) 2013 - 2022 Independent Trusted Third Party of the University Medicine Greifswald
+ * Copyright (C) 2013 - 2023 Independent Trusted Third Party of the University Medicine Greifswald
  * 							kontakt-ths@uni-greifswald.de
  * 							concept and implementation
  * 							l.geidel
@@ -31,11 +31,8 @@ package org.emau.icmvc.ttp.psn.frontend.controller;
  * ###license-information-end###
  */
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -43,12 +40,13 @@ import javax.annotation.PostConstruct;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
 
-import java.text.SimpleDateFormat;
+import org.apache.commons.lang3.StringUtils;
 import org.emau.icmvc.ganimed.ttp.psn.dto.DomainOutDTO;
 import org.emau.icmvc.ganimed.ttp.psn.dto.PSNDTO;
 import org.emau.icmvc.ganimed.ttp.psn.exceptions.InvalidParameterException;
 import org.emau.icmvc.ganimed.ttp.psn.exceptions.UnknownDomainException;
 import org.emau.icmvc.ttp.psn.frontend.controller.common.AbstractGPASBean;
+import org.icmvc.ttp.web.model.WebFile;
 import org.primefaces.model.DefaultStreamedContent;
 import org.primefaces.model.DualListModel;
 
@@ -61,8 +59,9 @@ import org.primefaces.model.DualListModel;
 @ManagedBean(name = "exportController")
 public class ExportController extends AbstractGPASBean
 {
+	public static final int MAX_FILE_NAME_LENGTH = 100;
 	private DualListModel<DomainOutDTO> domainLists = new DualListModel<>();
-	private DefaultStreamedContent downloadFile;
+	private WebFile webFile;
 
 	@PostConstruct
 	public void init()
@@ -72,65 +71,47 @@ public class ExportController extends AbstractGPASBean
 
 	public void onExport() throws UnknownDomainException, InvalidParameterException
 	{
+		webFile = new WebFile("gPAS");
+		List<String> columns = new ArrayList<>(Arrays.asList(getBundle().getString("psn.originalValue"), getBundle().getString("psn.pseudonym")));
+		if (domainLists.getTarget().size() > 1)
+		{
+			columns.add(getBundle().getString("psn.domain"));
+		}
+		webFile.setColumns(columns);
+		
 		List<PSNDTO> psns = new ArrayList<>();
-
 		for (DomainOutDTO domain : domainLists.getTarget())
 		{
 			psns.addAll(domainService.listPSNs(domain.getName()));
 		}
 
-		StringBuilder result = new StringBuilder();
-
-		// Header
-		result.append("sep=;");
-		result.append("\r\n");
-
-		result.append(getBundle().getString("psn.originalValue")).append(";");
-		result.append(getBundle().getString("psn.pseudonym")).append(";");
-		if (domainLists.getTarget().size() > 1)
-		{
-			result.append(getBundle().getString("psn.domain")).append(";");
-		}
-		result.append("\r\n");
-
 		// Content
 		for (PSNDTO psn : psns)
 		{
-			result.append(psn.getOriginalValue()).append(";");
-			result.append(psn.getPseudonym()).append(";");
 			if (domainLists.getTarget().size() > 1)
 			{
-				result.append(psn.getDomainName()).append(";");
+				webFile.getElements().add(Arrays.asList(psn.getOriginalValue(), psn.getPseudonym(), psn.getDomainName()));
 			}
-			result.append("\r\n");
+			else
+			{
+				webFile.getElements().add(Arrays.asList(psn.getOriginalValue(), psn.getPseudonym()));
+			}
 		}
-
-		// File name
-		SimpleDateFormat sdf = new SimpleDateFormat(getCommonBundle("en").getString("ui.date.pattern.date"));
-
-		StringBuilder fileName = new StringBuilder(sdf.format(new Date()));
-		fileName.append(" ").append(getBundle().getString("export.fileName"));
+		
+		// Filename
+		StringBuilder sb = new StringBuilder();
+		sb.append(getBundle().getString("export.fileName"));
 		for (DomainOutDTO domain : domainLists.getTarget())
 		{
-			fileName.append(" ").append(domain.getName());
+			sb.append(" ").append(domain.getName());
 		}
-		fileName.append(" gPAS");
-		fileName.append(".csv");
-
-		// Create download stream
-		InputStream stream = new ByteArrayInputStream(result.toString().getBytes(StandardCharsets.UTF_16LE));
-
-		downloadFile = DefaultStreamedContent.builder()
-				.stream(() -> stream)
-				.contentType("text/csv")
-				.name(fileName.toString())
-				.contentEncoding(StandardCharsets.UTF_16LE.name())
-				.build();
+		String fileName = StringUtils.abbreviate(sb.toString(), "...", MAX_FILE_NAME_LENGTH);
+		webFile.onDownload(fileName);
 	}
 
 	public DefaultStreamedContent getDownloadFile()
 	{
-		return downloadFile;
+		return webFile.getDownloadFile();
 	}
 
 	public DualListModel<DomainOutDTO> getDomainLists()

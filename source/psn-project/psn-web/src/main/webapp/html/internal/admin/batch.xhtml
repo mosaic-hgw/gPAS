@@ -2,7 +2,7 @@
   ###license-information-start###
   gPAS - a Generic Pseudonym Administration Service
   __
-  Copyright (C) 2013 - 2022 Independent Trusted Third Party of the University Medicine Greifswald
+  Copyright (C) 2013 - 2023 Independent Trusted Third Party of the University Medicine Greifswald
   							kontakt-ths@uni-greifswald.de
   							concept and implementation
   							l.geidel
@@ -111,7 +111,7 @@
 					<p:selectOneMenu id="domain" value="#{batchController.selectedDomain}" required="true" filter="true"
 									 filterMatchMode="contains">
 						<f:selectItem noSelectionOption="true" itemLabel="#{cmsg['ui.select.pleaseSelect']}" itemDisabled="true" />
-						<f:selectItems value="#{batchController.domainNames}" var="_domain" itemLabel="#{batchController.getDomain(_domain).label}" />
+						<f:selectItems value="#{batchController.domainNames}" var="_domain" itemLabel="#{batchController.getDomainLabel(_domain)}" />
 						<p:ajax event="itemSelect" process="@this" />
 					</p:selectOneMenu>
 
@@ -154,7 +154,7 @@
 			</p:panel>
 		</h:form>
 
-		<file:progress webFile="#{batchController.webFile}" progress="#{batchController.progress}" message="#{msg['batch.progress.processing']}" />
+		<file:progress size="#{batchController.webFile.elements.size()}" progress="#{batchController.progress}" message="#{msg['batch.progress.processing']}" />
 	</ui:define>
 </ui:composition>
 </body>

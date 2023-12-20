@@ -1,6 +1,7 @@
 ![context](https://user-images.githubusercontent.com/12081369/49164566-a5794200-f32f-11e8-8d3a-96244ea00832.png)
 
-Current Version: 1.12.1 (July 2022)
+Current Docker-Version of gPAS: 2023.1.2 (Okt. 2023)
+Current Docker-Version of TTP-FHIR-Gateway: 2023.1.2 (October 2023), Details from [ReleaseNotes](https://www.ths-greifswald.de/ttpfhirgw/releasenotes/2023-1-2)
 
 # About #
 The use of pseudonyms is a privacy-enhancing technique supporting privacy-by-design and ensuring non-attribution. Pseudonymisation allows storing directly person identifying data separately and securely from medical data and supports the data controller to meet the GDPR’s data security requirements (Art. 32 lit. 1 EU GDPR).
@@ -30,65 +31,55 @@ or visit https://ths-greifswald.de/gpas for more information.
 ## SOAP
 
 All functionalities of the gPAS are provided for external use via SOAP-interfaces.
+The [JavaDoc specs for the Services](https://www.ths-greifswald.de/gpas/doc "")
+are available online (see package `org.emau.icmvc.ganimed.ttp.psn`).
 
-[DomainManager Interface-Description (JavaDoc)](https://www.ths-greifswald.de/wp-content/uploads/tools/gpas/doc/1-12-0/org/emau/icmvc/ganimed/ttp/psn/DomainManager.html)
+Use SOAP-UI to create sample requests based on the WSDL files.
 
-The WSDL URL is <strong>http://<YOUR IPADDRESS>:8080/gpas/DomainService?wsdl</strong>
+### Service-Interface for PSN Management
 
-[PSNManager Service Interface-Description (JavaDoc)](https://www.ths-greifswald.de/wp-content/uploads/tools/gpas/doc/1-12-0/org/emau/icmvc/ganimed/ttp/psn/PSNManager.html "")
+The WSDL URL is [http://&lt;YOUR IPADDRESS&gt;:8080/gpas/gpasService?wsdl](https://demo.ths-greifswald.de/gpas/gpasService?wsdl)
 
-The WSDL URL is <strong>http://<YOUR IPADDRESS>:8080/gpas/gpasService?wsdl</strong>
+### Service-Interface  for PSN Management with Notifications
 
-Use SOAP-UI to create sample requests.
+The WSDL URL is [http://&lt;YOUR IPADDRESS&gt;:8080/gpas/gpasServiceWithNotification?wsdl](https://demo.ths-greifswald.de/gpas/gpasServiceWithNotification?wsdl)
+
+### Service-Interface for Configuration and Domain Management
+
+The WSDL URL is [http://&lt;YOUR IPADDRESS&gt;:8080/gpas/DomainService?wsdl](https://demo.ths-greifswald.de/gpas/DomainService?wsdl)
 
 ## FHIR
 
-More details from https://ths-greifswald.de/gpas/fhir
+More details from https://www.ths-greifswald.de/gpas/fhir
 
 # IT-Security Recommendations #
-For the operation of gPAS at least following IT-security measures are recommended:
-* operation in a separate network-zone
-* use of firewalls and IP-filters
-* use of Keycloak to restrict access to gPAS-Web
-* access restriction to the gPAS-Servers with basic authentication (e.g. with nginx or apache)
+Access to relevant application and database servers of the Trusted Third Party tools should only be possible for authorised personnel and via authorised end devices. We therefore recommend additionally implementing the following IT security measures:
+
+* Operation of the relevant servers in separate network zones (separate from the research and supply network).
+* Use of firewalls and IP filters
+* Access restriction at URL level with Basic Authentication (e.g. with NGINX or Apache)
+* use of Keycloak to restrict access to Web-Frontends and technical interfaces
 
 # Additional Information #
-
-The gPAS was developed by the University Medicine Greifswald  and published in 2013 as part of the [MOSAIC-Project](https://ths-greifswald.de/mosaic "")  (funded by the DFG HO 1937/2-1).
+The gPAS was developed by the University Medicine Greifswald and published in 2013 as part of the [MOSAIC-Project](https://ths-greifswald.de/mosaic "") (funded by the DFG HO 1937/2-1).
 
 Selected functionalities of gPAS were developed as part of the following research projects:
 - MIRACUM (funded by the German Federal Ministry of Education and Research 01ZZ1801M)
 
 ## Credits ##
-Concept and implementation: L. Geidel
-
-Web-Client: A. Blumentritt, M. Bialke, F.M. Moser
-
-Docker: R. Schuldt
-
-TTP-FHIR Gateway für gPAS: M. Bialke, P. Penndorf, L. Geidel, S. Lang
+**Concept and implementation:** L. Geidel <br/>
+**Web-Client:** A. Blumentritt, M. Bialke, F.M. Moser <br/>
+**Docker:** R. Schuldt <br/>
+**TTP-FHIR Gateway für gPAS:** M. Bialke, P. Penndorf, L. Geidel, S. Lang, F.M. Moser
 
 ## License ##
-License: AGPLv3, https://www.gnu.org/licenses/agpl-3.0.en.html
-
-Copyright: 2013 - 2022 University Medicine Greifswald
-
-Contact: https://www.ths-greifswald.de/kontakt/
+**License:** AGPLv3, https://www.gnu.org/licenses/agpl-3.0.en.html <br/>
+**Copyright:** 2013 - 2023 University Medicine Greifswald <br/>
+**Contact:** https://www.ths-greifswald.de/kontakt/
 
 ## Publications ##
-https://dx.doi.org/10.3414/ME14-01-0133
-
-https://dx.doi.org/10.1186/s12967-015-0545-6
+- https://dx.doi.org/10.3414/ME14-01-0133
+- https://dx.doi.org/10.1186/s12967-015-0545-6
 
 # Supported languages #
 German, English
-
-# Screenshots #
-
-List processing
-
-![context](https://www.ths-greifswald.de/wp-content/uploads/2019/01/gPAS-Screenshot-Listen-verarbeiten.png)
-
-Show Pseudonym trees
-
-![context](https://www.ths-greifswald.de/wp-content/uploads/2019/01/gPAS-Screenshot-Pseudonymbaum.png)

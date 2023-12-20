@@ -4,7 +4,7 @@ package org.emau.icmvc.ganimed.ttp.psn.internal;
  * ###license-information-start###
  * gPAS - a Generic Pseudonym Administration Service
  * __
- * Copyright (C) 2013 - 2022 Independent Trusted Third Party of the University Medicine Greifswald
+ * Copyright (C) 2013 - 2023 Independent Trusted Third Party of the University Medicine Greifswald
  * 							kontakt-ths@uni-greifswald.de
  * 							concept and implementation
  * 							l.geidel
@@ -141,6 +141,13 @@ public class DAO
 	public void deletePSN(String value, String domainName) throws UnknownValueException
 	{
 		em.remove(getPSNObject(value, domainName));
+		em.flush();
+	}
+
+	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	public void deleteAllPSNForDomain(String domainName)
+	{
+		em.createNamedQuery("PSN.deleteByDomain").setParameter("domainName", domainName).executeUpdate();
 		em.flush();
 	}
 
@@ -319,8 +326,8 @@ public class DAO
 		CriteriaQuery<Long> cq = cb.createQuery(Long.class);
 		Root<PSN> root = cq.from(PSN.class);
 		cq.select(cb.count(root));
-		Predicate predicate = cb.equal(root.get(PSN_.key).get(PSNKey_.domain), domainName);
-		predicate = cb.and(predicate, cb.like(root.get(PSN_.key).get(PSNKey_.originalValue), AnonymDomain.PREFIX + '%' + AnonymDomain.SUFFIX));
+		Predicate predicate = cb.equal(root.get(PSN_.key).get(PSNKey_.domain), AnonymDomain.NAME);
+		predicate = cb.and(predicate, cb.like(root.get(PSN_.key).get(PSNKey_.originalValue), domainName + AnonymDomain.DELIMITER + '%'));
 		cq.where(predicate);
 		return em.createQuery(cq).getSingleResult();
 	}
@@ -384,29 +391,37 @@ public class DAO
 	}
 
 	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-	public List<PSN> getPSNObjectsForDomainPaginated(String domainName, int startPosition, int maxResults)
+	public List<PSN> getPSNObjectsForDomainPaginated(String domainName, int maxResults, String startAfterOrigValue)
 	{
 		CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
 		CriteriaQuery<PSN> criteriaQuery = criteriaBuilder.createQuery(PSN.class);
 		Root<PSN> root = criteriaQuery.from(PSN.class);
 		Predicate predicate = criteriaBuilder.equal(root.get(PSN_.key).get(PSNKey_.domain), domainName);
-		criteriaQuery.select(root).where(predicate);
+		// beschleunigung
+		if (startAfterOrigValue != null)
+		{
+			predicate = criteriaBuilder.and(predicate, criteriaBuilder.greaterThan(root.get(PSN_.key).get(PSNKey_.originalValue), startAfterOrigValue));
+		}
+		criteriaQuery.select(root).where(predicate).orderBy(criteriaBuilder.asc(root.get(PSN_.key).get(PSNKey_.originalValue)));
 		TypedQuery<PSN> query = em.createQuery(criteriaQuery);
-		query.setFirstResult(startPosition);
 		query.setMaxResults(maxResults);
 		return query.getResultList();
 	}
 
 	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-	public List<String> getPseudonymsForDomainPaginated(String domainName, int startPosition, int maxResults)
+	public List<String> getPseudonymsForDomainPaginated(String domainName, int maxResults, String startAfterPseudonym)
 	{
 		CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
 		CriteriaQuery<String> criteriaQuery = criteriaBuilder.createQuery(String.class);
 		Root<PSN> root = criteriaQuery.from(PSN.class);
 		Predicate predicate = criteriaBuilder.equal(root.get(PSN_.key).get(PSNKey_.domain), domainName);
-		criteriaQuery.select(root.get(PSN_.pseudonym)).where(predicate);
+		// beschleunigung
+		if (startAfterPseudonym != null)
+		{
+			predicate = criteriaBuilder.and(predicate, criteriaBuilder.greaterThan(root.get(PSN_.pseudonym), startAfterPseudonym));
+		}
+		criteriaQuery.select(root.get(PSN_.pseudonym)).where(predicate).orderBy(criteriaBuilder.asc(root.get(PSN_.pseudonym)));
 		TypedQuery<String> query = em.createQuery(criteriaQuery);
-		query.setFirstResult(startPosition);
 		query.setMaxResults(maxResults);
 		List<String> result = query.getResultList();
 		em.clear();
@@ -454,7 +469,8 @@ public class DAO
 		CriteriaQuery<Statistic> criteriaQuery = criteriaBuilder.createQuery(Statistic.class);
 		Root<Statistic> root = criteriaQuery.from(Statistic.class);
 		criteriaQuery.select(root).orderBy(criteriaBuilder.desc(root.get(Statistic_.stat_entry_id)));
-		return em.createQuery(criteriaQuery).setMaxResults(1).getSingleResult();
+		List<Statistic> result = em.createQuery(criteriaQuery).setMaxResults(1).getResultList();
+		return result.size() == 0 ? null : result.get(0);
 	}
 
 	private Predicate generateWhereForPSNs(CriteriaBuilder criteriaBuilder, Root<PSN> root, List<String> domainNames, PaginationConfig config)

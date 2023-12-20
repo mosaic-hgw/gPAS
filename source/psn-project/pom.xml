@@ -3,18 +3,21 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.emau.icmvc.ganimed.ttp</groupId>
 	<artifactId>psn-project</artifactId>
-	<version>1.12.1</version>
+	<version>2023.1.2</version>
 	<name>gPAS</name>
 	<url>https://www.ths-greifswald.de/gpas</url>
 
 	<packaging>pom</packaging>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<ttp-web-common.version>2.13.7</ttp-web-common.version>
+		<ttp-web-common.version>2.15.5</ttp-web-common.version>
+		<ths-utils.version>1.4.11</ths-utils.version>
 		<project.shortName>gpas</project.shortName>
 		<project.upperName>GPAS</project.upperName>
 		<display_version>${project.version}</display_version>
-		<log4j.version>2.17.2</log4j.version>
+		<log4j.version>2.20.0</log4j.version>
+		<ttp-noti.version>2023.1.1</ttp-noti.version>
+		<ttp-gras.version>1.0.0</ttp-gras.version>
 	</properties>
 
 	<modules>
@@ -23,8 +26,8 @@
 		<module>psn-ear</module>
 		<module>psn-web</module>
 		<module>psn-coverage</module>
-        <module>psn-docker</module>
-    </modules>
+		<module>psn-docker</module>
+	</modules>
 
 	<profiles>
 		<profile>
@@ -81,7 +84,7 @@
 					<plugin>
 						<groupId>org.jacoco</groupId>
 						<artifactId>jacoco-maven-plugin</artifactId>
-						<version>0.8.7</version>
+						<version>0.8.8</version>
 						<executions>
 							<execution>
 								<goals>
@@ -126,7 +129,7 @@
 			<dependency>
 				<groupId>com.ibm.icu</groupId>
 				<artifactId>icu4j</artifactId>
-				<version>70.1</version>
+				<version>73.1</version>
 			</dependency>
 
 			<dependency>
@@ -150,16 +153,29 @@
 			<dependency>
 				<groupId>org.eclipse.persistence</groupId>
 				<artifactId>eclipselink</artifactId>
-				<version>2.7.10</version>
+				<version>2.7.12</version>
 				<scope>provided</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.persistence</groupId>
 				<artifactId>org.eclipse.persistence.jpa.modelgen.processor</artifactId>
-				<version>2.7.10</version>
+				<version>2.7.12</version>
 				<scope>provided</scope>
 			</dependency>
-			<!-- web -->
+			<!-- for notificationservice and keycloak-based soap auth-->
+			<dependency>
+				<groupId>org.emau.icmvc.ttp</groupId>
+				<artifactId>ths-utils</artifactId>
+				<version>${ths-utils.version}</version>
+				<type>jar</type>
+			</dependency>
+			<dependency>
+				<groupId>com.fasterxml.jackson.core</groupId>
+				<artifactId>jackson-databind</artifactId>
+				<version>2.15.2</version>
+				<scope>provided</scope>
+			</dependency>
+		<!-- web -->
 			<dependency>
 				<groupId>org.emau.icmvc.ttp</groupId>
 				<artifactId>ttp-web-common</artifactId>
@@ -175,14 +191,8 @@
 			<dependency>
 				<groupId>org.primefaces</groupId>
 				<artifactId>primefaces</artifactId>
-				<version>10.0.0</version>
+				<version>12.0.0</version>
 				<scope>provided</scope>
-			</dependency>
-			<dependency>
-				<groupId>commons-fileupload</groupId>
-				<artifactId>commons-fileupload</artifactId>
-				<scope>compile</scope>
-				<version>1.4</version>
 			</dependency>
 
 			<!-- test -->
@@ -190,13 +200,13 @@
 				<groupId>org.apache.cxf</groupId>
 				<artifactId>cxf-rt-frontend-jaxws</artifactId>
 				<scope>test</scope>
-				<version>3.5.1</version>
+				<version>4.0.2</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.cxf</groupId>
 				<artifactId>cxf-rt-transports-http-jetty</artifactId>
 				<scope>test</scope>
-				<version>3.5.1</version>
+				<version>4.0.2</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.logging.log4j</groupId>
@@ -214,33 +224,79 @@
 			<dependency>
 				<groupId>com.sun.xml.ws</groupId>
 				<artifactId>jaxws-rt</artifactId>
-				<version>2.3.5</version>
+				<version>2.3.6</version>
 				<type>pom</type>
+			</dependency>
+
+			<!-- own shared resources and deployments -->
+			<dependency>
+				<groupId>org.emau.icmvc.ganimed.ttp</groupId>
+				<artifactId>gpas-shared-resources</artifactId>
+				<version>${project.version}</version>
+				<type>jar</type>
+			</dependency>
+			<dependency>
+				<groupId>org.emau.icmvc.ganimed.ttp</groupId>
+				<artifactId>psn-ear</artifactId>
+				<version>${project.version}</version>
+				<type>ear</type>
+			</dependency>
+			<dependency>
+				<groupId>org.emau.icmvc.ganimed.ttp</groupId>
+				<artifactId>psn-web</artifactId>
+				<version>${project.version}</version>
+				<type>war</type>
+			</dependency>
+
+			<!-- external shared resources and deployments -->
+			<dependency>
+				<groupId>org.emau.icmvc.ttp</groupId>
+				<artifactId>noti-shared-resources</artifactId>
+				<version>${ttp-noti.version}</version>
+				<type>jar</type>
+			</dependency>
+			<dependency>
+				<groupId>org.emau.icmvc.ttp</groupId>
+				<artifactId>ths-notification-client-ear</artifactId>
+				<version>${ttp-noti.version}</version>
+				<type>ear</type>
+			</dependency>
+			<dependency>
+				<groupId>org.emau.icmvc.ttp</groupId>
+				<artifactId>ths-notification-service</artifactId>
+				<version>${ttp-noti.version}</version>
+				<type>war</type>
+			</dependency>
+			<dependency>
+				<groupId>org.icmvc.ttp</groupId>
+				<artifactId>gras-shared-resources</artifactId>
+				<version>${ttp-gras.version}</version>
+				<type>jar</type>
 			</dependency>
 
 			<!-- Tests -->
 			<dependency>
 				<groupId>org.junit.jupiter</groupId>
 				<artifactId>junit-jupiter</artifactId>
-				<version>5.8.2</version>
+				<version>5.9.3</version>
 				<scope>test</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.mockito</groupId>
 				<artifactId>mockito-core</artifactId>
-				<version>4.4.0</version>
+				<version>5.3.1</version>
 				<scope>test</scope>
 			</dependency>
 			<dependency>
 				<groupId>ch.qos.logback</groupId>
 				<artifactId>logback-core</artifactId>
-				<version>1.2.11</version>
+				<version>1.2.12</version>
 				<scope>test</scope>
 			</dependency>
 			<dependency>
 				<groupId>ch.qos.logback</groupId>
 				<artifactId>logback-classic</artifactId>
-				<version>1.2.11</version>
+				<version>1.2.12</version>
 				<scope>test</scope>
 			</dependency>
 			<dependency>
@@ -286,12 +342,21 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-jar-plugin</artifactId>
-					<version>3.2.2</version>
+					<version>3.3.0</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-javadoc-plugin</artifactId>
+					<version>3.4.1</version>
+					<configuration>
+						<windowtitle>gPAS ${project.version} API</windowtitle>
+						<bottom><![CDATA[gPAS ${project.version} API, Copyright 2022, <a href="https://www.ths-greifswald.de">ths-greifswald.de<a>]]></bottom>
+					</configuration>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-ejb-plugin</artifactId>
-					<version>3.1.0</version>
+					<version>3.2.1</version>
 					<configuration>
 						<ejbVersion>3.2</ejbVersion>
 					</configuration>
@@ -316,8 +381,8 @@
 					<artifactId>maven-compiler-plugin</artifactId>
 					<version>3.10.1</version>
 					<configuration>
-						<source>11</source>
-						<target>11</target>
+						<source>17</source>
+						<target>17</target>
 						<debug>true</debug>
 						<debuglevel>source,lines,vars</debuglevel>
 						<generatedSourcesDirectory>target/generated-sources/annotations</generatedSourcesDirectory>
@@ -351,7 +416,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-deploy-plugin</artifactId>
-					<version>2.8.2</version>
+					<version>3.0.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>

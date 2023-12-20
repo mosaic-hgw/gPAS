@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.emau.icmvc.ganimed.ttp</groupId>
 		<artifactId>psn-project</artifactId>
-		<version>1.12.1</version>
+		<version>2023.1.2</version>
 	</parent>
 
 	<dependencies>
@@ -31,6 +31,11 @@
 			<groupId>org.emau.icmvc.ganimed.ttp</groupId>
 			<artifactId>psn-commons</artifactId>
 		</dependency>
+		<!-- for notificationservice and keycloak-based soap auth-->
+		<dependency>
+			<groupId>org.emau.icmvc.ttp</groupId>
+			<artifactId>ths-utils</artifactId>
+		</dependency>
 		<!-- test -->
 		<dependency>
 			<groupId>org.apache.cxf</groupId>
@@ -45,5 +50,21 @@
 			<artifactId>log4j-core</artifactId>
 		</dependency>
 	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-ejb-plugin</artifactId>
+				<configuration>
+					<archive>
+						<manifestEntries>
+							<Dependencies>io.undertow.servlet export, io.undertow.core export, org.wildfly.security.elytron-http-oidc export, org.apache.cxf.impl export</Dependencies>
+						</manifestEntries>
+					</archive>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 
 </project>

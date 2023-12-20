@@ -4,7 +4,7 @@ package org.emau.icmvc.ganimed.ttp.psn.dto;
  * ###license-information-start###
  * gPAS - a Generic Pseudonym Administration Service
  * __
- * Copyright (C) 2013 - 2022 Independent Trusted Third Party of the University Medicine Greifswald
+ * Copyright (C) 2013 - 2023 Independent Trusted Third Party of the University Medicine Greifswald
  * 							kontakt-ths@uni-greifswald.de
  * 							concept and implementation
  * 							l.geidel
@@ -51,9 +51,7 @@ public class DomainInDTO implements Serializable, Comparable<DomainInDTO>
 {
 
 	private static final Comparator<DomainInDTO> COMPARATOR = Comparator
-			.comparing((DomainInDTO d) -> d != null && d.getLabel() != null ? d.getLabel().toLowerCase() : null, Comparator.nullsLast(Comparator.naturalOrder()))
-			.thenComparing((DomainInDTO d) -> d.getName().toLowerCase());
-
+			.comparing((DomainInDTO d) -> d != null && d.getLabel() != null ? d.getLabel().toLowerCase() : d != null ? d.getName().toLowerCase() : null, Comparator.nullsLast(Comparator.naturalOrder()));
 	private static final long serialVersionUID = -6534876415337982554L;
 	private String name;
 	private String label;

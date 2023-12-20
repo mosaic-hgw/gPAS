@@ -6,7 +6,7 @@
 	<parent>
 		<artifactId>psn-project</artifactId>
 		<groupId>org.emau.icmvc.ganimed.ttp</groupId>
-		<version>1.12.1</version>
+		<version>2023.1.2</version>
 	</parent>
 
 	<dependencies>

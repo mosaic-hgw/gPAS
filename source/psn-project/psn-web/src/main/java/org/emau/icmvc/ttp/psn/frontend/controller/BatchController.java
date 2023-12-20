@@ -4,7 +4,7 @@ package org.emau.icmvc.ttp.psn.frontend.controller;
  * ###license-information-start###
  * gPAS - a Generic Pseudonym Administration Service
  * __
- * Copyright (C) 2013 - 2022 Independent Trusted Third Party of the University Medicine Greifswald
+ * Copyright (C) 2013 - 2023 Independent Trusted Third Party of the University Medicine Greifswald
  * 							kontakt-ths@uni-greifswald.de
  * 							concept and implementation
  * 							l.geidel
@@ -124,6 +124,7 @@ public class BatchController extends AbstractGPASBean
 		Object[] args = { webFile.getElements().size() };
 		sum = inputs.size();
 		progress = 0;
+		boolean withNotifications = isSendingNotifications(selectedDomain);
 
 		switch (selectedAction)
 		{
@@ -134,7 +135,7 @@ public class BatchController extends AbstractGPASBean
 					{
 						for (List<String> split : splitSet(inputs, 100000))
 						{
-							resultMap.putAll(service.getOrCreatePseudonymForList(new HashSet<>(split), selectedDomain));
+							resultMap.putAll(getOrCreatePseudonymForList(new HashSet<>(split), selectedDomain));
 							progress += split.size();
 						}
 						logMessage(new MessageFormat(getBundle().getString("batch.message.info.done." + selectedAction)).format(args), Severity.INFO);
@@ -182,7 +183,7 @@ public class BatchController extends AbstractGPASBean
 				{
 					for (List<String> split : splitSet(inputs, 1000))
 					{
-						resultMap.putAll(service.anonymiseEntries(new HashSet<>(split), selectedDomain).entrySet().stream()
+						resultMap.putAll(anonymiseEntries(new HashSet<>(split), selectedDomain).entrySet().stream()
 								.collect(Collectors.toMap(
 										Map.Entry::getKey,
 										entry -> getBundle().getString("batch.action.ANONYMISE." + entry.getValue().toString()))));
@@ -200,7 +201,7 @@ public class BatchController extends AbstractGPASBean
 				{
 					for (List<String> split : splitSet(inputs, 1000))
 					{
-						resultMap.putAll(service.deleteEntries(new HashSet<>(split), selectedDomain).entrySet().stream()
+						resultMap.putAll(deleteEntries(new HashSet<>(split), selectedDomain).entrySet().stream()
 								.collect(Collectors.toMap(
 										Map.Entry::getKey,
 										entry -> getBundle().getString("batch.action.DELETE." + entry.getValue().toString()))));

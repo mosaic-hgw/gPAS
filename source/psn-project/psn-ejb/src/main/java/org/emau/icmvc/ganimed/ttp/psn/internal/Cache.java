@@ -4,7 +4,7 @@ package org.emau.icmvc.ganimed.ttp.psn.internal;
  * ###license-information-start###
  * gPAS - a Generic Pseudonym Administration Service
  * __
- * Copyright (C) 2013 - 2022 Independent Trusted Third Party of the University Medicine Greifswald
+ * Copyright (C) 2013 - 2023 Independent Trusted Third Party of the University Medicine Greifswald
  * 							kontakt-ths@uni-greifswald.de
  * 							concept and implementation
  * 							l.geidel
@@ -954,25 +954,7 @@ public class Cache
 					LOGGER.warn(message);
 					throw new DomainInUseException(message);
 				}
-				List<Domain> parents = checkParentDomains(domainDTO);
-				Domain testProject = new Domain(domainDTO, parents);
-				Cache.testConfig(testProject);
-				List<Domain> oldParents = domain.getParents();
-				if (oldParents != null)
-				{
-					for (Domain parent : oldParents)
-					{
-						parent.getChildren().remove(domain);
-					}
-				}
-				domain.update(domainDTO, parents);
-				updateDomainInCaches(domain);
-
-				for (Domain parent : parents)
-				{
-					parent.getChildren().add(domain);
-				}
-				dao.updateDomain(domain, parents, oldParents);
+				updateDomainWithParents(domain, domainDTO);
 			}
 			finally
 			{
@@ -985,16 +967,17 @@ public class Cache
 		}
 	}
 
-	public void updateDomainInUse(String domainName, String label, String comment) throws UnknownDomainException
+	public void updateDomainInUse(String domainName, String label, String comment, boolean sendNotificationsWeb, boolean psnsDeletable)
+			throws UnknownDomainException
 	{
-		domainRWL.readLock().lock();
+		domainRWL.writeLock().lock();
 		try
 		{
 			Domain domain = getDomain(domainName);
 			psnRWL.get(domainName).writeLock().lock();
 			try
 			{
-				domain.updateInUse(label, comment);
+				domain.updateInUse(label, comment, sendNotificationsWeb, psnsDeletable);
 				dao.updateDomain(domain, null, null);
 			}
 			finally
@@ -1004,17 +987,41 @@ public class Cache
 		}
 		finally
 		{
-			domainRWL.readLock().unlock();
+			domainRWL.writeLock().unlock();
 		}
 	}
 
-	public void deleteDomain(String domainName) throws DomainInUseException, UnknownDomainException
+	private void updateDomainWithParents(Domain domain, DomainInDTO domainDTO)
+			throws InvalidParameterException, InvalidParentDomainException, InvalidGeneratorException, InvalidAlphabetException, InvalidCheckDigitClassException
+	{
+		List<Domain> parents = checkParentDomains(domainDTO);
+		Domain testProject = new Domain(domainDTO, parents);
+		Cache.testConfig(testProject);
+		List<Domain> oldParents = domain.getParents();
+		if (oldParents != null)
+		{
+			for (Domain parent : oldParents)
+			{
+				parent.getChildren().remove(domain);
+			}
+		}
+		domain.update(domainDTO, parents);
+		updateDomainInCaches(domain);
+
+		for (Domain parent : parents)
+		{
+			parent.getChildren().add(domain);
+		}
+		dao.updateDomain(domain, parents, oldParents);
+	}
+
+	public void deleteDomain(String domainName, boolean force) throws DomainInUseException, UnknownDomainException
 	{
 		domainRWL.writeLock().lock();
 		try
 		{
 			Domain domain = getDomain(domainName);
-			if (psnCounterCache.get(domainName) > 0)
+			if (!force && psnCounterCache.get(domainName) > 0)
 			{
 				String message = "at least one pseudonym belongs to domain " + domainName + " which therefore can't be deleted";
 				LOGGER.warn(message);
@@ -1030,6 +1037,10 @@ public class Cache
 			for (Domain parent : parents)
 			{
 				parent.getChildren().remove(domain);
+			}
+			if (force && psnCounterCache.get(domainName) > 0)
+			{
+				dao.deleteAllPSNForDomain(domainName);
 			}
 			dao.deleteDomain(domain, parents);
 			removeDomain(domainName);
@@ -1088,16 +1099,19 @@ public class Cache
 				long psnCount = psnCounterCache.get(domainName);
 				if (psnCount > PAGE_SIZE_FOR_CACHE_INIT)
 				{
+					String lastOrigValue = null;
 					for (int i = 0; i * PAGE_SIZE_FOR_CACHE_INIT < psnCount; i++)
 					{
 						int nextPageSize = (int) ((i + 1) * PAGE_SIZE_FOR_CACHE_INIT < psnCount ? PAGE_SIZE_FOR_CACHE_INIT
 								: psnCount - i * PAGE_SIZE_FOR_CACHE_INIT);
 						if (nextPageSize > 0)
 						{
-							for (PSN psn : dao.getPSNObjectsForDomainPaginated(domainName, i * PAGE_SIZE_FOR_CACHE_INIT, nextPageSize))
+							List<PSN> psns = dao.getPSNObjectsForDomainPaginated(domainName, PAGE_SIZE_FOR_CACHE_INIT, lastOrigValue);
+							for (PSN psn : psns)
 							{
 								result.add(psn.toPSNDTO());
 							}
+							lastOrigValue = psns.get(psns.size() - 1).getKey().getOriginValue();
 						}
 					}
 				}
@@ -1133,7 +1147,19 @@ public class Cache
 			}
 			try
 			{
-				return dao.countPSNObjectsForDomains(domainNames, config);
+				if (config.getFilter().isEmpty())
+				{
+					long count = 0;
+					for (String domainName : domainNames)
+					{
+						count += psnCounterCache.get(domainName);
+					}
+					return count;
+				}
+				else
+				{
+					return dao.countPSNObjectsForDomains(domainNames, config);
+				}
 			}
 			finally
 			{
@@ -1296,7 +1322,7 @@ public class Cache
 		try
 		{
 			Statistic stat = dao.getLatestStat();
-			result = stat.toDTO();
+			result = stat == null ? new StatisticDTO() : stat.toDTO();
 		}
 		catch (NoResultException | EJBException e)
 		{
@@ -1399,13 +1425,14 @@ public class Cache
 		{
 			LOGGER.debug("found " + psnCount + " psns for domain " + domain.getName() + ", loading them into cache now");
 		}
+		String lastPseudonym = null;
 		for (int i = 0; i * PAGE_SIZE_FOR_CACHE_INIT < psnCount; i++)
 		{
 			int nextPageSize = (int) ((i + 1) * PAGE_SIZE_FOR_CACHE_INIT < psnCount ? PAGE_SIZE_FOR_CACHE_INIT
 					: psnCount - i * PAGE_SIZE_FOR_CACHE_INIT);
 			if (nextPageSize > 0)
 			{
-				List<String> psns = dao.getPseudonymsForDomainPaginated(domain.getName(), i * PAGE_SIZE_FOR_CACHE_INIT, nextPageSize);
+				List<String> psns = dao.getPseudonymsForDomainPaginated(domain.getName(), PAGE_SIZE_FOR_CACHE_INIT, lastPseudonym);
 				for (String psn : psns)
 				{
 					try
@@ -1417,6 +1444,7 @@ public class Cache
 						LOGGER.fatal("program error", e);
 					}
 				}
+				lastPseudonym = psns.get(psns.size() - 1);
 			}
 		}
 		if (result.getCount() != psnCount)
@@ -1590,18 +1618,16 @@ public class Cache
 				{
 					try
 					{
-						getValueFor(value, parent.getName());
-						valid = true;
-						break;
+						validatePSN(value, parent.getName());
+						valid = existsPseudonym(parent.getName(), value, -1);
+						if (valid)
+						{
+							break;
+						}
 					}
-					catch (InvalidPSNException | PSNNotFoundException ignore)
+					catch (InvalidPSNException ignore)
 					{
 						// could be if there are multiple parents
-					}
-					catch (ValueIsAnonymisedException ignore)
-					{
-						valid = true;
-						break;
 					}
 				}
 				if (!valid)

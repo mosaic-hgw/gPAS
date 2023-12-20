@@ -4,7 +4,7 @@ package org.emau.icmvc.ganimed.ttp.psn;
  * ###license-information-start###
  * gPAS - a Generic Pseudonym Administration Service
  * __
- * Copyright (C) 2013 - 2022 Independent Trusted Third Party of the University Medicine Greifswald
+ * Copyright (C) 2013 - 2023 Independent Trusted Third Party of the University Medicine Greifswald
  * 							kontakt-ths@uni-greifswald.de
  * 							concept and implementation
  * 							l.geidel
@@ -102,9 +102,16 @@ public interface DomainManager
 	/**
 	 * updates a existing domain which is in use (contains psns)
 	 *
-	 * @param domainName the name of the domain
-	 * @param label the new label
-	 * @param comment the new comment
+	 * @param domainName
+	 *            the name of the domain
+	 * @param label
+	 *            the new label
+	 * @param comment
+	 *            the new comment
+	 * @param sendNotificationsWeb
+	 *            whether the web should send notifications to external systems
+	 * @param psnsDeletable
+	 *            whether psns should be deleteable
 	 * @throws InvalidParameterException
 	 *             if domainName is null or empty
 	 * @throws UnknownDomainException
@@ -112,7 +119,10 @@ public interface DomainManager
 	 */
 	void updateDomainInUse(@XmlElement(required = true) @WebParam(name = "domainName") String domainName,
 			@XmlElement(required = true) @WebParam(name = "label") String label,
-			@XmlElement(required = true) @WebParam(name = "comment") String comment) throws InvalidParameterException, UnknownDomainException;
+			@XmlElement(required = true) @WebParam(name = "comment") String comment,
+			@XmlElement(required = true) @WebParam(name = "sendNotificationsWeb") boolean sendNotificationsWeb,
+			@XmlElement(required = true) @WebParam(name = "psnsDeletable") boolean psnsDeletable)
+			throws InvalidParameterException, UnknownDomainException, InvalidGeneratorException, InvalidAlphabetException, InvalidParentDomainException, InvalidCheckDigitClassException;
 
 	/**
 	 * deletes the given domain
@@ -120,7 +130,7 @@ public interface DomainManager
 	 * @param domainName
 	 *            identifier
 	 * @throws DomainInUseException
-	 *             if there's at least one pseudonym within that domain
+	 *             if there's at least one pseudonym within that domain or that domain is a parent domain
 	 * @throws InvalidParameterException
 	 *             if domainName is null or empty
 	 * @throws UnknownDomainException
@@ -130,9 +140,25 @@ public interface DomainManager
 			throws DomainInUseException, InvalidParameterException, UnknownDomainException;
 
 	/**
+	 * deletes the given domain with all pseudonyms - be sure you know, what you're doing
+	 *
+	 * @param domainName
+	 *            identifier
+	 * @throws DomainInUseException
+	 *             if that domain is a parent domain
+	 * @throws InvalidParameterException
+	 *             if domainName is null or empty
+	 * @throws UnknownDomainException
+	 *             if the given domain is not found
+	 */
+	void deleteDomainWithPSNs(@XmlElement(required = true) @WebParam(name = "domainName") String domainName)
+			throws DomainInUseException, InvalidParameterException, UnknownDomainException;
+
+	/**
 	 * returns all information for the given domain
 	 *
-	 * @param domainName the name of the domain
+	 * @param domainName
+	 *            the name of the domain
 	 * @return see {@link DomainOutDTO}
 	 * @throws InvalidParameterException
 	 *             if domainName is null or empty
@@ -151,7 +177,8 @@ public interface DomainManager
 	List<DomainOutDTO> listDomains();
 
 	/**
-	 * @param prefix the domain prefix
+	 * @param prefix
+	 *            the domain prefix
 	 * @return list of all domains with the given prefix; see {@link DomainOutDTO}
 	 * @throws InvalidParameterException
 	 *             if prefix is null or empty
@@ -162,7 +189,8 @@ public interface DomainManager
 			@XmlElement(required = true) @WebParam(name = "prefix") String prefix) throws InvalidParameterException;
 
 	/**
-	 * @param suffix the domain suffix
+	 * @param suffix
+	 *            the domain suffix
 	 * @return list of all domains with the given suffix; see {@link DomainOutDTO}
 	 * @throws InvalidParameterException
 	 *             if suffix is null or empty
@@ -189,11 +217,15 @@ public interface DomainManager
 	/**
 	 * lists all matching psns for the given domain paginated w.r.t. the filter in the pagination config
 	 *
-	 * @param domainName domain for which all pseudonyms should be retrieved
-	 * @param config see {@link PaginationConfig}
+	 * @param domainName
+	 *            domain for which all pseudonyms should be retrieved
+	 * @param config
+	 *            see {@link PaginationConfig}
 	 * @return all pseudonyms for that domain
-	 * @throws InvalidParameterException if domainName is null or empty
-	 * @throws UnknownDomainException if the given domain is not found
+	 * @throws InvalidParameterException
+	 *             if domainName is null or empty
+	 * @throws UnknownDomainException
+	 *             if the given domain is not found
 	 */
 	@XmlElementWrapper(nillable = true, name = "return")
 	@XmlElement(name = "psnList")
@@ -204,11 +236,15 @@ public interface DomainManager
 	/**
 	 * counts matching for the given domain w.r.t. the filter in the pagination config
 	 *
-	 * @param domainName domain for which all pseudonyms should be retrieved
-	 * @param config see {@link PaginationConfig} (page size and first entry will be ignored)
+	 * @param domainName
+	 *            domain for which all pseudonyms should be retrieved
+	 * @param config
+	 *            see {@link PaginationConfig} (page size and first entry will be ignored)
 	 * @return the number of all matching pseudonyms for that domain
-	 * @throws InvalidParameterException if domainName is null or empty
-	 * @throws UnknownDomainException if the given domain is not found
+	 * @throws InvalidParameterException
+	 *             if domainName is null or empty
+	 * @throws UnknownDomainException
+	 *             if the given domain is not found
 	 */
 	@XmlElement(name = "psnCount")
 	long countPSNs(
@@ -218,11 +254,15 @@ public interface DomainManager
 	/**
 	 * lists all matching psns for the given domains paginated w.r.t. the filter in the pagination config
 	 *
-	 * @param domainNames domains for which all pseudonyms should be retrieved
-	 * @param config see {@link PaginationConfig}
+	 * @param domainNames
+	 *            domains for which all pseudonyms should be retrieved
+	 * @param config
+	 *            see {@link PaginationConfig}
 	 * @return all pseudonyms for that domain
-	 * @throws InvalidParameterException if domainName is null or empty
-	 * @throws UnknownDomainException if the given domain is not found
+	 * @throws InvalidParameterException
+	 *             if domainName is null or empty
+	 * @throws UnknownDomainException
+	 *             if the given domain is not found
 	 */
 	@XmlElementWrapper(nillable = true, name = "return")
 	@XmlElement(name = "psnListForDomains")
@@ -233,11 +273,15 @@ public interface DomainManager
 	/**
 	 * counts matching for the given domain w.r.t. the filter in the pagination config
 	 *
-	 * @param domainNames domain for which all pseudonyms should be retrieved
-	 * @param config see {@link PaginationConfig} (page size and first entry will be ignored)
+	 * @param domainNames
+	 *            domain for which all pseudonyms should be retrieved
+	 * @param config
+	 *            see {@link PaginationConfig} (page size and first entry will be ignored)
 	 * @return the number of all matching pseudonyms for that domain
-	 * @throws InvalidParameterException if domainName is null or empty
-	 * @throws UnknownDomainException if the given domain is not found
+	 * @throws InvalidParameterException
+	 *             if domainName is null or empty
+	 * @throws UnknownDomainException
+	 *             if the given domain is not found
 	 */
 	@XmlElement(name = "psnCountForDomains")
 	long countPSNsForDomains(

@@ -1,0 +1,7 @@
+deployments/**
+jboss/**
+Dockerfile
+LICENSE.txt
+ABOUT_gPAS.md
+ReleaseNotes_gPAS.md
+README_gPAS.md

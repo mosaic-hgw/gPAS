@@ -4,7 +4,7 @@ package org.emau.icmvc.ganimed.ttp.psn.generator;
  * ###license-information-start###
  * gPAS - a Generic Pseudonym Administration Service
  * __
- * Copyright (C) 2013 - 2022 Independent Trusted Third Party of the University Medicine Greifswald
+ * Copyright (C) 2013 - 2023 Independent Trusted Third Party of the University Medicine Greifswald
  * 							kontakt-ths@uni-greifswald.de
  * 							concept and implementation
  * 							l.geidel
@@ -305,16 +305,16 @@ public class Generator
 		}
 		if (!prefix.isEmpty() && !value.startsWith(prefix))
 		{
-			throw new InvalidPSNException("unknown prefix - '" + prefix + "' expected");
+			throw new InvalidPSNException("unknown prefix for psn '" + value + "' - '" + prefix + "' expected");
 		}
 		if (!suffix.isEmpty() && !value.endsWith(suffix))
 		{
-			throw new InvalidPSNException("unknown suffix - '" + suffix + "' expected");
+			throw new InvalidPSNException("unknown suffix for psn '" + value + "'  - '" + suffix + "' expected");
 		}
 		int realLength = length;
 		if (includePrefixInCheckDigitCalculation && includeSuffixInCheckDigitCalculation)
 		{
-			realLength = value.length();
+			realLength += prefix.length() + suffix.length();
 		}
 		else if (includePrefixInCheckDigitCalculation)
 		{

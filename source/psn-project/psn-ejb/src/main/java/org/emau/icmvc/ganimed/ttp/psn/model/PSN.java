@@ -3,7 +3,7 @@ package org.emau.icmvc.ganimed.ttp.psn.model;
  * ###license-information-start###
  * gPAS - a Generic Pseudonym Administration Service
  * __
- * Copyright (C) 2013 - 2022 Independent Trusted Third Party of the University Medicine Greifswald
+ * Copyright (C) 2013 - 2023 Independent Trusted Third Party of the University Medicine Greifswald
  * 							kontakt-ths@uni-greifswald.de
  * 							concept and implementation
  * 							l.geidel
@@ -50,7 +50,8 @@ import org.emau.icmvc.ganimed.ttp.psn.dto.PSNDTO;
 @Table(name = "psn", uniqueConstraints = @UniqueConstraint(columnNames = { "domain", "pseudonym" }, name = "domain_pseudonym"))
 @NamedQueries({
 		@NamedQuery(name = "PSN.findByValues", query = "select psn from PSN psn where psn.key.domain = :domainName and psn.key.originalValue in :values"),
-		@NamedQuery(name = "PSN.findByPSNs", query = "select psn from PSN psn where psn.key.domain = :domainName and psn.pseudonym in :psns") })
+		@NamedQuery(name = "PSN.findByPSNs", query = "select psn from PSN psn where psn.key.domain = :domainName and psn.pseudonym in :psns"),
+		@NamedQuery(name = "PSN.deleteByDomain", query = "delete from PSN psn where psn.key.domain = :domainName") })
 @Cacheable(false)
 public class PSN implements Serializable
 {

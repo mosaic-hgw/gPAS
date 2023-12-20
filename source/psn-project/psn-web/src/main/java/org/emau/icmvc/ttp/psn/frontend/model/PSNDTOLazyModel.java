@@ -4,7 +4,7 @@ package org.emau.icmvc.ttp.psn.frontend.model;
  * ###license-information-start###
  * gPAS - a Generic Pseudonym Administration Service
  * __
- * Copyright (C) 2013 - 2022 Independent Trusted Third Party of the University Medicine Greifswald
+ * Copyright (C) 2013 - 2023 Independent Trusted Third Party of the University Medicine Greifswald
  * 							kontakt-ths@uni-greifswald.de
  * 							concept and implementation
  * 							l.geidel
@@ -53,7 +53,6 @@ import org.primefaces.model.SortMeta;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 public class PSNDTOLazyModel extends LazyDataModel<PSNDTO>
 {
 	private final transient DomainManager service;
@@ -61,7 +60,8 @@ public class PSNDTOLazyModel extends LazyDataModel<PSNDTO>
 	private final transient Map<String, PSNDTO> resultMap;
 	private final transient List<PSNDTO> resultList;
 	private transient PaginationConfig lastConfig;
-	private transient int lastUnfilteredRowCount;
+	private transient long lastRowCount = getRowCount();
+	private transient long lastUnfilteredRowCount;
 	protected final transient Logger logger = LoggerFactory.getLogger(getClass());
 
 	private final transient List<DomainOutDTO> domains;
@@ -69,7 +69,7 @@ public class PSNDTOLazyModel extends LazyDataModel<PSNDTO>
 	public PSNDTOLazyModel(DomainManager service, List<DomainOutDTO> domains)
 	{
 		this.service = service;
-		this.domains =new ArrayList<>(domains);
+		this.domains = new ArrayList<>(domains);
 		this.resultMap = new LinkedHashMap<>();
 		this.resultList = new ArrayList<>();
 	}
@@ -100,20 +100,21 @@ public class PSNDTOLazyModel extends LazyDataModel<PSNDTO>
 		return domains.stream().map(DomainOutDTO::getName).collect(Collectors.toList());
 	}
 
-	public List<Integer> getDomainCounts()
+	public List<Long> getDomainCounts()
 	{
 		return getDomainCounts(getDomainNames());
 	}
 
-	private List<Integer> getDomainCounts(List<String> domainNames)
+	private List<Long> getDomainCounts(List<String> domainNames)
 	{
-		return getRefreshedDomains(domainNames).stream().map(DomainOutDTO::getNumberOfPseudonyms).map(c -> (int) (long) c).collect(Collectors.toList());
+		return getRefreshedDomains(domainNames).stream().map(DomainOutDTO::getNumberOfPseudonyms).collect(Collectors.toList());
 	}
 
 	private List<DomainOutDTO> getRefreshedDomains(List<String> domainNames)
 	{
 		List<DomainOutDTO> domains = new ArrayList<>();
-		domainNames.forEach(d -> {
+		domainNames.forEach(d ->
+		{
 			try
 			{
 				domains.add(service.getDomain(d));
@@ -130,14 +131,14 @@ public class PSNDTOLazyModel extends LazyDataModel<PSNDTO>
 		return domains;
 	}
 
-	public int getUnfilteredRowCount()
+	public long getUnfilteredRowCount()
 	{
 		return getUnfilteredRowCount(getDomainNames());
 	}
 
-	private int getUnfilteredRowCount(List<String> domainNames)
+	private long getUnfilteredRowCount(List<String> domainNames)
 	{
-		return getDomainCounts(domainNames).stream().reduce(0, Integer::sum);
+		return getDomainCounts(domainNames).stream().reduce(0L, Long::sum);
 	}
 
 	@Override
@@ -163,8 +164,8 @@ public class PSNDTOLazyModel extends LazyDataModel<PSNDTO>
 		PaginationConfig config = new PaginationConfig(first, pageSize);
 		FilterMeta globalFilter = filterMetaMap.get(FilterMeta.GLOBAL_FILTER_KEY);
 
-		int unfilteredRowCount = getUnfilteredRowCount(domainNames);
-		int filteredRowCount;
+		long unfilteredRowCount = getUnfilteredRowCount(domainNames);
+		long filteredRowCount;
 
 		// if the global filter is set, all other filters will be ignored
 		if (globalFilter != null)
@@ -187,13 +188,13 @@ public class PSNDTOLazyModel extends LazyDataModel<PSNDTO>
 		try
 		{
 			PaginationConfig lastConfig = this.lastConfig;
-			int lastUnfilteredRowCount = this.lastUnfilteredRowCount;
-			int lastRowCount = getRowCount();
+			long lastUnfilteredRowCount = this.lastUnfilteredRowCount;
 
 			// avoid unnecessary querying
 			if (config.equals(lastConfig) && unfilteredRowCount == lastUnfilteredRowCount)
 			{
 				logger.debug("load: return with last result and last rowCount " + lastRowCount);
+				setRowCount((int) lastRowCount); // see comment in #count()
 				return getLastResult();
 			}
 
@@ -230,7 +231,7 @@ public class PSNDTOLazyModel extends LazyDataModel<PSNDTO>
 		return matchingPSNs;
 	}
 
-	private void updateResult(PaginationConfig config, List<PSNDTO> matchingPSNs, int rowCount, int unfilteredRowCount)
+	private void updateResult(PaginationConfig config, List<PSNDTO> matchingPSNs, long rowCount, long unfilteredRowCount)
 	{
 		synchronized (resultList)
 		{
@@ -241,14 +242,16 @@ public class PSNDTOLazyModel extends LazyDataModel<PSNDTO>
 			}
 			resultMap.clear();
 			resultList.forEach(psn -> resultMap.put(getRowKey(psn), psn));
-			setRowCount(rowCount);
+			setRowCount((int) rowCount);
 			lastUnfilteredRowCount = unfilteredRowCount;
 			lastConfig = config;
+			lastRowCount = rowCount;
 		}
 	}
 
 	/**
 	 * Returns the last result (as an unmodifiable list).
+	 *
 	 * @return the last result (as an unmodifiable list)
 	 */
 	protected List<PSNDTO> getLastResult()
@@ -266,11 +269,13 @@ public class PSNDTOLazyModel extends LazyDataModel<PSNDTO>
 	 * @see <a href="https://primefaces.github.io/primefaces/11_0_0/#/../migrationguide/11_0_0?id=datatable-dataview-datagrid-datalist">DataTable section in PF Migration guide 10 -> 11</a>
 	 * @see <a href="https://primefaces.github.io/primefaces/11_0_0/#/components/datatable?id=lazy-loading">Lazy Loading in DataTable part of PF Documentation</a>
 	 *
-	 * @param filterBy the filter map
+	 * @param filterBy
+	 *            the filter map
 	 * @return the number of items in the database wrt. the filter configuration or any arbitrary value, when {@link #setRowCount(int)} is used correctly
 	 */
-	//@Override // TODO(PF11) uncomment
-	public int count(Map<String, FilterMeta> filterBy) {
+	@Override
+	public int count(Map<String, FilterMeta> filterBy)
+	{
 		return 0;
 	}
 }

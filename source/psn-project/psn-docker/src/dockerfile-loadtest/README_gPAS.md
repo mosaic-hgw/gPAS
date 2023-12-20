@@ -15,10 +15,6 @@ Current Docker-Version of gPAS: ${GPAS_VERSION} (${build.monthYear})
     1. gPAS-Image Starten mit ENV-Variablen
     1. gPAS-Image Starten mit ENV-Datei
 1. Logging
-1. Authentifizierung
-    1. gras
-    1. keycloak
-1. Aktualisierung
 1. Fehlersuche
 1. Additional Information
 
@@ -29,25 +25,18 @@ Current Docker-Version of gPAS: ${GPAS_VERSION} (${build.monthYear})
 ## 1. Übersicht der Verzeichnisstruktur
 
 ```
-____docker/
+____dockerfile-loadtest/
   |____deployments/
   |  |____gpas-VERSION.ear
   |  |____gpas-web-VERSION.war
-  |  |____ths-notification-client-VERSION.ear
-  |  |____ths-notification-service-VERSION.war
-  |  |____ttp-fhir-gateway-VERSION.war
   |____jboss/
   |  |____configure_wildfly_commons.cli
-  |  |____configure_wildfly_fhir.cli
   |  |____configure_wildfly_gpas.cli
-  |  |____configure_wildfly_gras.cli
-  |  |____configure_wildfly_noti.cli
-  |  |____gpas_gras_jboss-web.xml
-  |  |____gpas_gras_web.xml
-  |  |____gpas_keycloak_web.xml
+  |____jmeter/
+  |  |____gPAS-LoadTest.jmx
   |____Dockerfile
   |____LICENSE.txt
-  |____README.md
+  |____README_gPAS.md
 ```
 
 
@@ -74,7 +63,7 @@ Um das gPAS-Image bauen zu können, müssen Sie zunächst in das Verzeichnis wec
 Da das Image auf ein von uns vorbereitetes WildFly-Image ([mosaicgreifswald/wildfly](https://hub.docker.com/r/mosaicgreifswald/wildfly)) basiert, wird dies zunächst von Docker-Hub heruntergeladen. Im nächsten Schritt werden aus den Verzeichnissen `deployments` und `jboss` die notwendigen Dateien in das gPAS-Image kopiert.
 
 ```sh
-docker build --tag=harbor.miracum.org/gpas/gpas:${GPAS_VERSION} .
+docker build --tag=harbor.miracum.org/gpas/gpas-test:${GPAS_VERSION} .
 ```
 
 
@@ -83,12 +72,12 @@ Im Anschluss kann das Image mit den Datenbank-Parametern wie folgt gestartet wer
 
 ```sh
 docker run --detach \
-           --env GPAS_DB_HOST=host_or_ip \
-           --env GPAS_DB_USER=gpas_user \
-           --env GPAS_DB_PASS=gpas_password \
+           --env TTP_GPAS_DB_HOST=host_or_ip \
+           --env TTP_GPAS_DB_USER=gpas_user \
+           --env TTP_GPAS_DB_PASS=gpas_password \
            --publish 8080:8080 \
            --name gpas-wildfly \
-           harbor.miracum.org/gpas/gpas:${GPAS_VERSION}
+           harbor.miracum.org/gpas/gpas-test:${GPAS_VERSION}
 ```
 
 Ist der WildFly mit dem gPAS fertig hochgefahren, kann die gPAS-Web-Oberfläche mit dieser Adresse geöffnet werden:
@@ -100,102 +89,40 @@ Die ENV-Variablen können, wie in diesem Beispiel zu sehen, in eine ENV-Datei au
 
 ```sh
 docker run --detach \
-           --env-file gpas.env \
-           --env-file noti.env \
-           --env-file ttp-fhir.env \
-           --env-file wildfly.env \
+           --env-file ttp_gpas.env \
+           --env-file ttp_commons.env \
            --publish 8080:8080 \
            --name gpas-wildfly \
-           harbor.miracum.org/gpas/gpas:${GPAS_VERSION}
+           harbor.miracum.org/gpas/gpas-test:${GPAS_VERSION}
 ```
 
 
 ---
 ## 4. Logging
 Wem die Standard-Log-Einstellungen nicht genügen, kann diese mit kleinen Anpassungen ändern.<br>
-Zum einen kann mit der ENV-Variable `CONSOLE_LOG_LEVEL` der Log-Level für den Console-Handler geändert werden (Default ist *info*):
+Zum einen kann mit der ENV-Variable `WF_CONSOLE_LOG_LEVEL` der Log-Level für den Console-Handler geändert werden (Default ist *info*):
 
 ```sh
 docker run --detach \
-           --env CONSOLE_LOG_LEVEL=debug \
+           --env WF_CONSOLE_LOG_LEVEL=debug \
            --publish 8080:8080 \
            --name gpas-wildfly \
-           harbor.miracum.org/gpas/gpas:${GPAS_VERSION}
+           harbor.miracum.org/gpas/gpas-test:${GPAS_VERSION}
 ```
-Zum anderen kann mit `GPAS_FILE_LOG` *on* eine separate Log-Datei für den gPAS angelegt werden. Diese wird im WildFly-Container unter `${docker.wildfly.logs}` abgelegt und kann wie folgt gemountet werden.
+Zum anderen kann mit `TTP_GPAS_LOG_TO_FILE` *on* eine separate Log-Datei für den gPAS angelegt werden. Diese wird im WildFly-Container unter `${docker.wildfly.logs}` abgelegt und kann wie folgt gemountet werden.
 
 ```sh
 docker run --detach \
            --volume logs:${docker.wildfly.logs} \
-           --env GPAS_FILE_LOG=on \
+           --env TTP_GPAS_LOG_TO_FILE=on \
            --publish 8080:8080 \
            --name gpas-wildfly \
-           harbor.miracum.org/gpas/gpas:${GPAS_VERSION}
+           harbor.miracum.org/gpas/gpas-test:${GPAS_VERSION}
 ```
 
 
 ---
-## 5. Authentifizierung
-In der Standard-Ausgabe vom gPAS ist keine Authentifizierung notwendig, um alle Bereiche zu nutzen. Möchte man den gPAS jedoch nur für bestimmte Nutzergruppen zugänglich machen, oder sogar das Anlegen von neuen Domänen beschränken, können zwei Authentifizierungsverfahren angewendet werden: `gRAS` und `KeyCloak`.
-
-
-#### 5.1. gRAS-Authentifizierung
-Um diese Variante zu nutzen, muss die ENV-Variable `GPAS_AUTH_MODE` den Wert *gras* bekommen.<br>
-Außerdem müssen zusätzlich zur gPAS-DB-Verbindung, noch ENV-Variablen für die gRAS-Datenbank angegeben werden:
-
-```sh
-docker run --detach \
-           --env ... \
-           --env GPAS_AUTH_MODE=gras \
-           --env GRAS_DB_HOST=host_or_ip \
-           --env GRAS_DB_USER=gras_user \
-           --env GRAS_DB_PASS=gras_password \
-           --publish 8080:8080 \
-           --name gpas-wildfly \
-           harbor.miracum.org/gpas/gpas:${GPAS_VERSION}
-```
-**Hinweis:** Hier noch einmal der Verweis auf die Verwendung eine ENV-Datei (siehe 3.3).
-
-
-#### 5.2. KeyCloak-Authentifizierung
-Statt gRAS kann auch eine KeyCloak-Authentifizierung eingesetzt werden.<br>
-Neben der ENV-Variable `GPAS_AUTH_MODE` mit den Wert *keycloak*, müssen weitere Variablen für die KeyCloak-Credentials hinzugefügt werden:
-
-```sh
-docker run --detach \
-           --env ... \
-           --env GPAS_AUTH_MODE=keycloak \
-           --env KEYCLOAK_SERVER_URL=<PROTOCOL://HOST_OR_IP:PORT/auth/> \
-           --env KEYCLOAK_SSL_REQUIRED=<none|external|all> \
-           --env KEYCLOAK_REALM=<REALM> \
-           --env KEYCLOAK_RESOURCE=<RESOURCE> \
-           --env KEYCLOAK_CLIENT_SECRET=<CLIENT_SECRET> \
-           --env KEYCLOAK_USE_RESOURCE_ROLE_MAPPINGS=<true|false> \
-           --env KEYCLOAK_CONFIDENTIAL_PORT=<CONFIDENTIAL_PORT> \
-           --publish 8080:8080 \
-           --name gpas-wildfly \
-           harbor.miracum.org/gpas/gpas:${GPAS_VERSION}
-```
-**Hinweis 1:** Konfiguration des Keycloak-Server unter https://www.ths-greifswald.de/ttp-tools/keycloak.
-**Hinweis 2:** Die KeyCloak-Authentifizierung mittels `keycloak-json` ist in dieser Variante nicht möglich.
-
-
----
-## 6. Aktualisierung
-1. Stoppen und Löschen Sie das *alte* gPAS-Image mit: `docker rm -f gpas-wildfly` (Evtl. müssen Sie bei sich den Container-Namen ändern.)
-1. Prüfen Sie, ob es auch neue Update-SQLs im Verzeichnis `update_sqls` gibt, falls ja ...
-    1. Legen Sie ein Backup Ihrer gPAS-Datenbank an
-    1. Spielen Sie die notwendigen Update-Skripte ein.<br>Achten Sie auf die Versions-Nummern und führen Sie nur die Skripte aus, die Sie wirklich benötigen.<br>Benötigen Sie mehr als ein Skript, ist die richtige Reihenfolge (von klein nach groß) relevant.
-1. Bauen Sie das *neue* gPAS-Image, wie unter 3.1 beschrieben
-1. Starten Sie das *neue* gPAS-Image, wie oben mehrfach beschrieben.
-1. Wenn Sie sicher sind, dass die volle Funktionalität wieder hergestellt ist, können Sie jetzt ggf. das angelegte gPAS-Datenbackup wieder löschen.
-
-
----
-## 7. Fehlersuche
-* Validierung Zugriff auf KeyCloak<br>
-  `curl <PROTOCOL>://<HOST_OR_IP>:<PORT>/auth/realms/<REALM>/.well-known/openid-configuration`<br><br>
-
+## 5. Fehlersuche
 * `Failed to load URLs from .../.well-known/openid-configuration`<br>
   Die Keycloak-Konfiguration verweist möglicherweise auf einen falschen Realm-Eintrag. Dadurch kann die OpenId-Konfiguration nicht abgerufen werden.<br><br>
 
@@ -214,7 +141,7 @@ docker run --detach \
 
 
 ---
-## 8. Additional Information
+## 6. Additional Information
 The gPAS was developed by the University Medicine Greifswald and published in 2013 as part of the [MOSAIC-Project](https://ths-greifswald.de/mosaic "") (funded by the DFG HO 1937/2-1).
 
 Selected functionalities of gPAS were developed as part of the following research projects:

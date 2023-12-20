@@ -1,36 +1,5 @@
 package org.emau.icmvc.ttp.psn.frontend.controller;
 
-/*-
- * ###license-information-start###
- * gPAS - a Generic Pseudonym Administration Service
- * __
- * Copyright (C) 2013 - 2022 Independent Trusted Third Party of the University Medicine Greifswald
- * 							kontakt-ths@uni-greifswald.de
- * 							concept and implementation
- * 							l.geidel
- * 							web client
- * 							a.blumentritt
- * 							docker
- * 							r.schuldt
- * 							please cite our publications
- * 							http://dx.doi.org/10.3414/ME14-01-0133
- * 							http://dx.doi.org/10.1186/s12967-015-0545-6
- * __
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- * ###license-information-end###
- */
-
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -64,6 +33,7 @@ import org.emau.icmvc.ganimed.ttp.psn.exceptions.UnknownValueException;
 import org.emau.icmvc.ganimed.ttp.psn.exceptions.ValueIsAnonymisedException;
 import org.emau.icmvc.ttp.psn.frontend.controller.common.AbstractGPASBean;
 import org.emau.icmvc.ttp.psn.frontend.model.PSNDTOLazyModel;
+import org.primefaces.PrimeFaces;
 import org.primefaces.component.datatable.DataTable;
 import org.primefaces.model.DefaultTreeNode;
 import org.primefaces.model.TreeNode;
@@ -87,6 +57,7 @@ public class PSNController extends AbstractGPASBean
 	private String pseudonym;
 	private TreeNode pseudonymTree;
 	private boolean treeOpen = false;
+	private boolean autoShowTree = false;
 
 	@PostConstruct
 	public void init()
@@ -114,6 +85,23 @@ public class PSNController extends AbstractGPASBean
 		}
 	}
 
+	public void load(String originalValue, String pseudonym)
+	{
+		if (FacesContext.getCurrentInstance().isPostback())
+		{
+			return;
+		}
+
+		if (StringUtils.isNotEmpty(originalValue) || StringUtils.isNotEmpty(pseudonym))
+		{
+			autoShowTree = true;
+			PrimeFaces.current().executeScript("PF('blockPseudonyms').show()");
+			selectedDomain = getDomainsWithAll().stream().filter(d -> d.getName().equals("ALL")).findFirst().orElse(null);
+			PrimeFaces.current().executeScript("$('#main\\\\:pseudonyms\\\\:globalFilter').val('" + (StringUtils.isNotEmpty(originalValue) ? originalValue : pseudonym) + "')");
+			PrimeFaces.current().executeScript("PF('pseudonyms').filter();");
+		}
+	}
+
 	public void onSelectDomain() throws UnknownDomainException
 	{
 		if (selectedDomain != null)
@@ -138,7 +126,7 @@ public class PSNController extends AbstractGPASBean
 		{
 			if (!originalValueAlreadyExists(originalValue))
 			{
-				pseudonym = service.getOrCreatePseudonymFor(originalValue, domain.getName());
+				pseudonym = getOrCreatePseudonymFor(originalValue, domain.getName());
 				selectedDomain = domain;
 				Object[] args = { originalValue, pseudonym, domain.getName() };
 				logMessage(new MessageFormat(getBundle().getString("edit.message.info.pseudonymSaved")).format(args), Severity.INFO, true, false);
@@ -163,7 +151,7 @@ public class PSNController extends AbstractGPASBean
 		{
 			if (!originalValueAlreadyExists(originalValue) && !pseudonymAlreadyExists(pseudonym))
 			{
-				service.insertValuePseudonymPair(originalValue, pseudonym, domain.getName());
+				insertValuePseudonymPair(originalValue, pseudonym, domain.getName());
 				selectedDomain = domain;
 				Object[] args = { originalValue, pseudonym, domain.getName() };
 				logMessage(new MessageFormat(getBundle().getString("edit.message.info.pseudonymSaved")).format(args), Severity.INFO, true, false);
@@ -185,7 +173,7 @@ public class PSNController extends AbstractGPASBean
 	{
 		try
 		{
-			service.deleteEntry(selectedPseudonym.getOriginalValue(), selectedPseudonym.getDomainName());
+			deleteEntry(selectedPseudonym.getOriginalValue(), selectedPseudonym.getDomainName());
 			Object[] args = { selectedPseudonym.getPseudonym(), selectedPseudonym.getDomainName() };
 			logMessage(new MessageFormat(getBundle().getString("edit.message.info.deleted")).format(args), Severity.INFO, true, false);
 			loadDomains();
@@ -202,7 +190,7 @@ public class PSNController extends AbstractGPASBean
 	{
 		try
 		{
-			service.anonymiseEntry(selectedPseudonym.getOriginalValue(), selectedPseudonym.getDomainName());
+			anonymiseEntry(selectedPseudonym.getOriginalValue(), selectedPseudonym.getDomainName());
 			Object[] args = { selectedPseudonym.getOriginalValue(), selectedPseudonym.getPseudonym(), selectedPseudonym.getDomainName() };
 			logMessage(new MessageFormat(getBundle().getString("edit.message.info.anonymised")).format(args), Severity.INFO, true, false);
 			loadDomains();
@@ -223,9 +211,13 @@ public class PSNController extends AbstractGPASBean
 		treeOpen = true;
 		selectedRow = psn;
 		setSelectedPseudonymFromDataTable();
-		loadTree(psn.getOriginalValue());
+		if (psn != null)
+		{
+			loadTree(psn.getOriginalValue());
+		}
+		autoShowTree = false;
 	}
-	
+
 	private void loadTree(String value)
 	{
 		PSNNetDTO net;
@@ -247,7 +239,7 @@ public class PSNController extends AbstractGPASBean
 			logMessage(e.getLocalizedMessage(), Severity.ERROR);
 		}
 	}
-	
+
 	public void onCloseTree()
 	{
 		treeOpen = false;
@@ -292,12 +284,12 @@ public class PSNController extends AbstractGPASBean
 	{
 		return psn != null && !isAnonym(psn.getOriginalValue());
 	}
-	
+
 	public boolean isAnonym(String originalValue) throws InvalidParameterException
 	{
 		return service.isAnonym(originalValue);
 	}
-	
+
 	public boolean isDeletable(PSNDTO psn) throws UnknownDomainException
 	{
 		if (psn != null && !ROOT_DOMAIN.equals(psn.getDomainName()))
@@ -451,7 +443,7 @@ public class PSNController extends AbstractGPASBean
 			searchNodes(childNodeUI, childNodeDTO);
 		}
 	}
-	
+
 	@Override
 	public void loadDomains()
 	{
@@ -607,5 +599,10 @@ public class PSNController extends AbstractGPASBean
 	public enum Relation
 	{
 		CHILD, SIBLING
+	}
+
+	public boolean isAutoShowTree()
+	{
+		return autoShowTree;
 	}
 }

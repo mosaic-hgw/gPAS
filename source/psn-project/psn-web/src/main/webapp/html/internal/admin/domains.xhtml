@@ -2,7 +2,7 @@
   ###license-information-start###
   gPAS - a Generic Pseudonym Administration Service
   __
-  Copyright (C) 2013 - 2022 Independent Trusted Third Party of the University Medicine Greifswald
+  Copyright (C) 2013 - 2023 Independent Trusted Third Party of the University Medicine Greifswald
   							kontakt-ths@uni-greifswald.de
   							concept and implementation
   							l.geidel
@@ -65,14 +65,13 @@
 				</h4>
 
 				<p:tree id="domains" value="#{domainController.domainTree}" var="_domain" dynamic="true" orientation="horizontal"
-						escape="false"
 						styleClass="noToggler hide-root"
 						selectionMode="single" selection="#{domainController.selectedDomainNode}">
 					<p:ajax event="contextMenu" ignoreAutoUpdate="true" update="main:domains_menu" />
 					<p:ajax event="select" ignoreAutoUpdate="true" update="main:domains_menu" />
 
 					<p:treeNode>
-						<h:outputText value="#{domainController.getDomainLabel(_domain.name)}" style="display: block" />
+						<h:outputText value="#{domainController.getDomainLabel(_domain)}" style="display: block" />
 						<h:outputText styleClass="secondary" style="float: left;"
 									  value="#{_domain.config.psnPrefix} #{_domain.config.psnSuffix}" />
 						<h:outputText styleClass="secondary" style="float: right;"
@@ -105,24 +104,60 @@
 								oncomplete="PF('new_dialog').show();" />
 					<p:divider />
 
-					<p:menuitem value="#{cmsg['ui.button.edit']}" icon="mdi mdi-pencil"
+					<p:menuitem value="#{domainController.editable ? cmsg['ui.button.edit'] : msg['page.domains.edit.limited']}" icon="mdi mdi-pencil"
 								actionListener="#{domainController.onEdit}" update="@this, new_dialog"
-								disabled="#{!domainController.editable}"
 								oncomplete="PF('new_dialog').show()">
 					</p:menuitem>
 
 					<p:menuitem actionListener="#{domainController.setSelectedDomainFromNode}" value="#{cmsg['ui.button.delete']}"
 								icon="mdi mdi-delete-empty" update="confirmDelete_dialog:message"
-								disabled="#{!domainController.deletable}"
+								rendered="#{domainController.deletable}"
 								oncomplete="PF('confirmDelete_dialog').show();">
+					</p:menuitem>
+
+					<p:menuitem actionListener="#{domainController.setSelectedDomainFromNode}" value="#{msg['domains.deleteWithPsns']}"
+								icon="mdi mdi-delete-alert" update="delete_domain_with_psns"
+								rendered="#{!domainController.deletable}"
+								styleClass="red"
+								oncomplete="PF('delete_domain_with_psns').show();">
 					</p:menuitem>
 				</p:contextMenu>
 			</p:panel>
 		</h:form>
 
 		<components:confirm_dialog id="confirmDelete_dialog"
-								   message="#{domainController.formatMessage('domains.delete.confirmation', [domainController.selectedDomain.label])}"
+								   message="#{domainController.formatMessage('domains.delete.confirmation', [domainController.selectedDomain == null ? null : domainController.getDomainLabel(domainController.selectedDomain)])}"
 								   action="#{domainController.onDelete}" update="main:domains, main:domainsCounter" />
+
+		<!-- Delete Domain with psns confirmation -->
+		<p:dialog header="#{cmsg['ui.dialog.confirmation']}" modal="true" widgetVar="delete_domain_with_psns">
+			<h:panelGroup id="delete_domain_with_psns" layout="block">
+				<h:form rendered="#{not empty domainController.selectedDomain}">
+
+					<div class="content ui-dialog-severe" style="max-width: 500px; margin-bottom: 15px;">
+						<span class="ui-icon ui-confirm-dialog-severity mdi mdi-alert-outline" />
+						<h:outputFormat escape="false" value="#{msg['domains.deleteWithPsns.confirmation']}">
+							<f:param value="#{text.sanitize(domainController.getDomainLabel(domainController.selectedDomain))}" />
+						</h:outputFormat>
+					</div>
+					<div class="mb-2">
+						<p:selectBooleanCheckbox value="#{domainController.deleteConfirmation}">
+							<p:ajax update="@form" />
+						</p:selectBooleanCheckbox>
+						<h:outputText value="#{msg['domains.deleteWithPsns.confirmation2']}" />
+					</div>
+					<p:commandButton actionListener="#{domainController.onDelete}"
+									 disabled="#{not domainController.deleteConfirmation}" icon="mdi mdi-check"
+									 oncomplete="PF('delete_domain_with_psns').hide();"
+									 update="main:domains, main:domainsCounter, @form"
+									 value="#{cmsg['ui.button.delete']}" />
+					<p:commandButton icon="mdi mdi-close"
+									 oncomplete="PF('delete_domain_with_psns').hide();"
+									 styleClass="secondary"
+									 value="#{cmsg['ui.button.cancel']}" />
+				</h:form>
+			</h:panelGroup>
+		</p:dialog>
 
 		<p:dialog closeOnEscape="true" widgetVar="new_dialog" modal="true" responsive="true" blockScroll="true" id="new_dialog"
 				  header="#{msg['domains.dialog.'.concat(domainController.mode.name())]}">
@@ -131,8 +166,8 @@
 				<p:focus context="edit" />
 				<p:messages escape="false" />
 
-				<div class="p-grid">
-					<div class="p-col-12 p-lg-6" style="padding-right: 40px;">
+				<div class="grid">
+					<div class="col-12 lg:col-6" style="padding-right: 40px;">
 						<p:panelGrid columns="2" columnClasses="ui-grid-col-6,ui-grid-col-6" layout="grid"
 									 styleClass="#{domainController.readOnly ? 'mimic-datatable' : ''}">
 
@@ -150,23 +185,24 @@
 
 							<!-- Created -->
 							<p:outputLabel value="#{cmsg['model.common.created']}" rendered="#{domainController.readOnly}" />
-							<h:outputText value="#{domainController.selectedDomain.createDate}" rendered="#{domainController.readOnly}" converter="datetime"/>
+							<h:outputText value="#{domainController.selectedDomain.createDate}" rendered="#{domainController.readOnly}" converter="datetime" />
 
 							<!-- Edited -->
 							<p:outputLabel value="#{cmsg['model.common.updated']}" rendered="#{domainController.readOnly}" />
-							<h:outputText value="#{domainController.selectedDomain.updateDate}" rendered="#{domainController.readOnly}" converter="datetime"/>
+							<h:outputText value="#{domainController.selectedDomain.updateDate}" rendered="#{domainController.readOnly}" converter="datetime" />
 
 							<!-- Parents -->
 							<p:outputLabel for="parentDomains" value="#{msg['domain.parents']}" />
 							<p:autoComplete id="parentDomains"
 											completeMethod="#{domainController.completeAvailableParentDomains}"
+											disabled="#{!domainController.editable}"
 											forceSelection="true"
 											itemLabel="#{domainController.getDomainLabel(_domain)}"
 											itemValue="#{_domain}"
 											minQueryLength="0"
 											multiple="true"
 											onfocus="PF('context').input.val() === '' ? PF('context').search('') : ''"
-											placeholder="#{msg['page.edit.newPseudonym.filterDomains']}"
+											placeholder="#{domainController.editable ? msg['page.edit.newPseudonym.filterDomains'] : ''}"
 											queryDelay="0"
 											rendered="#{!domainController.readOnly}"
 											value="#{domainController.selectedDomain.parentDomainNames}"
@@ -197,27 +233,36 @@
 							<!-- PSN Length -->
 							<h:panelGroup layout="block">
 								<p:outputLabel value="#{msg['domain.properties.PSN_LENGTH']}" />
-								<components:tooltip id="psnLengthHint" value="#{msg['domain.properties.PSN_LENGTH.tooltip']}" />
 							</h:panelGroup>
-							<p:spinner rendered="#{!domainController.readOnly}"
-									   value="#{domainController.selectedDomain.config.psnLength}"
-									   min="1" max="100" />
-							<h:outputText rendered="#{domainController.readOnly}"
-										  value="#{domainController.selectedDomain.config.psnLength}" />
+							<p:spinner id="psnLengthSpinner" rendered="#{!domainController.readOnly}" disabled="#{!domainController.editable}"
+									   value="#{domainController.psnLength}" min="1" max="#{domainController.maxPsnValueLength}">
+								<p:ajax event="keyup" update="psnPrefixInput, psnSuffixInput, psnLengthCounter" process="@this" partialSubmit="true" />
+								<p:ajax event="valueChange" update="psnPrefixInput, psnSuffixInput, psnLengthCounter" process="@this" partialSubmit="true" />
+								<p:ajax event="blur" update="psnLengthCounter" process="@this" partialSubmit="true" />
+							</p:spinner>
+							<h:outputText rendered="#{domainController.readOnly}" value="#{domainController.psnLength}" />
 
 							<!-- PSN Prefix -->
 							<p:outputLabel value="#{msg['domain.properties.PSN_PREFIX']}" />
-							<p:inputText rendered="#{!domainController.readOnly}"
-										 value="#{domainController.selectedDomain.config.psnPrefix}" />
-							<h:outputText rendered="#{domainController.readOnly}"
-										  value="#{domainController.selectedDomain.config.psnPrefix}" />
+							<p:inputText id="psnPrefixInput" rendered="#{!domainController.readOnly}" disabled="#{!domainController.editable}"
+										 value="#{domainController.psnPrefix}" maxlength="#{domainController.maxPsnPrefixLength}">
+								<p:ajax event="keyup" update="psnLengthSpinner, psnSuffixInput, psnLengthCounter" process="@this" partialSubmit="true" />
+							</p:inputText>
+							<h:outputText rendered="#{domainController.readOnly}" value="#{domainController.psnPrefix}" />
 
 							<!-- PSN Suffix -->
 							<p:outputLabel value="#{msg['domain.properties.PSN_SUFFIX']}" />
-							<p:inputText rendered="#{!domainController.readOnly}"
-										 value="#{domainController.selectedDomain.config.psnSuffix}" />
-							<h:outputText rendered="#{domainController.readOnly}"
-										  value="#{domainController.selectedDomain.config.psnSuffix}" />
+							<p:inputText id="psnSuffixInput" rendered="#{!domainController.readOnly}" disabled="#{!domainController.editable}"
+										 value="#{domainController.psnSuffix}" maxlength="#{domainController.maxPsnSuffixLength}">
+								<p:ajax event="keyup" update="psnLengthSpinner, psnPrefixInput, psnLengthCounter" process="@this" partialSubmit="true" />
+							</p:inputText>
+							<h:outputText rendered="#{domainController.readOnly}" value="#{domainController.psnSuffix}" />
+
+							<p:column rendered="#{!domainController.readOnly}" />
+							<h:outputFormat id="psnLengthCounter" styleClass="textCounter #{domainController.remainingPsnTotalLength lt 0 ? 'red' : ''}" rendered="#{!domainController.readOnly}"
+											value="#{domainController.remainingPsnTotalLength gt 0 ? msg['page.domains.psnLengthSum'] : domainController.remainingPsnTotalLength == 0 ? msg['page.domains.psnLengthSumMax'] : msg['page.domains.psnLengthSumMaxExceeded']}">
+								<f:param value="#{domainController.psnLengthSum}" />
+							</h:outputFormat>
 
 							<!-- PSNs Deletable -->
 							<p:outputLabel value="#{msg['domain.properties.PSNS_DELETABLE']}" />
@@ -227,7 +272,7 @@
 										  value="#{cmsg['ui.boolean.'.concat(domainController.selectedDomain.config.psnsDeletable)]}" />
 						</p:panelGrid>
 					</div>
-					<div class="p-col-12 p-lg-6">
+					<div class="col-12 lg:col-6">
 						<h4>
 							<h:outputText value="#{msg['page.domains.properties.advanced']}" />
 						</h4>
@@ -235,7 +280,7 @@
 									 styleClass="#{domainController.readOnly ? 'mimic-datatable' : ''}">
 							<!-- Alphabet -->
 							<p:outputLabel for="alphabet" value="#{msg['domain.alphabet']}" />
-							<p:selectOneMenu id="alphabet"
+							<p:selectOneMenu id="alphabet" disabled="#{!domainController.editable}"
 											 value="#{domainController.selectedDomain.alphabet}"
 											 rendered="#{!domainController.readOnly}">
 								<f:selectItem itemValue="CUSTOM" itemLabel="#{msg['domain.customAlphabet']}" />
@@ -254,7 +299,7 @@
 							<h:panelGroup
 									rendered="#{!domainController.readOnly and (domainController.selectedDomain.alphabet == 'CUSTOM' or not empty domainController.customAlphabet)}"
 									style="white-space: nowrap;">
-								<p:inputText id="customAlphabet" placeholder="#{msg['domain.customAlphabet.values']}"
+								<p:inputText id="customAlphabet" disabled="#{!domainController.editable}" placeholder="#{msg['domain.customAlphabet.values']}"
 											 value="#{domainController.customAlphabet}" style="width: 190px;" />
 								<components:tooltip id="customAlphabetHint" value="#{msg['domain.customAlphabet.hint']}" />
 							</h:panelGroup>
@@ -264,7 +309,7 @@
 										   rendered="#{domainController.selectedDomain.alphabet == 'CUSTOM' or not empty domainController.customAlphabet}" />
 							<ui:fragment
 									rendered="#{domainController.selectedDomain.alphabet == 'CUSTOM' or not empty domainController.customAlphabet}">
-								<p:spinner rendered="#{!domainController.readOnly}"
+								<p:spinner rendered="#{!domainController.readOnly}" disabled="#{!domainController.editable}"
 										   value="#{domainController.selectedDomain.config.useLastCharAsDelimiterAfterXChars}"
 										   min="0" max="100" />
 								<h:outputText rendered="#{domainController.readOnly}"
@@ -273,7 +318,7 @@
 
 							<!-- CheckDigitGenerator -->
 							<p:outputLabel for="checkDigitGenerator" value="#{msg['domain.checkDigitGenerator']}" />
-							<p:selectOneMenu id="checkDigitGenerator"
+							<p:selectOneMenu id="checkDigitGenerator" disabled="#{!domainController.editable}"
 											 value="#{domainController.selectedDomain.checkDigitClass}"
 											 rendered="#{!domainController.readOnly}">
 								<f:selectItems
@@ -291,7 +336,7 @@
 										   rendered="#{domainController.getGeneratorShort(domainController.selectedDomain.checkDigitClass) == 'ReedSolomonLagrange'}" />
 							<ui:fragment
 									rendered="#{domainController.getGeneratorShort(domainController.selectedDomain.checkDigitClass) == 'ReedSolomonLagrange'}">
-								<p:spinner rendered="#{!domainController.readOnly}"
+								<p:spinner rendered="#{!domainController.readOnly}" disabled="#{!domainController.editable}"
 										   value="#{domainController.selectedDomain.config.maxDetectedErrors}"
 										   min="0" max="100" />
 								<h:outputText rendered="#{domainController.readOnly}"
@@ -303,7 +348,7 @@
 										   rendered="#{domainController.getGeneratorShort(domainController.selectedDomain.checkDigitClass) != 'NoCheckDigits'}" />
 							<ui:fragment
 									rendered="#{domainController.getGeneratorShort(domainController.selectedDomain.checkDigitClass) != 'NoCheckDigits'}">
-								<p:selectBooleanCheckbox rendered="#{!domainController.readOnly}"
+								<p:selectBooleanCheckbox rendered="#{!domainController.readOnly}" disabled="#{!domainController.editable}"
 														 value="#{domainController.selectedDomain.config.includePrefixInCheckDigitCalculation}" />
 								<h:outputText rendered="#{domainController.readOnly}"
 											  value="#{cmsg['ui.boolean.'.concat(domainController.selectedDomain.config.includePrefixInCheckDigitCalculation)]}" />
@@ -314,11 +359,18 @@
 										   rendered="#{domainController.getGeneratorShort(domainController.selectedDomain.checkDigitClass) != 'NoCheckDigits'}" />
 							<ui:fragment
 									rendered="#{domainController.getGeneratorShort(domainController.selectedDomain.checkDigitClass) != 'NoCheckDigits'}">
-								<p:selectBooleanCheckbox rendered="#{!domainController.readOnly}"
+								<p:selectBooleanCheckbox rendered="#{!domainController.readOnly}" disabled="#{!domainController.editable}"
 														 value="#{domainController.selectedDomain.config.includeSuffixInCheckDigitCalculation}" />
 								<h:outputText rendered="#{domainController.readOnly}"
 											  value="#{cmsg['ui.boolean.'.concat(domainController.selectedDomain.config.includeSuffixInCheckDigitCalculation)]}" />
 							</ui:fragment>
+
+							<!-- Send Notifications Web -->
+							<p:outputLabel value="#{msg['domain.properties.SEND_NOTIFICATIONS_WEB']}" />
+							<p:selectBooleanCheckbox rendered="#{!domainController.readOnly}"
+													 value="#{domainController.selectedDomain.config.sendNotificationsWeb}" />
+							<h:outputText rendered="#{domainController.readOnly}"
+										  value="#{cmsg['ui.boolean.'.concat(domainController.selectedDomain.config.sendNotificationsWeb)]}" />
 						</p:panelGrid>
 
 						<h4>
@@ -328,7 +380,7 @@
 									 styleClass="#{domainController.readOnly ? 'mimic-datatable' : ''}">
 							<!-- Cache -->
 							<p:outputLabel for="cache" value="#{msg['domain.cache']}" />
-							<p:selectOneMenu id="cache" value="#{domainController.selectedDomain.config.forceCache}"
+							<p:selectOneMenu id="cache" disabled="#{!domainController.editable}" value="#{domainController.selectedDomain.config.forceCache}"
 											 rendered="#{!domainController.readOnly}">
 								<f:selectItems value="#{domainController.cacheOptions}" var="_option"
 											   itemLabel="#{msg['domain.cache.'.concat(_option)]}"

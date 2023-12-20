@@ -4,7 +4,7 @@ package org.emau.icmvc.ttp.psn.frontend.converter;
  * ###license-information-start###
  * gPAS - a Generic Pseudonym Administration Service
  * __
- * Copyright (C) 2013 - 2022 Independent Trusted Third Party of the University Medicine Greifswald
+ * Copyright (C) 2013 - 2023 Independent Trusted Third Party of the University Medicine Greifswald
  * 							kontakt-ths@uni-greifswald.de
  * 							concept and implementation
  * 							l.geidel
@@ -63,7 +63,7 @@ public class DomainDTOConverter extends AbstractGPASBean implements Converter
 		}
 		else
 		{
-			throw new ConverterException(new FacesMessage(modelValue + " is not a valid DomainOutDTO"));
+			throw new ConverterException(new FacesMessage(text.sanitize(modelValue + " is not a valid DomainOutDTO")));
 		}
 	}
 
@@ -86,11 +86,11 @@ public class DomainDTOConverter extends AbstractGPASBean implements Converter
 					return domain;
 				}
 			}
-			throw new ConverterException(new FacesMessage("Cannot find DomainOutDTO with ID: " + submittedValue));
+			throw new ConverterException(new FacesMessage(text.sanitize("Cannot find DomainOutDTO with ID: " + submittedValue)));
 		}
 		catch (NumberFormatException e)
 		{
-			throw new ConverterException(new FacesMessage(submittedValue + " is not a valid DomainOutDTO ID"), e);
+			throw new ConverterException(new FacesMessage(text.sanitize(submittedValue + " is not a valid DomainOutDTO ID")), e);
 		}
 	}
 }

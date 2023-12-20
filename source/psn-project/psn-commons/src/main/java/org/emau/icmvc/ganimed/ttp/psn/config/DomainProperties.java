@@ -4,7 +4,7 @@ package org.emau.icmvc.ganimed.ttp.psn.config;
  * ###license-information-start###
  * gPAS - a Generic Pseudonym Administration Service
  * __
- * Copyright (C) 2013 - 2022 Independent Trusted Third Party of the University Medicine Greifswald
+ * Copyright (C) 2013 - 2023 Independent Trusted Third Party of the University Medicine Greifswald
  * 							kontakt-ths@uni-greifswald.de
  * 							concept and implementation
  * 							l.geidel
@@ -33,6 +33,7 @@ package org.emau.icmvc.ganimed.ttp.psn.config;
 
 import org.emau.icmvc.ganimed.ttp.psn.enums.ForceCache;
 import org.emau.icmvc.ganimed.ttp.psn.enums.ValidateViaParents;
+import org.emau.icmvc.ganimed.ttp.psn.exceptions.InvalidParameterException;
 
 public enum DomainProperties
 {
@@ -100,5 +101,10 @@ public enum DomainProperties
 	 * throws an {@link InvalidParameterException} if there's no parent domain set<br>
 	 * default {@link ValidateViaParents#OFF}
 	 */
-	VALIDATE_VALUES_VIA_PARENTS;
+	VALIDATE_VALUES_VIA_PARENTS,
+	/**
+	 * Use notifications when creating, anonymising, deleting or inserting pseudonyms from Web interface.<br/>
+	 * default = false
+	 */
+	SEND_NOTIFICATIONS_WEB
 }

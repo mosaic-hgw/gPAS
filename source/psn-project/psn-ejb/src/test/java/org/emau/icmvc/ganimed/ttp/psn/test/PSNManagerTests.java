@@ -4,7 +4,7 @@ package org.emau.icmvc.ganimed.ttp.psn.test;
  * ###license-information-start###
  * gPAS - a Generic Pseudonym Administration Service
  * __
- * Copyright (C) 2013 - 2022 Independent Trusted Third Party of the University Medicine Greifswald
+ * Copyright (C) 2013 - 2023 Independent Trusted Third Party of the University Medicine Greifswald
  * 							kontakt-ths@uni-greifswald.de
  * 							concept and implementation
  * 							l.geidel
@@ -30,13 +30,6 @@ package org.emau.icmvc.ganimed.ttp.psn.test;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * ###license-information-end###
  */
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import java.net.URL;
 import java.util.Arrays;
@@ -93,6 +86,7 @@ public class PSNManagerTests
 {
 	private static final String DOMAIN = "test12345_psn_test";
 	private static final String DOMAIN_FOR_DELETE = "test12345_psn_test_delete";
+	private static final String DOMAIN_FOR_DELETE_2 = "test12345_psn_test_delete_2";
 	private static final String DOMAIN_FOR_GEN_TEST = "test12345_psn_test_gen";
 	private static final String PSN_URL = "http://localhost:8080/gpas/gpasService?wsdl";
 	private PSNManager psnManager;
@@ -490,6 +484,21 @@ public class PSNManagerTests
 		assertEquals(2, deletionResults.size(), "unexpected number of deletion results");
 		assertEquals(DeletionResult.NOT_FOUND, deletionResults.get(valueDontExists), "unexpected deletion result for non-existing value");
 		assertEquals(DeletionResult.SUCCESS, deletionResults.get(value), "unexpected deletion result for existing value");
+
+		logger.info("### try to delete a domain with psns");
+		try
+		{
+			DomainInDTO domainDTO = new DomainInDTO(DOMAIN_FOR_DELETE_2, DOMAIN_FOR_DELETE_2, Verhoeff.class.getName(), Numbers.class.getName(), new DomainConfig(), "test-kommentar", null);
+			domainManager.addDomain(domainDTO);
+		}
+		catch (DomainInUseException ignore)
+		{
+			// darf nicht autreten
+			throw ignore;
+		}
+		psnManager.getOrCreatePseudonymFor("1", DOMAIN_FOR_DELETE_2);
+		psnManager.getOrCreatePseudonymFor("2", DOMAIN_FOR_DELETE_2);
+		domainManager.deleteDomainWithPSNs(DOMAIN_FOR_DELETE_2);
 		logger.info("### delete tests end");
 	}
 

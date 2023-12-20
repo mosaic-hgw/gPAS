@@ -33,18 +33,18 @@ FROM mosaicgreifswald/debian-wildfly-mysql:${TAG}
 # ###license-information-end###
 
 # tool-defaults
-ENV ${project.upperName}_VERSION                           ${project.version}
-ENV ${project.upperName}_AUTH_MODE                         none
+ENV TTP_${project.upperName}_VERSION        ${project.version}
+ENV TTP_${project.upperName}_WEB_AUTH_MODE  none
 
 # keycloak-defaults
-ENV KEYCLOAK_SSL_REQUIRED                  all
-ENV KEYCLOAK_USE_RESOURCE_ROLE_MAPPINGS    false
-ENV KEYCLOAK_CONFIDENTIAL_PORT             8443
+ENV TTP_KEYCLOAK_SSL_REQUIRED                  all
+ENV TTP_KEYCLOAK_USE_RESOURCE_ROLE_MAPPINGS    false
+ENV TTP_KEYCLOAK_CONFIDENTIAL_PORT             8443
 
 # annotations
 LABEL maintainer                           = "ronny.schuldt@uni-greifswald.de" \
       org.opencontainers.image.authors     = "university-medicine greifswald" \
-      org.opencontainers.image.source      = "https://github.com/mosaic-hgw/gPAS" \
+      org.opencontainers.image.source      = "https://github.com/mosaic-hgw/${project.name}" \
       org.opencontainers.image.vendor      = "uni-greifswald.de" \
       org.opencontainers.image.title       = "${project.name}" \
       org.opencontainers.image.version     = "${project.version}" \

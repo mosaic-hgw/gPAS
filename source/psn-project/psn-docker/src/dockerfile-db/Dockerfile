@@ -1,0 +1,63 @@
+FROM mosaicgreifswald/wildfly:wildfly-mysql
+
+# ###license-information-start###
+# gPAS - a Generic Pseudonym Administration Service
+# __
+# Copyright (C) 2013 - ${build.year} Independent Trusted Third Party of the University Medicine Greifswald
+# 							kontakt-ths@uni-greifswald.de
+
+# 							concept and implementation
+# 							l.geidel
+# 							web client
+# 							a.blumentritt
+# 							docker
+# 							r.schuldt
+
+# 							please cite our publications
+# 							http://dx.doi.org/10.3414/ME14-01-0133
+# 							http://dx.doi.org/10.1186/s12967-015-0545-6
+# __
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+# ###license-information-end###
+
+# envs
+ENV TTP_${project.upperName}_VERSION="${project.version}" \
+    TTP_${project.upperName}_WEB_AUTH_MODE="none" \
+    TTP_${project.upperName}_DB_HOST="localhost" \
+    TTP_${project.upperName}_LOG_TO_FILE="true" \
+    TTP_${project.upperName}_LOG_LEVEL="INFO" \
+    \
+    WF_MAX_CHILD_ELEMENTS="1000001" \
+    WF_MAX_POST_SIZE="104857600" \
+    JAVA_OPTS="-server -Xms1G -Xmx3G -XX:MetaspaceSize=256M -XX:MaxMetaspaceSize=1G -XX:StringTableSize=1000003 -Djava.net.preferIPv4Stack=true -Djava.awt.headless=true -Djboss.modules.system.pkgs=org.jboss.byteman"
+
+# annotations
+LABEL maintainer                           = "ronny.schuldt@uni-greifswald.de" \
+      org.opencontainers.image.authors     = "university-medicine greifswald" \
+      org.opencontainers.image.source      = "https://github.com/mosaic-hgw/${project.name}" \
+      org.opencontainers.image.vendor      = "uni-greifswald.de" \
+      org.opencontainers.image.title       = "${project.name}-db" \
+      org.opencontainers.image.version     = "${project.version}-2023-02-06" \
+      org.opencontainers.image.description = "gPAS - a Generic Pseudonym Administration Service" \
+      org.opencontainers.image.license     = "AGPLv3"
+
+# copy files
+COPY ["deployments/*ar",                   "${ENTRY_WILDFLY_DEPLOYS}/"]
+COPY ["jboss/*",                           "${ENTRY_WILDFLY_CLI}/"]
+COPY ["sqls/*.sql",                        "${ENTRY_MYSQL_INITFILES}/"]
+COPY ["LICENSE.txt",                       "./"]
+
+USER root
+RUN chown -R ${USER}:${USER} ${ENTRY_WILDFLY_DEPLOYS} ${ENTRY_WILDFLY_CLI} ${ENTRY_MYSQL_INITFILES} LICENSE.txt
+USER ${USER}

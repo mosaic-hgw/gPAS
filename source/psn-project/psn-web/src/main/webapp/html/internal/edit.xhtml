@@ -1,8 +1,8 @@
 <!--
-  ###license-information-start###
+ ###license-information-start###
   gPAS - a Generic Pseudonym Administration Service
   __
-  Copyright (C) 2013 - 2022 Independent Trusted Third Party of the University Medicine Greifswald
+  Copyright (C) 2013 - 2023 Independent Trusted Third Party of the University Medicine Greifswald
   							kontakt-ths@uni-greifswald.de
   							concept and implementation
   							l.geidel
@@ -27,7 +27,7 @@
   You should have received a copy of the GNU Affero General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
   ###license-information-end###
-  -->
+ -->
 
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:components="http://java.sun.com/jsf/composite/components" xmlns:f="http://java.sun.com/jsf/core"
 	  xmlns:h="http://java.sun.com/jsf/html" xmlns:p="http://primefaces.org/ui"
@@ -58,6 +58,8 @@
 	</ui:define>
 
 	<ui:define name="content">
+		<f:event listener="#{psnController.load(param['originalValue'], param['pseudonym'])}" type="preRenderView" />
+
 		<h:form id="main" onkeypress="if (event.keyCode === 13) { return false; }">
 			<p:focus context="main" />
 			<p:panel>
@@ -73,8 +75,8 @@
 								 value="#{msg['edit.new.pseudonymPair']}" />
 			</p:panel>
 			<p:panel style="margin-top: 15px;">
-				<div class="p-grid">
-					<div class="p-col-12 p-md-5 p-lg-4">
+				<div class="grid">
+					<div class="col-12 md:col-5 lg:col-4">
 						<h4>
 							<h:outputText value="#{msg['edit.domains']}" />
 						</h4>
@@ -95,16 +97,16 @@
 								</p:inputText>
 							</f:facet>
 
-							<p:column filterBy="#{_domain.label}"
+							<p:column filterBy="#{psnController.getDomainLabel(_domain)}"
 									  filterMatchMode="contains" filterStyle="display: none" headerText="#{msg['domain.name']}">
-								<h:outputText value="#{_domain.label}" />
+								<h:outputText value="#{psnController.getDomainLabel(_domain)}" />
 							</p:column>
 						</p:dataTable>
 						<ui:fragment rendered="#{empty psnController.domains}">
 							<h:outputText value="#{msg['edit.domains.none']}" />
 						</ui:fragment>
 					</div>
-					<div class="p-col-12 p-md-7 p-lg-8">
+					<div class="col-12 md:col-7 lg:col-8">
 						<h:panelGroup id="pseudonymContainer" layout="block">
 							<h4>
 								<h:outputFormat id="pseudonymsCounter" value="#{msg['edit.pseudonyms']}">
@@ -140,7 +142,8 @@
 										 selectionMode="single"
 										 value="#{psnController.getPSNLazyModel()}" lazy="true" var="_psn"
 										 widgetVar="pseudonyms">
-								<p:ajax event="filter" ignoreAutoUpdate="true" oncomplete="unBlockDataTable('blockPseudonyms'); updateRowCount();" onstart="blockDataTable('blockPseudonyms');"
+								<p:ajax event="filter" ignoreAutoUpdate="true" oncomplete="unBlockDataTable('blockPseudonyms'); updateRowCount(); autoShowTree();"
+										onstart="blockDataTable('blockPseudonyms');"
 										delay="700" />
 								<p:ajax event="page" ignoreAutoUpdate="true" oncomplete="updateRowCount();" />
 								<p:ajax event="contextMenu" ignoreAutoUpdate="true"
@@ -185,6 +188,9 @@
 								</p:column>
 							</p:dataTable>
 							<components:rightclick />
+							<p:remoteCommand name="autoShowTree" actionListener="#{psnController.showTree(psnController.selectedRow)}"
+											 onstart="#{psnController.autoShowTree ? 'PF(\'pseudonyms\').selectRow(0)' : ''}"
+											 oncomplete="#{psnController.autoShowTree ? 'PF(\'tree_dialog\').show();' : ''}" update="tree_dialog, @this" />
 
 							<p:contextMenu id="pseudonyms_menu" for="pseudonyms">
 								<p:menuitem actionListener="#{psnController.showTree(psnController.selectedRow)}" icon="mdi mdi-share-variant"
@@ -207,7 +213,6 @@
 
 								<p:menuitem actionListener="#{psnController.onPseudonymiseOriginalValue}"
 											disabled="#{psnController.getRelatedDomains('SIBLING', false).size() == 0}"
-											escape="false"
 											icon="mdi mdi-shield-plus" onclick="PF('loading').show();"
 											oncomplete="PF('loading').hide(); PF('newPseudonym_dialog').show();"
 											process="@this"
@@ -216,7 +221,6 @@
 
 								<p:menuitem actionListener="#{psnController.onPseudonymisePseudonym}"
 											disabled="#{psnController.getRelatedDomains('CHILD', false).size() == 0}"
-											escape="false"
 											icon="mdi mdi-shield-plus"
 											onclick="PF('loading').show();" oncomplete="PF('loading').hide(); PF('newPseudonym_dialog').show();"
 											process="@this"
@@ -280,7 +284,7 @@
 										 required="true"
 										 value="#{psnController.domain}">
 							<f:selectItem itemDisabled="true" itemLabel="#{cmsg['ui.select.pleaseSelect']}" noSelectionOption="true" />
-							<f:selectItems itemLabel="#{_domain.label}" itemValue="#{_domain}" value="#{psnController.filteredDomains}"
+							<f:selectItems itemLabel="#{psnController.getDomainLabel(_domain)}" itemValue="#{_domain}" value="#{psnController.filteredDomains}"
 										   var="_domain" />
 						</p:selectOneMenu>
 
@@ -313,7 +317,7 @@
 										 filterPlaceholder="#{msg['page.edit.newPseudonym.filterDomains']}"
 										 required="true"
 										 value="#{psnController.domain}">
-							<f:selectItems itemLabel="#{_domain.label}" itemValue="#{_domain}" value="#{psnController.filteredDomains}"
+							<f:selectItems itemLabel="#{psnController.getDomainLabel(_domain)}" itemValue="#{_domain}" value="#{psnController.filteredDomains}"
 										   var="_domain" />
 						</p:selectOneMenu>
 
@@ -341,7 +345,7 @@
 				<h:form id="tree_form" rendered="#{not empty psnController.selectedPseudonym}">
 					<p:messages escape="false" style="margin-bottom: 10px;" />
 
-					<p:tree id="tree" cache="false" dynamic="trze" escape="false" orientation="horizontal"
+					<p:tree id="tree" cache="false" escape="false" orientation="horizontal"
 							selection="#{psnController.selectedNode}" selectionMode="single"
 							styleClass="noToggler psn-tree"
 							value="#{psnController.pseudonymTree}"
@@ -353,9 +357,10 @@
 											 rendered="#{_node.domainName != psnController.ROOT_DOMAIN and psnController.isAnonymisable(_node)}"
 											 styleClass="tree-cut on-hover"
 											 title="#{msg['edit.psn.anonymise']}"
-											 update="confirmAnonymise_dialog:message"/>
+											 update="confirmAnonymise_dialog:message" />
 							<h:outputText style="display: block" value="#{psnController.isAnonym(_node.pseudonym) ? msg['model.pseudonym.anonym'] : _node.pseudonym}" />
-							<h:outputText styleClass="secondary" value="#{_node.domainName == psnController.ROOT_DOMAIN ? msg['psn.net.startValue'] : psnController.getDomainLabel(_node.domainName)}" />
+							<h:outputText styleClass="secondary"
+										  value="#{_node.domainName == psnController.ROOT_DOMAIN ? msg['psn.net.startValue'] : psnController.getDomainLabel(_node.domainName)}" />
 						</p:treeNode>
 						<p:ajax event="contextMenu" ignoreAutoUpdate="true" listener="#{psnController.setSelectedPseudonymFromTree}" update="@form:tree_menu, main:selectedPseudonym" />
 						<p:ajax event="select" ignoreAutoUpdate="true" listener="#{psnController.setSelectedPseudonymFromTree}" update="main:selectedPseudonym" />
@@ -365,11 +370,10 @@
 						<p:menuitem icon="mdi mdi-content-copy" oncomplete="PF('growl').renderMessage({'summary':copyToClipboard('main\:selectedPseudonym'), 'detail':
 													\' #{cmsg['message.info.copiedToClipboard']}\', 'severity':'info'})"
 									value="#{cmsg['ui.button.copy']}" />
-						
+
 						<p:divider rendered="#{psnController.selectedNode.data.domainName != psnController.ROOT_DOMAIN}" />
 						<p:menuitem actionListener="#{psnController.onPseudonymisePseudonym}"
 									disabled="#{psnController.getRelatedDomains('CHILD', false).size() == 0}"
-									escape="false"
 									icon="mdi mdi-shield-plus"
 									onclick="PF('loading').show();" oncomplete="PF('loading').hide(); PF('newPseudonym_dialog').show();"
 									rendered="#{psnController.selectedNode.data.domainName != psnController.ROOT_DOMAIN}"
@@ -379,12 +383,11 @@
 						<p:divider rendered="#{psnController.selectedNode.data.domainName != psnController.ROOT_DOMAIN}" />
 						<p:menuitem disabled="#{!psnController.isAnonymisable(psnController.selectedNode.data)}"
 									icon="mdi mdi-guy-fawkes-mask"
-									escape="false"
 									oncomplete="PF('confirmAnonymise_dialog').show();"
 									rendered="#{psnController.selectedNode.data.domainName != psnController.ROOT_DOMAIN}"
 									update="confirmAnonymise_dialog:message"
 									value="#{msg['edit.psn.anonymise']}" />
-						
+
 						<p:divider rendered="#{psnController.selectedNode.data.domainName != psnController.ROOT_DOMAIN}" />
 						<p:menuitem disabled="#{not (psnController.isDeletable(psnController.selectedNode.data))}"
 									icon="mdi mdi-delete-empty"

@@ -4,7 +4,7 @@ package org.emau.icmvc.ganimed.ttp.psn.model;
  * ###license-information-start###
  * gPAS - a Generic Pseudonym Administration Service
  * __
- * Copyright (C) 2013 - 2022 Independent Trusted Third Party of the University Medicine Greifswald
+ * Copyright (C) 2013 - 2023 Independent Trusted Third Party of the University Medicine Greifswald
  * 							kontakt-ths@uni-greifswald.de
  * 							concept and implementation
  * 							l.geidel
@@ -60,7 +60,7 @@ import org.emau.icmvc.ganimed.ttp.psn.exceptions.InvalidParameterException;
 @Table(name = "domain")
 public class Domain implements Serializable
 {
-	private static final long serialVersionUID = -7049326405657496751L;
+	private static final long serialVersionUID = 8862938470475350856L;
 	private static final transient Logger LOGGER = LogManager.getLogger(Domain.class);
 	@Id
 	private String name;
@@ -234,10 +234,13 @@ public class Domain implements Serializable
 		this.parents = parents;
 	}
 
-	public void updateInUse(String label, String comment)
+	public void updateInUse(String label, String comment, boolean sendNotificationsWeb, boolean psnsDeletable)
 	{
 		this.label = label;
 		this.comment = comment;
+		this.config.setSendNotificationsWeb(sendNotificationsWeb);
+		this.config.setPsnsDeletable(psnsDeletable);
+		persistPropertiesToString();
 		this.updateTimestamp = new Timestamp(System.currentTimeMillis());
 	}
 

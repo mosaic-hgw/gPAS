@@ -1,4 +1,5 @@
-FROM ${docker.baseImage}
+ARG TAG=${docker.baseImage}
+FROM ${TAG}
 
 # ###license-information-start###
 # gPAS - a Generic Pseudonym Administration Service
@@ -32,13 +33,27 @@ FROM ${docker.baseImage}
 # ###license-information-end###
 
 # tool-defaults
-ENV ${project.upperName}_VERSION                           ${project.version}
-ENV ${project.upperName}_AUTH_MODE                         none
+ENV TTP_${project.upperName}_VERSION        ${project.version}
+ENV TTP_${project.upperName}_WEB_AUTH_MODE  none
+
+# mysql-defaults
+ENV TTP_${project.upperName}_DB_HOST        mysql
+ENV TTP_${project.upperName}_DB_PORT        3306
+ENV TTP_${project.upperName}_DB_NAME        ${project.shortName}
+ENV TTP_${project.upperName}_DB_USER        ${project.shortName}_user
+ENV TTP_${project.upperName}_DB_PASS        ${project.shortName}_password
+
+# gras-defaults
+ENV TTP_GRAS_DB_HOST        mysql
+ENV TTP_GRAS_DB_PORT        3306
+ENV TTP_GRAS_DB_NAME        gras
+ENV TTP_GRAS_DB_USER        gras_user
+ENV TTP_GRAS_DB_PASS        gras_password
 
 # keycloak-defaults
-ENV KEYCLOAK_SSL_REQUIRED                  all
-ENV KEYCLOAK_USE_RESOURCE_ROLE_MAPPINGS    false
-ENV KEYCLOAK_CONFIDENTIAL_PORT             8443
+ENV TTP_KEYCLOAK_SSL_REQUIRED                  all
+ENV TTP_KEYCLOAK_USE_RESOURCE_ROLE_MAPPINGS    false
+ENV TTP_KEYCLOAK_CONFIDENTIAL_PORT             8443
 
 # annotations
 LABEL maintainer                           = "ronny.schuldt@uni-greifswald.de" \

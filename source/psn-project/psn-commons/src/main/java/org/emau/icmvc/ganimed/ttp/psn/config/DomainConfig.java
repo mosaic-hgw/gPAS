@@ -4,7 +4,7 @@ package org.emau.icmvc.ganimed.ttp.psn.config;
  * ###license-information-start###
  * gPAS - a Generic Pseudonym Administration Service
  * __
- * Copyright (C) 2013 - 2022 Independent Trusted Third Party of the University Medicine Greifswald
+ * Copyright (C) 2013 - 2023 Independent Trusted Third Party of the University Medicine Greifswald
  * 							kontakt-ths@uni-greifswald.de
  * 							concept and implementation
  * 							l.geidel
@@ -31,6 +31,7 @@ package org.emau.icmvc.ganimed.ttp.psn.config;
  * ###license-information-end###
  */
 
+import java.io.Serial;
 import java.io.Serializable;
 
 import org.emau.icmvc.ganimed.ttp.psn.enums.ForceCache;
@@ -39,26 +40,31 @@ import org.emau.icmvc.ganimed.ttp.psn.exceptions.InvalidParameterException;
 
 public class DomainConfig implements Serializable
 {
+	@Serial
 	private static final long serialVersionUID = -8036316501414002948L;
+	public static final int DEFAULT_PSN_LENGTH = 8;
 	public static final long MAX_PSEUDONYMS_FOR_DEFAULT_CACHE_ON = 1000000000; // 125 mb is needed for such a cache
 	private static final String PROPERTY_DELIMITER = ";";
 	private static final int DB_PSN_FIELD_LENGTH = 255;
 	private int maxDetectedErrors = 2;
-	private int psnLength = 8;
+	private int psnLength = DEFAULT_PSN_LENGTH;
 	private String psnPrefix = "";
 	private String psnSuffix = "";
 	private boolean includePrefixInCheckDigitCalculation = false;
 	private boolean includeSuffixInCheckDigitCalculation = false;
 	private int useLastCharAsDelimiterAfterXChars = 0;
 	private boolean psnsDeletable = false;
+	private boolean sendNotificationsWeb = false;
 	private ForceCache forceCache = ForceCache.DEFAULT;
 	private ValidateViaParents validateValuesViaParents = ValidateViaParents.OFF;
 
 	public DomainConfig()
 	{}
 
-	public DomainConfig(int maxDetectedErrors, int psnLength, String psnPrefix, String psnSuffix, boolean includePrefixInCheckDigitCalculation, boolean includeSuffixInCheckDigitCalculation,
-			int useLastCharAsDelimiterAfterXChars, boolean psnsDeletable, ForceCache forceCache, ValidateViaParents validateValuesViaParents) throws InvalidParameterException
+	public DomainConfig(int maxDetectedErrors, int psnLength, String psnPrefix, String psnSuffix,
+			boolean includePrefixInCheckDigitCalculation, boolean includeSuffixInCheckDigitCalculation,
+			int useLastCharAsDelimiterAfterXChars, boolean psnsDeletable, ForceCache forceCache,
+			ValidateViaParents validateValuesViaParents, boolean sendNotificationsWeb) throws InvalidParameterException
 	{
 		super();
 		setMaxDetectedErrors(maxDetectedErrors);
@@ -71,6 +77,7 @@ public class DomainConfig implements Serializable
 		this.psnsDeletable = psnsDeletable;
 		this.forceCache = forceCache;
 		this.validateValuesViaParents = validateValuesViaParents;
+		this.sendNotificationsWeb = sendNotificationsWeb;
 	}
 
 	public DomainConfig(DomainConfig config) throws InvalidParameterException
@@ -86,11 +93,12 @@ public class DomainConfig implements Serializable
 		this.psnsDeletable = config.isPsnsDeletable();
 		this.forceCache = config.getForceCache();
 		this.validateValuesViaParents = config.getValidateValuesViaParents();
+		this.sendNotificationsWeb = config.isSendNotificationsWeb();
 	}
 
 	/**
-	 * reads the old (pre version 1.10) domain config properties string<br>
-	 * better don't use this
+	 * reads the old (pre version 1.10) domain config properties string
+	 * @deprecated better don't use this
 	 */
 	@Deprecated
 	public DomainConfig(String properties) throws InvalidParameterException
@@ -137,6 +145,9 @@ public class DomainConfig implements Serializable
 								break;
 							case VALIDATE_VALUES_VIA_PARENTS:
 								setValidateValuesViaParents(ValidateViaParents.valueOf(propertyParts[1].trim()));
+								break;
+							case SEND_NOTIFICATIONS_WEB:
+								setSendNotificationsWeb(Boolean.valueOf(propertyParts[1].trim()));
 								break;
 							default:
 								throw new InvalidParameterException("invalid property: " + propertyParts[0].trim());
@@ -345,64 +356,99 @@ public class DomainConfig implements Serializable
 		this.validateValuesViaParents = validateValuesViaParents;
 	}
 
+	public boolean isSendNotificationsWeb()
+	{
+		return sendNotificationsWeb;
+	}
+
+	public void setSendNotificationsWeb(boolean sendNotificationsWeb)
+	{
+		this.sendNotificationsWeb = sendNotificationsWeb;
+	}
+
 	/**
-	 * @return the old (pre version 1.10) domain config properties string<br>
-	 *         better don't use this
+	 * @return the old (pre version 1.10) domain config properties string
+	 * @deprecated better don't use this
 	 */
 	@Deprecated
 	public String getPropertiesString()
 	{
 		StringBuilder sb = new StringBuilder();
-		sb.append(DomainProperties.FORCE_CACHE.toString());
+		sb.append(DomainProperties.FORCE_CACHE);
 		sb.append("=");
 		sb.append(getForceCache().toString());
 		sb.append(PROPERTY_DELIMITER);
-		sb.append(DomainProperties.INCLUDE_PREFIX_IN_CHECK_DIGIT_CALCULATION.toString());
+		sb.append(DomainProperties.INCLUDE_PREFIX_IN_CHECK_DIGIT_CALCULATION);
 		sb.append("=");
 		sb.append(isIncludePrefixInCheckDigitCalculation());
 		sb.append(PROPERTY_DELIMITER);
-		sb.append(DomainProperties.INCLUDE_SUFFIX_IN_CHECK_DIGIT_CALCULATION.toString());
+		sb.append(DomainProperties.INCLUDE_SUFFIX_IN_CHECK_DIGIT_CALCULATION);
 		sb.append("=");
 		sb.append(isIncludeSuffixInCheckDigitCalculation());
 		sb.append(PROPERTY_DELIMITER);
-		sb.append(DomainProperties.MAX_DETECTED_ERRORS.toString());
+		sb.append(DomainProperties.MAX_DETECTED_ERRORS);
 		sb.append("=");
 		sb.append(getMaxDetectedErrors());
 		sb.append(PROPERTY_DELIMITER);
-		sb.append(DomainProperties.PSN_LENGTH.toString());
+		sb.append(DomainProperties.PSN_LENGTH);
 		sb.append("=");
 		sb.append(getPsnLength());
 		sb.append(PROPERTY_DELIMITER);
-		sb.append(DomainProperties.PSN_PREFIX.toString());
+		sb.append(DomainProperties.PSN_PREFIX);
 		sb.append("=");
 		sb.append(getPsnPrefix());
 		sb.append(PROPERTY_DELIMITER);
-		sb.append(DomainProperties.PSN_SUFFIX.toString());
+		sb.append(DomainProperties.PSN_SUFFIX);
 		sb.append("=");
 		sb.append(getPsnSuffix());
 		sb.append(PROPERTY_DELIMITER);
-		sb.append(DomainProperties.PSNS_DELETABLE.toString());
+		sb.append(DomainProperties.PSNS_DELETABLE);
 		sb.append("=");
 		sb.append(isPsnsDeletable());
 		sb.append(PROPERTY_DELIMITER);
-		sb.append(DomainProperties.USE_LAST_CHAR_AS_DELIMITER_AFTER_X_CHARS.toString());
+		sb.append(DomainProperties.USE_LAST_CHAR_AS_DELIMITER_AFTER_X_CHARS);
 		sb.append("=");
 		sb.append(getUseLastCharAsDelimiterAfterXChars());
 		sb.append(PROPERTY_DELIMITER);
-		sb.append(DomainProperties.VALIDATE_VALUES_VIA_PARENTS.toString());
+		sb.append(DomainProperties.VALIDATE_VALUES_VIA_PARENTS);
 		sb.append("=");
 		sb.append(getValidateValuesViaParents().toString());
 		sb.append(PROPERTY_DELIMITER);
+		if (isSendNotificationsWeb())
+		{
+			sb.append(DomainProperties.SEND_NOTIFICATIONS_WEB);
+			sb.append("=");
+			sb.append(true);
+			sb.append(PROPERTY_DELIMITER);
+		}
 		return sb.toString();
+	}
+
+	public static int getMaxNumberOfCharactersInFullyQualifiedPsn()
+	{
+		return DB_PSN_FIELD_LENGTH / 4;
+	}
+
+	public static void checkLength(String psnPrefix, String psnSuffix, int psnLength) throws InvalidParameterException
+	{
+		int length = psnLength + (psnPrefix == null ? 0 : psnPrefix.length()) + (psnSuffix == null ? 0 : psnSuffix.length());
+		// *4, da utf8mb4 bald standard fuer utf8 in mysql werden soll
+		length *= 4;
+		if (length > DB_PSN_FIELD_LENGTH)
+		{
+			throw new InvalidParameterException("the length of prefix + psn + suffix mustn't exceed " +
+					getMaxNumberOfCharactersInFullyQualifiedPsn());
+		}
 	}
 
 	private void checkLength() throws InvalidParameterException
 	{
 		// *4, da utf8mb4 bald standard fuer utf8 in mysql werden soll
-		int length = psnLength + (psnPrefix == null ? 0 : psnPrefix.length()) + (psnSuffix == null ? 0 : psnSuffix.length()) * 4;
+		int length = (psnLength + (psnPrefix == null ? 0 : psnPrefix.length()) + (psnSuffix == null ? 0 : psnSuffix.length())) * 4;
 		if (length > DB_PSN_FIELD_LENGTH)
 		{
-			throw new InvalidParameterException("the length of prefix + psn + suffix mustn't exceed " + DB_PSN_FIELD_LENGTH / 4);
+			throw new InvalidParameterException("the length of prefix + psn + suffix mustn't exceed " +
+					getMaxNumberOfCharactersInFullyQualifiedPsn());
 		}
 	}
 
@@ -421,6 +467,7 @@ public class DomainConfig implements Serializable
 		result = prime * result + (psnsDeletable ? 1231 : 1237);
 		result = prime * result + useLastCharAsDelimiterAfterXChars;
 		result = prime * result + (validateValuesViaParents == null ? 0 : validateValuesViaParents.hashCode());
+		result = prime * result + (sendNotificationsWeb ? 1231 : 1237);
 		return result;
 	}
 
@@ -494,14 +541,24 @@ public class DomainConfig implements Serializable
 		{
 			return false;
 		}
+		if (sendNotificationsWeb != other.sendNotificationsWeb)
+		{
+			return false;
+		}
 		return true;
 	}
 
 	@Override
 	public String toString()
 	{
-		return "DomainConfig [maxDetectedErrors=" + maxDetectedErrors + ", psnLength=" + psnLength + ", psnPrefix=" + psnPrefix + ", psnSuffix=" + psnSuffix + ", includePrefixInCheckDigitCalculation="
-				+ includePrefixInCheckDigitCalculation + ", includeSuffixInCheckDigitCalculation=" + includeSuffixInCheckDigitCalculation + ", useLastCharAsDelimiterAfterXChars="
-				+ useLastCharAsDelimiterAfterXChars + ", psnsDeletable=" + psnsDeletable + ", forceCache=" + forceCache + ", validateValuesViaParents=" + validateValuesViaParents + "]";
+		return "DomainConfig [maxDetectedErrors=" + maxDetectedErrors
+				+ ", psnLength=" + psnLength + ", psnPrefix=" + psnPrefix + ", psnSuffix=" + psnSuffix
+				+ ", includePrefixInCheckDigitCalculation=" + includePrefixInCheckDigitCalculation
+				+ ", includeSuffixInCheckDigitCalculation=" + includeSuffixInCheckDigitCalculation
+				+ ", useLastCharAsDelimiterAfterXChars=" + useLastCharAsDelimiterAfterXChars
+				+ ", psnsDeletable=" + psnsDeletable + ", forceCache=" + forceCache
+				+ ", validateValuesViaParents=" + validateValuesViaParents
+				+ ", sendNotificationsWeb=" + sendNotificationsWeb
+				+ "]";
 	}
 }

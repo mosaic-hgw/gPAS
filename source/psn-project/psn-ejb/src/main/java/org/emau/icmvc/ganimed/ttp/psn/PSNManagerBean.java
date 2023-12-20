@@ -4,7 +4,7 @@ package org.emau.icmvc.ganimed.ttp.psn;
  * ###license-information-start###
  * gPAS - a Generic Pseudonym Administration Service
  * __
- * Copyright (C) 2013 - 2022 Independent Trusted Third Party of the University Medicine Greifswald
+ * Copyright (C) 2013 - 2023 Independent Trusted Third Party of the University Medicine Greifswald
  * 							kontakt-ths@uni-greifswald.de
  * 							concept and implementation
  * 							l.geidel
@@ -42,8 +42,6 @@ import javax.ejb.Stateless;
 import javax.jws.WebService;
 import javax.jws.soap.SOAPBinding;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.emau.icmvc.ganimed.ttp.psn.dto.InsertPairExceptionDTO;
 import org.emau.icmvc.ganimed.ttp.psn.dto.PSNNetDTO;
 import org.emau.icmvc.ganimed.ttp.psn.dto.PSNTreeDTO;
@@ -59,328 +57,136 @@ import org.emau.icmvc.ganimed.ttp.psn.exceptions.PSNNotFoundException;
 import org.emau.icmvc.ganimed.ttp.psn.exceptions.UnknownDomainException;
 import org.emau.icmvc.ganimed.ttp.psn.exceptions.UnknownValueException;
 import org.emau.icmvc.ganimed.ttp.psn.exceptions.ValueIsAnonymisedException;
-import org.emau.icmvc.ganimed.ttp.psn.internal.AnonymDomain;
 
 @WebService(name = "gpasService")
 @SOAPBinding(style = SOAPBinding.Style.RPC)
 @Stateless
 @Remote(PSNManager.class)
 @ConcurrencyManagement(ConcurrencyManagementType.BEAN)
-public class PSNManagerBean extends GPASServiceBase implements PSNManager
+public class PSNManagerBean extends PSNManagerBase implements PSNManager
 {
-	private static final Logger LOGGER = LogManager.getLogger(PSNManagerBean.class);
-
 	@Override
-	public String getOrCreatePseudonymFor(String value, String domainName) throws DBException, DomainIsFullException, InvalidParameterException, UnknownDomainException
+	public String getOrCreatePseudonymFor(String value, String domainName)
+			throws DBException, DomainIsFullException, InvalidParameterException, UnknownDomainException
 	{
-		if (LOGGER.isDebugEnabled())
-		{
-			LOGGER.debug("getOrCreatePseudonymFor for value " + value + " within domain " + domainName);
-		}
-		checkParameter(value, "value");
-		checkParameter(domainName, "domainName");
-		String result = cache.getOrCreatePseudonymFor(value, domainName);
-		if (LOGGER.isDebugEnabled())
-		{
-			LOGGER.debug("getOrCreatePseudonymFor for value " + value + " within domain " + domainName + " succeed");
-		}
-		return result;
-	}
-
-	@Override
-	public String getPseudonymFor(String value, String domainName) throws InvalidParameterException, UnknownDomainException, UnknownValueException
-	{
-		if (LOGGER.isDebugEnabled())
-		{
-			LOGGER.debug("getPseudonymFor for value " + value + " within domain " + domainName);
-		}
-		checkParameter(value, "value");
-		checkParameter(domainName, "domainName");
-		String result = cache.getPseudonymFor(value, domainName);
-		if (LOGGER.isDebugEnabled())
-		{
-			LOGGER.debug("getPseudonymFor for value " + value + " within domain " + domainName + " succeed");
-		}
-		return result;
-	}
-
-	@Override
-	public void anonymiseEntry(String value, String domainName) throws DBException, InvalidParameterException, UnknownDomainException, UnknownValueException, ValueIsAnonymisedException
-	{
-		if (LOGGER.isDebugEnabled())
-		{
-			LOGGER.debug("anonymiseEntry for domain " + domainName);
-		}
-		checkParameter(value, "value");
-		checkParameter(domainName, "domainName");
-		if (AnonymDomain.NAME.equals(domainName))
-		{
-			String message = "it's not possible to anonymise values for the intern domain " + AnonymDomain.NAME;
-			LOGGER.error(message);
-			throw new InvalidParameterException(message);
-		}
-		cache.anonymiseEntry(value, domainName);
-		if (LOGGER.isDebugEnabled())
-		{
-			LOGGER.debug("entry for domain " + domainName + " anonymised");
-		}
-	}
-
-	@Override
-	public Map<String, AnonymisationResult> anonymiseEntries(Set<String> values, String domainName) throws DBException, InvalidParameterException, UnknownDomainException
-	{
-		if (LOGGER.isDebugEnabled())
-		{
-			LOGGER.debug("anonymiseEntries for " + values.size() + " for domain " + domainName);
-		}
-		checkParameter(values, "values");
-		checkParameter(domainName, "domainName");
-		if (AnonymDomain.NAME.equals(domainName))
-		{
-			String message = "it's not possible to anonymise values for the intern domain " + AnonymDomain.NAME;
-			LOGGER.error(message);
-			throw new InvalidParameterException(message);
-		}
-		Map<String, AnonymisationResult> result = cache.anonymiseEntries(values, domainName);
-		if (LOGGER.isDebugEnabled())
-		{
-			LOGGER.debug(values.size() + " entries for domain " + domainName + " anonymised");
-		}
-		return result;
-	}
-
-	@Override
-	public boolean isAnonym(String value) throws InvalidParameterException
-	{
-		if (LOGGER.isDebugEnabled())
-		{
-			LOGGER.debug("isAnonym for value " + value);
-		}
-		checkParameter(value, "value");
-		boolean result = cache.isAnonym(value);
-		if (LOGGER.isDebugEnabled())
-		{
-			LOGGER.debug(value + " is " + (result ? "an" : "no") + " anonym");
-		}
-		return result;
-	}
-
-	@Override
-	public boolean isAnonymised(String psn, String domainName) throws InvalidParameterException, InvalidPSNException, UnknownDomainException, PSNNotFoundException
-	{
-		if (LOGGER.isDebugEnabled())
-		{
-			LOGGER.debug("isAnonymised for psn " + psn + " within domain " + domainName);
-		}
-		checkParameter(psn, "psn");
-		checkParameter(domainName, "domainName");
-		boolean result = cache.isAnonymised(psn, domainName);
-		if (LOGGER.isDebugEnabled())
-		{
-			LOGGER.debug(psn + " is " + (result ? "" : "not") + " anonymised within " + domainName);
-		}
-		return result;
-	}
-
-	@Override
-	public void deleteEntry(String value, String domainName) throws DeletionForbiddenException, InvalidParameterException, UnknownDomainException, UnknownValueException
-	{
-		if (LOGGER.isDebugEnabled())
-		{
-			LOGGER.debug("deleteEntry for value " + value + " from domain " + domainName);
-		}
-		checkParameter(value, "value");
-		checkParameter(domainName, "domainName");
-		cache.deleteEntry(value, domainName);
-		if (LOGGER.isDebugEnabled())
-		{
-			LOGGER.debug("value-pseudonym-pair for value " + value + " removed from domain " + domainName);
-		}
-	}
-
-	@Override
-	public Map<String, DeletionResult> deleteEntries(Set<String> values, String domainName) throws DeletionForbiddenException, InvalidParameterException, UnknownDomainException
-	{
-		if (LOGGER.isDebugEnabled())
-		{
-			LOGGER.debug("deleteEntries for " + values.size() + " values from domain " + domainName);
-		}
-		Map<String, DeletionResult> result = cache.deleteEntries(values, domainName);
-		if (LOGGER.isDebugEnabled())
-		{
-			LOGGER.debug("deleted " + values.size() + " entries from domain " + domainName);
-		}
-		return result;
-	}
-
-	@Override
-	public void validatePSN(String psn, String domainName) throws InvalidParameterException, InvalidPSNException, UnknownDomainException
-	{
-		if (LOGGER.isDebugEnabled())
-		{
-			LOGGER.debug("validatePSN " + psn + " within domain " + domainName);
-		}
-		checkParameter(psn, "psn");
-		checkParameter(domainName, "domainName");
-		cache.validatePSN(psn, domainName);
-		if (LOGGER.isDebugEnabled())
-		{
-			LOGGER.debug(psn + " within domain " + domainName + " is valid");
-		}
-	}
-
-	@Override
-	public String getValueFor(String psn, String domainName)
-			throws InvalidPSNException, PSNNotFoundException, InvalidParameterException, UnknownDomainException, ValueIsAnonymisedException
-	{
-		if (LOGGER.isDebugEnabled())
-		{
-			LOGGER.debug("getValueFor for pseudonym " + psn + " within domain " + domainName);
-		}
-		checkParameter(psn, "psn");
-		checkParameter(domainName, "domainName");
-		String result = cache.getValueFor(psn, domainName);
-		if (LOGGER.isDebugEnabled())
-		{
-			LOGGER.debug("found value for pseudonym " + psn + " within domain " + domainName);
-		}
-		return result;
+		return super.getOrCreatePseudonymFor(value, domainName);
 	}
 
 	@Override
 	public Map<String, String> getOrCreatePseudonymForList(Set<String> values, String domainName)
 			throws DBException, DomainIsFullException, InvalidParameterException, UnknownDomainException
 	{
-		if (LOGGER.isDebugEnabled())
-		{
-			LOGGER.debug("getOrCreatePseudonymForList for " + values.size() + " values within domain " + domainName);
-		}
-		checkParameter(values, "values");
-		checkParameter(domainName, "domainName");
-		Map<String, String> result = cache.getOrCreatePseudonymForList(values, domainName);
-		if (LOGGER.isDebugEnabled())
-		{
-			LOGGER.debug("proceeded " + result.size() + " values");
-		}
-		return result;
+		return super.getOrCreatePseudonymForList(values, domainName);
 	}
 
 	@Override
-	public Map<String, String> getValueForList(Set<String> psnList, String domainName) throws InvalidParameterException, UnknownDomainException
+	public String getPseudonymFor(String value, String domainName)
+			throws InvalidParameterException, UnknownDomainException, UnknownValueException
 	{
-		if (LOGGER.isDebugEnabled())
-		{
-			LOGGER.debug("getValueForList for " + psnList.size() + " pseudonyms within domain " + domainName);
-		}
-		checkParameter(psnList, "psnList");
-		checkParameter(domainName, "domainName");
-		Map<String, String> result = cache.getValueForList(psnList, domainName);
-		if (LOGGER.isDebugEnabled())
-		{
-			LOGGER.debug("proceeded " + result.size() + " pseudonyms");
-		}
-		return result;
+		return super.getPseudonymFor(value, domainName);
 	}
 
 	@Override
-	public Map<String, String> getPseudonymForList(Set<String> values, String domainName) throws InvalidParameterException, UnknownDomainException
+	public Map<String, String> getPseudonymForList(Set<String> values, String domainName)
+			throws InvalidParameterException, UnknownDomainException
 	{
-		if (LOGGER.isDebugEnabled())
-		{
-			LOGGER.debug("getPseudonymForList for " + values.size() + " values within domain " + domainName);
-		}
-		checkParameter(values, "values");
-		checkParameter(domainName, "domainName");
-		Map<String, String> result = cache.getPseudonymForList(values, domainName);
-		if (LOGGER.isDebugEnabled())
-		{
-			LOGGER.debug("proceeded " + result.size() + " values");
-		}
-		return result;
+		return super.getPseudonymForList(values, domainName);
 	}
 
 	@Override
-	public Map<String, String> getPseudonymForValuePrefix(String valuePrefix, String domainName) throws InvalidParameterException, UnknownDomainException
+	public Map<String, String> getPseudonymForValuePrefix(String valuePrefix, String domainName)
+			throws InvalidParameterException, UnknownDomainException
 	{
-		if (LOGGER.isDebugEnabled())
-		{
-			LOGGER.debug("getPseudonymForValuePrefix for " + valuePrefix + " within domain " + domainName);
-		}
-		checkParameter(valuePrefix, "valuePrefix");
-		checkParameter(domainName, "domainName");
-		Map<String, String> result = cache.getPseudonymForValuePrefix(valuePrefix, domainName);
-		if (LOGGER.isDebugEnabled())
-		{
-			LOGGER.debug("found " + result.size() + " pseudonyms");
-		}
-		return result;
+		return super.getPseudonymForValuePrefix(valuePrefix, domainName);
 	}
 
 	@Override
-	public void insertValuePseudonymPair(String value, String pseudonym, String domainName) throws InsertPairException, InvalidParameterException, UnknownDomainException
+	public void anonymiseEntry(String value, String domainName)
+			throws DBException, InvalidParameterException, UnknownDomainException, UnknownValueException, ValueIsAnonymisedException
 	{
-		if (LOGGER.isDebugEnabled())
-		{
-			LOGGER.debug("insertValuePseudonymPair for value " + value + " in domain " + domainName);
-		}
-		checkParameter(value, "value");
-		checkParameter(pseudonym, "pseudonym");
-		checkParameter(domainName, "domainName");
-		cache.insertValuePseudonymPair(value, pseudonym, domainName);
-		if (LOGGER.isDebugEnabled())
-		{
-			LOGGER.debug("persisted pseudonym for " + value + " in domain " + domainName);
-		}
+		super.anonymiseEntry(value, domainName);
 	}
 
 	@Override
-	public List<InsertPairExceptionDTO> insertValuePseudonymPairs(Map<String, String> pairs, String domainName) throws InvalidParameterException, UnknownDomainException
+	public Map<String, AnonymisationResult> anonymiseEntries(Set<String> values, String domainName)
+			throws DBException, InvalidParameterException, UnknownDomainException
 	{
-		if (LOGGER.isDebugEnabled())
-		{
-			LOGGER.debug("insertValuePseudonymPairs for " + pairs.size() + " value-pseudonym pairs in domain " + domainName);
-		}
-		checkParameter(pairs, "pairs");
-		checkParameter(domainName, "domainName");
-		List<InsertPairExceptionDTO> result = cache.insertValuePseudonymPairs(pairs, domainName);
-		if (LOGGER.isDebugEnabled())
-		{
-			LOGGER.debug("inserted " + (pairs.size() - result.size()) + " value-pseudonym pairs in domain " + domainName + ". " + result.size() + " errors occurred");
-		}
-		return result;
+		return super.anonymiseEntries(values, domainName);
+	}
+
+	@Override
+	public boolean isAnonym(String value)
+			throws InvalidParameterException
+	{
+		return super.isAnonym(value);
+	}
+
+	@Override
+	public boolean isAnonymised(String psn, String domainName)
+			throws InvalidParameterException, InvalidPSNException, UnknownDomainException, PSNNotFoundException
+	{
+		return super.isAnonymised(psn, domainName);
+	}
+
+	@Override
+	public void deleteEntry(String value, String domainName)
+			throws DeletionForbiddenException, InvalidParameterException, UnknownDomainException, UnknownValueException
+	{
+		super.deleteEntry(value, domainName);
+	}
+
+	@Override
+	public Map<String, DeletionResult> deleteEntries(Set<String> values, String domainName)
+			throws DeletionForbiddenException, InvalidParameterException, UnknownDomainException
+	{
+		return super.deleteEntries(values, domainName);
+	}
+
+	@Override
+	public void validatePSN(String psn, String domainName)
+			throws InvalidParameterException, InvalidPSNException, UnknownDomainException
+	{
+		super.validatePSN(psn, domainName);
+	}
+
+	@Override
+	public String getValueFor(String psn, String domainName)
+			throws InvalidParameterException, InvalidPSNException, PSNNotFoundException, UnknownDomainException, ValueIsAnonymisedException
+	{
+		return super.getValueFor(psn, domainName);
+	}
+
+	@Override
+	public Map<String, String> getValueForList(Set<String> psnList, String domainName)
+			throws InvalidParameterException, UnknownDomainException
+	{
+		return super.getValueForList(psnList, domainName);
+	}
+
+	@Override
+	public void insertValuePseudonymPair(String value, String pseudonym, String domainName)
+			throws InsertPairException, InvalidParameterException, UnknownDomainException
+	{
+		super.insertValuePseudonymPair(value, pseudonym, domainName);
+	}
+
+	@Override
+	public List<InsertPairExceptionDTO> insertValuePseudonymPairs(Map<String, String> pairs, String domainName)
+			throws InvalidParameterException, UnknownDomainException
+	{
+		return super.insertValuePseudonymPairs(pairs, domainName);
 	}
 
 	@Override
 	public PSNTreeDTO getPSNTreeForPSN(String psn, String domainName)
 			throws InvalidParameterException, InvalidPSNException, PSNNotFoundException, UnknownDomainException, ValueIsAnonymisedException
 	{
-		if (LOGGER.isDebugEnabled())
-		{
-			LOGGER.debug("getPSNTreeForPSN for " + psn + " within domain " + domainName);
-		}
-		checkParameter(psn, "psn");
-		checkParameter(domainName, "domainName");
-		PSNTreeDTO result = cache.getPSNTreeForPSN(psn, domainName);
-		if (LOGGER.isDebugEnabled())
-		{
-			LOGGER.debug("psn tree created");
-		}
-		return result;
+		return super.getPSNTreeForPSN(psn, domainName);
 	}
 
 	@Override
 	public PSNNetDTO getPSNNetFor(String valueOrPSN) throws InvalidParameterException
 	{
-		if (LOGGER.isDebugEnabled())
-		{
-			LOGGER.debug("getPSNNetFor for value or psn " + valueOrPSN);
-		}
-		checkParameter(valueOrPSN, "valueOrPSN");
-		PSNNetDTO result = cache.getPSNNetFor(valueOrPSN);
-		if (LOGGER.isDebugEnabled())
-		{
-			LOGGER.debug("psn net created");
-		}
-		return result;
+		return super.getPSNNetFor(valueOrPSN);
 	}
 }

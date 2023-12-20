@@ -4,7 +4,7 @@ package org.emau.icmvc.ganimed.ttp.psn;
  * ###license-information-start###
  * gPAS - a Generic Pseudonym Administration Service
  * __
- * Copyright (C) 2013 - 2022 Independent Trusted Third Party of the University Medicine Greifswald
+ * Copyright (C) 2013 - 2023 Independent Trusted Third Party of the University Medicine Greifswald
  * 							kontakt-ths@uni-greifswald.de
  * 							concept and implementation
  * 							l.geidel
@@ -102,14 +102,15 @@ public class DomainManagerBean extends GPASServiceBase implements DomainManager
 	}
 
 	@Override
-	public void updateDomainInUse(String domainName, String label, String comment) throws InvalidParameterException, UnknownDomainException
+	public void updateDomainInUse(String domainName, String label, String comment, boolean sendNotificationsWeb, boolean psnsDeletable)
+			throws InvalidParameterException, UnknownDomainException
 	{
 		if (LOGGER.isInfoEnabled())
 		{
 			LOGGER.info("updateDomainInUse with name " + domainName);
 		}
 		checkParameter(domainName, "domainName");
-		cache.updateDomainInUse(domainName, label, comment);
+		cache.updateDomainInUse(domainName, label, comment, sendNotificationsWeb, psnsDeletable);
 		if (LOGGER.isInfoEnabled())
 		{
 			LOGGER.info("domain " + domainName + " updated");
@@ -124,10 +125,25 @@ public class DomainManagerBean extends GPASServiceBase implements DomainManager
 			LOGGER.info("deleteDomain with name " + domainName);
 		}
 		checkParameter(domainName, "domainName");
-		cache.deleteDomain(domainName);
+		cache.deleteDomain(domainName, false);
 		if (LOGGER.isInfoEnabled())
 		{
 			LOGGER.info("domain " + domainName + " deleted");
+		}
+	}
+
+	@Override
+	public void deleteDomainWithPSNs(String domainName) throws DomainInUseException, InvalidParameterException, UnknownDomainException
+	{
+		if (LOGGER.isInfoEnabled())
+		{
+			LOGGER.info("deleteDomainWithPSNs with name " + domainName);
+		}
+		checkParameter(domainName, "domainName");
+		cache.deleteDomain(domainName, true);
+		if (LOGGER.isInfoEnabled())
+		{
+			LOGGER.info("domain " + domainName + " and all related PSNs deleted");
 		}
 	}
 
