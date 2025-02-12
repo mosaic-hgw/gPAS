@@ -1,0 +1,575 @@
+# https://www.jetbrains.com/help/idea/http-client-in-product-code-editor.html
+# https://www.jetbrains.com/help/idea/exploring-http-syntax.html#environment-variables
+
+@soap_service_url = {{protocol}}://{{host}}:{{port}}/{{soap_context}}/{{soap_service}}
+@value_prefix = value_prefix
+@value_1 = {{$random.alphabetic(8)}}
+@value_2 = {{$random.alphabetic(8)}}
+@psn_1 = test_psn_1
+@psn_2 = test_psn_2
+
+
+### Anonymise All Entries for Value
+POST {{soap_service_url}}
+Content-Type: application/xml
+
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:psn="http://psn.ttp.ganimed.icmvc.emau.org/">
+	<soapenv:Header/>
+	<soapenv:Body>
+		<psn:anonymiseAllEntriesForValue>
+			<value>{{value_1}}</value>
+			<domainName>{{domain_name}}</domainName>
+		</psn:anonymiseAllEntriesForValue>
+	</soapenv:Body>
+</soapenv:Envelope>
+
+
+### Anonymise All Entries for Values
+POST {{soap_service_url}}
+Content-Type: application/xml
+
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:psn="http://psn.ttp.ganimed.icmvc.emau.org/">
+	<soapenv:Header/>
+	<soapenv:Body>
+		<psn:anonymiseAllEntriesForValues>
+			<!--1 or more repetitions:-->
+			<values>{{value_1}}</values>
+			<values>{{value_2}}</values>
+			<domainName>{{domain_name}}</domainName>
+		</psn:anonymiseAllEntriesForValues>
+	</soapenv:Body>
+</soapenv:Envelope>
+
+
+### Anonymise Entries
+POST {{soap_service_url}}
+Content-Type: application/xml
+
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:psn="http://psn.ttp.ganimed.icmvc.emau.org/">
+	<soapenv:Header/>
+	<soapenv:Body>
+		<psn:anonymiseEntries>
+			<!--1 or more repetitions:-->
+			<values>{{value_1}}</values>
+			<values>{{value_2}}</values>
+			<domainName>{{domain_name}}</domainName>
+		</psn:anonymiseEntries>
+	</soapenv:Body>
+</soapenv:Envelope>
+
+
+### Anonymise Entry
+POST {{soap_service_url}}
+Content-Type: application/xml
+
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:psn="http://psn.ttp.ganimed.icmvc.emau.org/">
+	<soapenv:Header/>
+	<soapenv:Body>
+		<psn:anonymiseEntry>
+			<value>{{value_1}}</value>
+			<domainName>{{domain_name}}</domainName>
+		</psn:anonymiseEntry>
+	</soapenv:Body>
+</soapenv:Envelope>
+
+
+### Anonymise Pseudonym
+POST {{soap_service_url}}
+Content-Type: application/xml
+
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:psn="http://psn.ttp.ganimed.icmvc.emau.org/">
+	<soapenv:Header/>
+	<soapenv:Body>
+		<psn:anonymisePseudonym>
+			<psn>{{psn_1}}</psn>
+			<domainName>{{domain_name}}</domainName>
+		</psn:anonymisePseudonym>
+	</soapenv:Body>
+</soapenv:Envelope>
+
+
+### Anonymise Pseudonyms
+POST {{soap_service_url}}
+Content-Type: application/xml
+
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:psn="http://psn.ttp.ganimed.icmvc.emau.org/">
+	<soapenv:Header/>
+	<soapenv:Body>
+		<psn:anonymisePseudonyms>
+			<!--1 or more repetitions:-->
+			<psns>{{psn_1}}</psns>
+			<psns>{{psn_2}}</psns>
+			<domainName>{{domain_name}}</domainName>
+		</psn:anonymisePseudonyms>
+	</soapenv:Body>
+</soapenv:Envelope>
+
+
+### Create Pseudonym
+POST {{soap_service_url}}
+Content-Type: application/xml
+
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:psn="http://psn.ttp.ganimed.icmvc.emau.org/">
+	<soapenv:Header/>
+	<soapenv:Body>
+		<psn:createPseudonymFor>
+			<value>{{value_1}}</value>
+			<domainName>{{domain_name}}</domainName>
+		</psn:createPseudonymFor>
+	</soapenv:Body>
+</soapenv:Envelope>
+
+
+### Create Pseudonym for List
+POST {{soap_service_url}}
+Content-Type: application/xml
+
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:psn="http://psn.ttp.ganimed.icmvc.emau.org/">
+	<soapenv:Header/>
+	<soapenv:Body>
+		<psn:createPseudonymForList>
+			<!--1 or more repetitions:-->
+			<values>{{value_1}}</values>
+			<values>{{value_2}}</values>
+			<domainName>{{domain_name}}</domainName>
+		</psn:createPseudonymForList>
+	</soapenv:Body>
+</soapenv:Envelope>
+
+
+### Create Pseudonyms
+POST {{soap_service_url}}
+Content-Type: application/xml
+
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:psn="http://psn.ttp.ganimed.icmvc.emau.org/">
+	<soapenv:Header/>
+	<soapenv:Body>
+		<psn:createPseudonymsFor>
+			<value>{{value_1}}</value>
+			<domainName>{{domain_name}}</domainName>
+			<number>2</number>
+		</psn:createPseudonymsFor>
+	</soapenv:Body>
+</soapenv:Envelope>
+
+### Create Pseudonyms for List
+POST {{soap_service_url}}
+Content-Type: application/xml
+
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:psn="http://psn.ttp.ganimed.icmvc.emau.org/">
+	<soapenv:Header/>
+	<soapenv:Body>
+		<psn:createPseudonymsForList>
+			<!--1 or more repetitions:-->
+			<values>{{value_1}}</values>
+			<values>{{value_2}}</values>
+			<domainName>{{domain_name}}</domainName>
+			<number>2</number>
+		</psn:createPseudonymsForList>
+	</soapenv:Body>
+</soapenv:Envelope>
+
+
+### Delete All Entries for Value
+POST {{soap_service_url}}
+Content-Type: application/xml
+
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:psn="http://psn.ttp.ganimed.icmvc.emau.org/">
+	<soapenv:Header/>
+	<soapenv:Body>
+		<psn:deleteAllEntriesForValue>
+			<value>{{value_1}}</value>
+			<domainName>{{domain_name}}</domainName>
+		</psn:deleteAllEntriesForValue>
+	</soapenv:Body>
+</soapenv:Envelope>
+
+
+### Delete All Entries for Values
+POST {{soap_service_url}}
+Content-Type: application/xml
+
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:psn="http://psn.ttp.ganimed.icmvc.emau.org/">
+	<soapenv:Header/>
+	<soapenv:Body>
+		<psn:deleteAllEntriesForValues>
+			<!--1 or more repetitions:-->
+			<values>{{value_1}}</values>
+			<values>{{value_2}}</values>
+			<domainName>{{domain_name}}</domainName>
+		</psn:deleteAllEntriesForValues>
+	</soapenv:Body>
+</soapenv:Envelope>
+
+
+### Delete Entries
+POST {{soap_service_url}}
+Content-Type: application/xml
+
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:psn="http://psn.ttp.ganimed.icmvc.emau.org/">
+	<soapenv:Header/>
+	<soapenv:Body>
+		<psn:deleteEntries>
+			<!--1 or more repetitions:-->
+			<values>{{value_1}}</values>
+			<values>{{value_2}}</values>
+			<domainName>{{domain_name}}</domainName>
+		</psn:deleteEntries>
+	</soapenv:Body>
+</soapenv:Envelope>
+
+
+### Delete Entry
+POST {{soap_service_url}}
+Content-Type: application/xml
+
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:psn="http://psn.ttp.ganimed.icmvc.emau.org/">
+	<soapenv:Header/>
+	<soapenv:Body>
+		<psn:deleteEntry>
+			<value>{{value_1}}</value>
+			<domainName>{{domain_name}}</domainName>
+		</psn:deleteEntry>
+	</soapenv:Body>
+</soapenv:Envelope>
+
+
+### Delete Pseudonym
+POST {{soap_service_url}}
+Content-Type: application/xml
+
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:psn="http://psn.ttp.ganimed.icmvc.emau.org/">
+	<soapenv:Header/>
+	<soapenv:Body>
+		<psn:deletePseudonym>
+			<psn>{{psn_1}}</psn>
+			<domainName>{{domain_name}}</domainName>
+		</psn:deletePseudonym>
+	</soapenv:Body>
+</soapenv:Envelope>
+
+
+### Delete Pseudonyms
+POST {{soap_service_url}}
+Content-Type: application/xml
+
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:psn="http://psn.ttp.ganimed.icmvc.emau.org/">
+	<soapenv:Header/>
+	<soapenv:Body>
+		<psn:deletePseudonyms>
+			<!--1 or more repetitions:-->
+			<psns>{{psn_1}}</psns>
+			<psns>{{psn_2}}</psns>
+			<domainName>{{domain_name}}</domainName>
+		</psn:deletePseudonyms>
+	</soapenv:Body>
+</soapenv:Envelope>
+
+
+### Get or Create Pseudonym
+POST {{soap_service_url}}
+Content-Type: application/xml
+
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:psn="http://psn.ttp.ganimed.icmvc.emau.org/">
+	<soapenv:Header/>
+	<soapenv:Body>
+		<psn:getOrCreatePseudonymFor>
+			<value>{{value_1}}</value>
+			<domainName>{{domain_name}}</domainName>
+		</psn:getOrCreatePseudonymFor>
+	</soapenv:Body>
+</soapenv:Envelope>
+
+
+### Get or Create Pseudonym for List
+POST {{soap_service_url}}
+Content-Type: application/xml
+
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:psn="http://psn.ttp.ganimed.icmvc.emau.org/">
+	<soapenv:Header/>
+	<soapenv:Body>
+		<psn:getOrCreatePseudonymForList>
+			<!--1 or more repetitions:-->
+			<values>{{value_1}}</values>
+			<values>{{value_2}}</values>
+			<domainName>{{domain_name}}</domainName>
+		</psn:getOrCreatePseudonymForList>
+	</soapenv:Body>
+</soapenv:Envelope>
+
+
+### Get or Create Pseudonyms
+POST {{soap_service_url}}
+Content-Type: application/xml
+
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:psn="http://psn.ttp.ganimed.icmvc.emau.org/">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <psn:getOrCreatePseudonymsFor>
+         <value>{{value_1}}</value>
+         <domainName>{{domain_name}}</domainName>
+         <minNumber>3</minNumber>
+      </psn:getOrCreatePseudonymsFor>
+   </soapenv:Body>
+</soapenv:Envelope>
+
+
+### Get or Create Pseudonyms for List
+POST {{soap_service_url}}
+Content-Type: application/xml
+
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:psn="http://psn.ttp.ganimed.icmvc.emau.org/">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <psn:getOrCreatePseudonymsForList>
+         <!--1 or more repetitions:-->
+         <values>{{value_1}}</values>
+         <values>{{value_2}}</values>
+         <domainName>{{domain_name}}</domainName>
+         <minNumber>3</minNumber>
+      </psn:getOrCreatePseudonymsForList>
+   </soapenv:Body>
+</soapenv:Envelope>
+
+
+### Get Pseudonym
+POST {{soap_service_url}}
+Content-Type: application/xml
+
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:psn="http://psn.ttp.ganimed.icmvc.emau.org/">
+	<soapenv:Header/>
+	<soapenv:Body>
+		<psn:getPseudonymFor>
+			<value>{{value_1}}</value>
+			<domainName>{{domain_name}}</domainName>
+		</psn:getPseudonymFor>
+	</soapenv:Body>
+</soapenv:Envelope>
+
+
+### Get Pseudonym for List
+POST {{soap_service_url}}
+Content-Type: application/xml
+
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:psn="http://psn.ttp.ganimed.icmvc.emau.org/">
+	<soapenv:Header/>
+	<soapenv:Body>
+		<psn:getPseudonymForList>
+			<!--1 or more repetitions:-->
+            <values>{{value_1}}</values>
+            <values>{{value_2}}</values>
+			<domainName>{{domain_name}}</domainName>
+		</psn:getPseudonymForList>
+	</soapenv:Body>
+</soapenv:Envelope>
+
+
+### Get Pseudonym for Value Prefix
+POST {{soap_service_url}}
+Content-Type: application/xml
+
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:psn="http://psn.ttp.ganimed.icmvc.emau.org/">
+	<soapenv:Header/>
+	<soapenv:Body>
+		<psn:getPseudonymForValuePrefix>
+			<valuePrefix>{{value_prefix}}</valuePrefix>
+			<domainName>{{domain_name}}</domainName>
+		</psn:getPseudonymForValuePrefix>
+	</soapenv:Body>
+</soapenv:Envelope>
+
+
+### Get Pseudonyms
+POST {{soap_service_url}}
+Content-Type: application/xml
+
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:psn="http://psn.ttp.ganimed.icmvc.emau.org/">
+	<soapenv:Header/>
+	<soapenv:Body>
+		<psn:getPseudonymsFor>
+			<value>{{value_1}}</value>
+			<domainName>{{domain_name}}</domainName>
+		</psn:getPseudonymsFor>
+	</soapenv:Body>
+</soapenv:Envelope>
+
+### Get Pseudonyms for List
+POST {{soap_service_url}}
+Content-Type: application/xml
+
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:psn="http://psn.ttp.ganimed.icmvc.emau.org/">
+	<soapenv:Header/>
+	<soapenv:Body>
+		<psn:getPseudonymsForList>
+			<!--1 or more repetitions:-->
+            <values>{{value_1}}</values>
+            <values>{{value_2}}</values>
+			<domainName>{{domain_name}}</domainName>
+		</psn:getPseudonymsForList>
+	</soapenv:Body>
+</soapenv:Envelope>
+
+
+### Get Pseudonyms for Value Prefix
+POST {{soap_service_url}}
+Content-Type: application/xml
+
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:psn="http://psn.ttp.ganimed.icmvc.emau.org/">
+	<soapenv:Header/>
+	<soapenv:Body>
+		<psn:getPseudonymsForValuePrefix>
+			<valuePrefix>{{value_prefix}}</valuePrefix>
+			<domainName>{{domain_name}}</domainName>
+		</psn:getPseudonymsForValuePrefix>
+	</soapenv:Body>
+</soapenv:Envelope>
+
+
+### Get PSN Net
+POST {{soap_service_url}}
+Content-Type: application/xml
+
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:psn="http://psn.ttp.ganimed.icmvc.emau.org/">
+	<soapenv:Header/>
+	<soapenv:Body>
+		<psn:getPSNNetFor>
+			<valueOrPSN>{{value_1}}</valueOrPSN>
+		</psn:getPSNNetFor>
+	</soapenv:Body>
+</soapenv:Envelope>
+
+
+### Get PSN Tree for PSN
+POST {{soap_service_url}}
+Content-Type: application/xml
+
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:psn="http://psn.ttp.ganimed.icmvc.emau.org/">
+	<soapenv:Header/>
+	<soapenv:Body>
+		<psn:getPSNTreeForPSN>
+			<psn>{{psn_1}}</psn>
+			<domainName>{{domain_name}}</domainName>
+		</psn:getPSNTreeForPSN>
+	</soapenv:Body>
+</soapenv:Envelope>
+
+
+### Get Value
+POST {{soap_service_url}}
+Content-Type: application/xml
+
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:psn="http://psn.ttp.ganimed.icmvc.emau.org/">
+	<soapenv:Header/>
+	<soapenv:Body>
+		<psn:getValueFor>
+			<psn>{{psn_1}}</psn>
+			<domainName>{{domain_name}}</domainName>
+		</psn:getValueFor>
+	</soapenv:Body>
+</soapenv:Envelope>
+
+
+### Get Value for List
+POST {{soap_service_url}}
+Content-Type: application/xml
+
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:psn="http://psn.ttp.ganimed.icmvc.emau.org/">
+	<soapenv:Header/>
+	<soapenv:Body>
+		<psn:getValueForList>
+			<!--1 or more repetitions:-->
+			<psnList>{{psn_1}}</psnList>
+			<psnList>{{psn_2}}</psnList>
+			<domainName>{{domain_name}}</domainName>
+		</psn:getValueForList>
+	</soapenv:Body>
+</soapenv:Envelope>
+
+
+### Insert Value Pseudonym Pair
+POST {{soap_service_url}}
+Content-Type: application/xml
+
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:psn="http://psn.ttp.ganimed.icmvc.emau.org/">
+	<soapenv:Header/>
+	<soapenv:Body>
+		<psn:insertValuePseudonymPair>
+			<value>{{value_1}}</value>
+			<pseudonym>{{psn_1}}</pseudonym>
+			<domainName>{{domain_name}}</domainName>
+		</psn:insertValuePseudonymPair>
+	</soapenv:Body>
+</soapenv:Envelope>
+
+
+### Insert Value Pseudonym Pairs
+POST {{soap_service_url}}
+Content-Type: application/xml
+
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:psn="http://psn.ttp.ganimed.icmvc.emau.org/">
+	<soapenv:Header/>
+	<soapenv:Body>
+		<psn:insertValuePseudonymPairs>
+			<pairs>
+				<!--Zero or more repetitions:-->
+				<entry>
+					<!--Optional:-->
+					<key>{{value_1}}</key>
+					<!--Optional:-->
+					<value>{{psn_1}}</value>
+				</entry>
+				<entry>
+					<!--Optional:-->
+					<key>{{value_2}}</key>
+					<!--Optional:-->
+					<value>{{psn_2}}</value>
+				</entry>
+			</pairs>
+			<domainName>{{domain_name}}</domainName>
+		</psn:insertValuePseudonymPairs>
+	</soapenv:Body>
+</soapenv:Envelope>
+
+
+### Is Anonym
+POST {{soap_service_url}}
+Content-Type: application/xml
+
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:psn="http://psn.ttp.ganimed.icmvc.emau.org/">
+	<soapenv:Header/>
+	<soapenv:Body>
+		<psn:isAnonym>
+			<value>{{value_1}}</value>
+		</psn:isAnonym>
+	</soapenv:Body>
+</soapenv:Envelope>
+
+
+### Is Anonymised
+POST {{soap_service_url}}
+Content-Type: application/xml
+
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:psn="http://psn.ttp.ganimed.icmvc.emau.org/">
+	<soapenv:Header/>
+	<soapenv:Body>
+		<psn:isAnonymised>
+			<psn>{{psn_1}}</psn>
+			<domainName>{{domain_name}}</domainName>
+		</psn:isAnonymised>
+	</soapenv:Body>
+</soapenv:Envelope>
+
+
+### Validate PSN
+POST {{soap_service_url}}
+Content-Type: application/xml
+
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:psn="http://psn.ttp.ganimed.icmvc.emau.org/">
+	<soapenv:Header/>
+	<soapenv:Body>
+		<psn:validatePSN>
+			<psn>{{psn_1}}</psn>
+			<domainName>{{domain_name}}</domainName>
+		</psn:validatePSN>
+	</soapenv:Body>
+</soapenv:Envelope>

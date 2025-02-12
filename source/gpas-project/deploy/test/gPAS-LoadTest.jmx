@@ -1,0 +1,1413 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jmeterTestPlan version="1.2" properties="5.0" jmeter="5.5">
+  <hashTree>
+    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="gPAS-Loadtest (v1.10.0-2023.1.0)" enabled="true">
+      <stringProp name="TestPlan.comments"></stringProp>
+      <boolProp name="TestPlan.functional_mode">false</boolProp>
+      <boolProp name="TestPlan.tearDown_on_shutdown">true</boolProp>
+      <boolProp name="TestPlan.serialize_threadgroups">false</boolProp>
+      <elementProp name="TestPlan.user_defined_variables" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
+        <collectionProp name="Arguments.arguments">
+          <elementProp name="############################ connection ############################" elementType="Argument">
+            <stringProp name="Argument.name">############################ connection ############################</stringProp>
+            <stringProp name="Argument.value"></stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="GPAS_SOAP_PROTOCOL" elementType="Argument">
+            <stringProp name="Argument.name">GPAS_SOAP_PROTOCOL</stringProp>
+            <stringProp name="Argument.value">${__groovy(System.getenv(&quot;GPAS_SOAP_PROTOCOL&quot;) ?: &quot;${__P(GPAS_SOAP_PROTOCOL,http)}&quot;)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="GPAS_SOAP_HOST" elementType="Argument">
+            <stringProp name="Argument.name">GPAS_SOAP_HOST</stringProp>
+            <stringProp name="Argument.value">${__groovy(System.getenv(&quot;GPAS_SOAP_HOST&quot;) ?: &quot;${__P(GPAS_SOAP_HOST,wildfly)}&quot;)}</stringProp>
+            <stringProp name="Argument.desc">= wildfly</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="GPAS_SOAP_PORT" elementType="Argument">
+            <stringProp name="Argument.name">GPAS_SOAP_PORT</stringProp>
+            <stringProp name="Argument.value">${__groovy(System.getenv(&quot;GPAS_SOAP_PORT&quot;) ?: &quot;${__P(GPAS_SOAP_PORT,8080)}&quot;)}</stringProp>
+            <stringProp name="Argument.desc">= 8080</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="GPAS_SOAP_CONTEXT" elementType="Argument">
+            <stringProp name="Argument.name">GPAS_SOAP_CONTEXT</stringProp>
+            <stringProp name="Argument.value">gpas</stringProp>
+            <stringProp name="Argument.desc">&quot;gpas&quot;);</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="GPAS_SOAP_SERVICE" elementType="Argument">
+            <stringProp name="Argument.name">GPAS_SOAP_SERVICE</stringProp>
+            <stringProp name="Argument.value">gpasService</stringProp>
+            <stringProp name="Argument.desc">&quot;gpasService&quot;);</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="GPAS_SOAP_MANAGEMENT" elementType="Argument">
+            <stringProp name="Argument.name">GPAS_SOAP_MANAGEMENT</stringProp>
+            <stringProp name="Argument.value">DomainService</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="############################ domain-config ############################" elementType="Argument">
+            <stringProp name="Argument.name">############################ domain-config ############################</stringProp>
+            <stringProp name="Argument.value"></stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="DOMAIN" elementType="Argument">
+            <stringProp name="Argument.name">DOMAIN</stringProp>
+            <stringProp name="Argument.value">${__groovy(System.getenv(&quot;TEST_DOMAIN&quot;) ?: &quot;${__P(TEST_DOMAIN,dummy)}&quot;)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="CHECK_DIGIT_CLASS" elementType="Argument">
+            <stringProp name="Argument.name">CHECK_DIGIT_CLASS</stringProp>
+            <stringProp name="Argument.value">${__groovy(System.getenv(&quot;TEST_CHECK_DIGIT_CLASS&quot;) ?: &quot;${__P(TEST_CHECK_DIGIT_CLASS,org.emau.icmvc.ganimed.ttp.psn.generator.Verhoeff)}&quot;)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="ALPHABET" elementType="Argument">
+            <stringProp name="Argument.name">ALPHABET</stringProp>
+            <stringProp name="Argument.value">${__groovy(System.getenv(&quot;TEST_ALPHABET&quot;) ?: &quot;${__P(TEST_ALPHABET,org.emau.icmvc.ganimed.ttp.psn.alphabets.Numbers)}&quot;)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="PROP_FORCE_CACHE" elementType="Argument">
+            <stringProp name="Argument.name">PROP_FORCE_CACHE</stringProp>
+            <stringProp name="Argument.value">${__groovy(System.getenv(&quot;TEST_PROP_FORCE_CACHE&quot;) ?: &quot;${__P(TEST_PROP_FORCE_CACHE,DEFAULT)}&quot;)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="PROP_PSN_LENGTH" elementType="Argument">
+            <stringProp name="Argument.name">PROP_PSN_LENGTH</stringProp>
+            <stringProp name="Argument.value">${__groovy(System.getenv(&quot;TEST_PROP_PSN_LENGTH&quot;) ?: &quot;${__P(TEST_PROP_PSN_LENGTH,8)}&quot;)}</stringProp>
+            <stringProp name="Argument.desc">= 7</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="PROP_PREFIX" elementType="Argument">
+            <stringProp name="Argument.name">PROP_PREFIX</stringProp>
+            <stringProp name="Argument.value">${__groovy(System.getenv(&quot;TEST_PROP_PREFIX&quot;) ?: &quot;${__P(TEST_PROP_PREFIX,dmy_)}&quot;)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="COMMENT" elementType="Argument">
+            <stringProp name="Argument.name">COMMENT</stringProp>
+            <stringProp name="Argument.value">${__groovy(System.getenv(&quot;TEST_COMMENT&quot;) ?: &quot;${__P(TEST_COMMENT,)}&quot;)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="PARENT_DOMAIN_NAME" elementType="Argument">
+            <stringProp name="Argument.name">PARENT_DOMAIN_NAME</stringProp>
+            <stringProp name="Argument.value">${__groovy(System.getenv(&quot;TEST_PARENT_DOMAIN_NAME&quot;) ?: &quot;${__P(TEST_PARENT_DOMAIN_NAME,)}&quot;)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="AGGREGATE_REPORT" elementType="Argument">
+            <stringProp name="Argument.name">AGGREGATE_REPORT</stringProp>
+            <stringProp name="Argument.value">${__groovy(System.getenv(&quot;TEST_AGGREGATE_REPORT&quot;) ?: &quot;${__P(TEST_AGGREGATE_REPORT,~/report.csv)}&quot;)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="############################ threading ############################" elementType="Argument">
+            <stringProp name="Argument.name">############################ threading ############################</stringProp>
+            <stringProp name="Argument.value"></stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="HOW_MANY_DOMAINS" elementType="Argument">
+            <stringProp name="Argument.name">HOW_MANY_DOMAINS</stringProp>
+            <stringProp name="Argument.value">${__groovy(System.getenv(&quot;TEST_HOW_MANY_DOMAINS&quot;) ?: &quot;${__P(TEST_HOW_MANY_DOMAINS,1)}&quot;)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="THREADS" elementType="Argument">
+            <stringProp name="Argument.name">THREADS</stringProp>
+            <stringProp name="Argument.value">${__groovy(System.getenv(&quot;TEST_THREADS&quot;) ?: &quot;${__P(TEST_THREADS,1)}&quot;)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="RAMP_UP" elementType="Argument">
+            <stringProp name="Argument.name">RAMP_UP</stringProp>
+            <stringProp name="Argument.value">${__groovy(System.getenv(&quot;TEST_RAMP_UP&quot;) ?: &quot;${__P(TEST_RAMP_UP,1)}&quot;)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="LOOPS" elementType="Argument">
+            <stringProp name="Argument.name">LOOPS</stringProp>
+            <stringProp name="Argument.value">${__groovy(System.getenv(&quot;TEST_LOOPS&quot;) ?: &quot;${__P(TEST_LOOPS,20)}&quot;)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="PACKAGE_SIZE" elementType="Argument">
+            <stringProp name="Argument.name">PACKAGE_SIZE</stringProp>
+            <stringProp name="Argument.value">${__groovy(System.getenv(&quot;TEST_PACKAGE_SIZE&quot;) ?: &quot;${__P(TEST_PACKAGE_SIZE,49999)}&quot;)}</stringProp>
+            <stringProp name="Argument.desc">= 49999</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="NEXT_REQUEST_TIME" elementType="Argument">
+            <stringProp name="Argument.name">NEXT_REQUEST_TIME</stringProp>
+            <stringProp name="Argument.value">${__groovy(System.getenv(&quot;TEST_NEXT_REQUEST_TIME&quot;) ?: &quot;${__P(TEST_NEXT_REQUEST_TIME,0)}&quot;)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="ABORT_ON_RESPONSE_ERROR" elementType="Argument">
+            <stringProp name="Argument.name">ABORT_ON_RESPONSE_ERROR</stringProp>
+            <stringProp name="Argument.value">${__groovy(System.getenv(&quot;TEST_ABORT_ON_RESPONSE_ERROR&quot;) ?: &quot;${__P(TEST_ABORT_ON_RESPONSE_ERROR,true)}&quot;)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="############################ additional-testing ############################" elementType="Argument">
+            <stringProp name="Argument.name">############################ additional-testing ############################</stringProp>
+            <stringProp name="Argument.value"></stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="RESTART_WILDFLY_EVERY_X_LOOPS" elementType="Argument">
+            <stringProp name="Argument.name">RESTART_WILDFLY_EVERY_X_LOOPS</stringProp>
+            <stringProp name="Argument.value">${__groovy(System.getenv(&quot;TEST_RESTART_WILDFLY_EVERY_X_LOOPS&quot;) ?: &quot;${__P(TEST_RESTART_WILDFLY_EVERY_X_LOOPS,0)}&quot;)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="RESTART_WILDFLY_ADMIN_USER" elementType="Argument">
+            <stringProp name="Argument.name">RESTART_WILDFLY_ADMIN_USER</stringProp>
+            <stringProp name="Argument.value">${__groovy(System.getenv(&quot;TEST_RESTART_WILDFLY_ADMIN_USER&quot;) ?: &quot;${__P(TEST_RESTART_WILDFLY_ADMIN_USER,admin)}&quot;)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="RESTART_WILDFLY_ADMIN_PASSWORD" elementType="Argument">
+            <stringProp name="Argument.name">RESTART_WILDFLY_ADMIN_PASSWORD</stringProp>
+            <stringProp name="Argument.value">${__groovy(System.getenv(&quot;TEST_RESTART_WILDFLY_ADMIN_PASSWORD&quot;) ?: &quot;${__P(TEST_RESTART_WILDFLY_ADMIN_PASSWORD,wildfly_password)}&quot;)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="############################ additional-testing ############################" elementType="Argument">
+            <stringProp name="Argument.name">############################ additional-testing ############################</stringProp>
+            <stringProp name="Argument.value"></stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="GET_PSNS_EVERY_X_LOOPS" elementType="Argument">
+            <stringProp name="Argument.name">GET_PSNS_EVERY_X_LOOPS</stringProp>
+            <stringProp name="Argument.value">${__groovy(System.getenv(&quot;TEST_GET_PSNS_EVERY_X_LOOPS&quot;) ?: &quot;${__P(TEST_GET_PSNS_EVERY_X_LOOPS,0)}&quot;)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="GET_PSNS_HOW_MANY" elementType="Argument">
+            <stringProp name="Argument.name">GET_PSNS_HOW_MANY</stringProp>
+            <stringProp name="Argument.value">${__groovy(System.getenv(&quot;TEST_GET_PSNS_HOW_MANY&quot;) ?: &quot;${__P(TEST_GET_PSNS_HOW_MANY,1000)}&quot;)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="############################ db-stats-logging ############################" elementType="Argument">
+            <stringProp name="Argument.name">############################ db-stats-logging ############################</stringProp>
+            <stringProp name="Argument.value"></stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="DB_STATS_LOGGING_EVERY_X_LOOPS" elementType="Argument">
+            <stringProp name="Argument.name">DB_STATS_LOGGING_EVERY_X_LOOPS</stringProp>
+            <stringProp name="Argument.value">${__groovy(System.getenv(&quot;TEST_DB_STATS_LOGGING_EVERY_X_LOOPS&quot;) ?: &quot;${__P(TEST_DB_STATS_LOGGING_EVERY_X_LOOPS,0)}&quot;)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="DB_STATS_DB_HOST" elementType="Argument">
+            <stringProp name="Argument.name">DB_STATS_DB_HOST</stringProp>
+            <stringProp name="Argument.value">${__groovy(System.getenv(&quot;TEST_DB_STATS_DB_HOST&quot;) ?: &quot;${__P(TEST_DB_STATS_DB_HOST,mysql)}&quot;)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="DB_STATS_DB_PORT" elementType="Argument">
+            <stringProp name="Argument.name">DB_STATS_DB_PORT</stringProp>
+            <stringProp name="Argument.value">${__groovy(System.getenv(&quot;TEST_DB_STATS_DB_PORT&quot;) ?: &quot;${__P(TEST_DB_STATS_DB_PORT,3306)}&quot;)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="DB_STATS_DB_NAME" elementType="Argument">
+            <stringProp name="Argument.name">DB_STATS_DB_NAME</stringProp>
+            <stringProp name="Argument.value">${__groovy(System.getenv(&quot;TEST_DB_STATS_DB_NAME&quot;) ?: &quot;${__P(TEST_DB_STATS_DB_NAME,gpas)}&quot;)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="DB_STATS_DB_USER" elementType="Argument">
+            <stringProp name="Argument.name">DB_STATS_DB_USER</stringProp>
+            <stringProp name="Argument.value">${__groovy(System.getenv(&quot;TEST_DB_STATS_DB_USER&quot;) ?: &quot;${__P(TEST_DB_STATS_DB_USER,gpas_user)}&quot;)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="DB_STATS_DB_PASSWORD" elementType="Argument">
+            <stringProp name="Argument.name">DB_STATS_DB_PASSWORD</stringProp>
+            <stringProp name="Argument.value">${__groovy(System.getenv(&quot;TEST_DB_STATS_DB_PASSWORD&quot;) ?: &quot;${__P(TEST_DB_STATS_DB_PASSWORD,gpas_password)}&quot;)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+        </collectionProp>
+      </elementProp>
+      <stringProp name="TestPlan.user_define_classpath"></stringProp>
+    </TestPlan>
+    <hashTree>
+      <SetupThreadGroup guiclass="SetupThreadGroupGui" testclass="SetupThreadGroup" testname="setUp" enabled="true">
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+          <stringProp name="LoopController.loops">1</stringProp>
+        </elementProp>
+        <stringProp name="ThreadGroup.num_threads">1</stringProp>
+        <stringProp name="ThreadGroup.ramp_time">1</stringProp>
+        <boolProp name="ThreadGroup.scheduler">false</boolProp>
+        <stringProp name="ThreadGroup.duration"></stringProp>
+        <stringProp name="ThreadGroup.delay"></stringProp>
+        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
+      </SetupThreadGroup>
+      <hashTree>
+        <GenericController guiclass="LogicControllerGui" testclass="GenericController" testname="set individual variables" enabled="true"/>
+        <hashTree>
+          <BeanShellSampler guiclass="BeanShellSamplerGui" testclass="BeanShellSampler" testname="&gt;&gt; set individual variables" enabled="false">
+            <stringProp name="BeanShellSampler.query">// CONNECTION /////////////////////////////////////////////////////////////////////////////////////////
+//vars.put(&quot;GPAS_SOAP_PROTOCOL&quot;,              &quot;http&quot;);
+vars.put(&quot;GPAS_SOAP_HOST&quot;,                  &quot;192.168.56.101&quot;);
+//vars.put(&quot;GPAS_SOAP_PORT&quot;,                  &quot;8080&quot;);
+//vars.put(&quot;GPAS_SOAP_CONTEXT&quot;,               &quot;&quot;);
+//vars.put(&quot;GPAS_SOAP_MANAGEMENT&quot;,            &quot;&quot;);
+//vars.put(&quot;GPAS_SOAP_SERVICE&quot;,               &quot;&quot;);
+
+// DOMAIN-CONFIGURATION ///////////////////////////////////////////////////////////////////////////////
+//vars.put(&quot;DOMAIN&quot;,                          &quot;dummy&quot;);
+//vars.put(&quot;CHECK_DIGIT_CLASS&quot;,               &quot;org.emau.icmvc.ganimed.ttp.psn.generator.Verhoeff&quot;);
+//vars.put(&quot;ALPHABET&quot;,                        &quot;org.emau.icmvc.ganimed.ttp.psn.alphabets.Numbers&quot;);
+vars.put(&quot;PROP_FORCE_CACHE&quot;,                &quot;OFF&quot;);
+vars.put(&quot;PROP_PSN_LENGTH&quot;,                 &quot;11&quot;);
+//vars.put(&quot;PROP_PREFIX&quot;,                     &quot;dmy_&quot;);
+//vars.put(&quot;COMMENT&quot;,                         &quot;&quot;);
+//vars.put(&quot;PARENT_DOMAIN_NAME&quot;,              &quot;&quot;);
+
+// TEST-CONFIGURATION /////////////////////////////////////////////////////////////////////////////////
+vars.put(&quot;HOW_MANY_DOMAINS&quot;,                &quot;5&quot;);
+vars.put(&quot;PACKAGE_SIZE&quot;,                    &quot;2000&quot;);
+//vars.put(&quot;NEXT_REQUEST_TIME&quot;,               &quot;0&quot;);
+vars.put(&quot;ABORT_ON_RESPONSE_ERROR&quot;,         &quot;true&quot;);
+
+// RESTART-CONFIGURATION //////////////////////////////////////////////////////////////////////////////
+vars.put(&quot;RESTART_WILDFLY_EVERY_X_LOOPS&quot;,   &quot;0&quot;);
+//vars.put(&quot;RESTART_WILDFLY_ADMIN_USER&quot;,      &quot;admin&quot;);
+//vars.put(&quot;RESTART_WILDFLY_ADMIN_PASSWORD&quot;,  &quot;wildfly_password&quot;);
+
+// GET-PSNs-TEST //////////////////////////////////////////////////////////////////////////////////////
+vars.put(&quot;GET_PSNS_EVERY_X_LOOPS&quot;,          &quot;5&quot;);
+vars.put(&quot;GET_PSNS_HOW_MANY&quot;,               &quot;2000&quot;);
+
+// DB-STATS-LOGGING ///////////////////////////////////////////////////////////////////////////////////
+vars.put(&quot;DB_STATS_LOGGING_EVERY_X_LOOPS&quot;,  &quot;0&quot;);
+vars.put(&quot;DB_STATS_DB_HOST&quot;,                &quot;dockervm&quot;);
+//vars.put(&quot;DB_STATS_DB_PORT&quot;,                &quot;3306&quot;);
+//vars.put(&quot;DB_STATS_DB_NAME&quot;,                &quot;gpas&quot;);
+vars.put(&quot;DB_STATS_DB_USER&quot;,                &quot;root&quot;);
+vars.put(&quot;DB_STATS_DB_PASSWORD&quot;,            &quot;root&quot;);
+</stringProp>
+            <stringProp name="BeanShellSampler.filename"></stringProp>
+            <stringProp name="BeanShellSampler.parameters"></stringProp>
+            <boolProp name="BeanShellSampler.resetInterpreter">false</boolProp>
+          </BeanShellSampler>
+          <hashTree/>
+        </hashTree>
+        <BeanShellSampler guiclass="BeanShellSamplerGui" testclass="BeanShellSampler" testname="log configuration before start" enabled="true">
+          <stringProp name="BeanShellSampler.query">String out = 	&quot;#\n&quot; +
+	&quot;# CONFIGURATION\n&quot; +
+	&quot;# =============\n&quot; + 
+	&quot;# GPAS_SOAP_PROTOCOL   = ${GPAS_SOAP_PROTOCOL}\n&quot; + 
+	&quot;# GPAS_SOAP_HOST       = ${GPAS_SOAP_HOST}\n&quot; + 
+	&quot;# GPAS_SOAP_PORT       = ${GPAS_SOAP_PORT}\n&quot; + 
+	&quot;# GPAS_SOAP_CONTEXT       = ${GPAS_SOAP_CONTEXT}\n&quot; +
+	&quot;# GPAS_SOAP_MANAGEMENT    = ${GPAS_SOAP_MANAGEMENT}\n&quot; +
+	&quot;# GPAS_SOAP_SERVICE       = ${GPAS_SOAP_SERVICE}\n&quot; +
+	&quot;#\n&quot; +
+	&quot;# DOMAIN                  = ${DOMAIN}\n&quot; +
+	&quot;# CHECK_DIGIT_CLASS       = ${CHECK_DIGIT_CLASS}\n&quot; +
+	&quot;# ALPHABET                = ${ALPHABET}\n&quot; +
+	&quot;# PROP_FORCE_CACHE        = ${PROP_FORCE_CACHE}\n&quot; +
+	&quot;# PROP_PSN_LENGTH         = ${PROP_PSN_LENGTH}\n&quot; +
+	&quot;# PROP_PREFIX             = ${PROP_PREFIX}\n&quot; +
+	&quot;# COMMENT                 = ${COMMENT}\n&quot; +
+	&quot;# PARENT_DOMAIN_NAME      = ${PARENT_DOMAIN_NAME}\n&quot; +
+	&quot;#\n&quot; +
+	&quot;# HOW_MANY_DOMAINS        = ${HOW_MANY_DOMAINS}\n&quot; +
+	&quot;# THREADS                 = ${THREADS}\n&quot; +
+	&quot;# RAMP_UP                 = ${RAMP_UP}\n&quot; +
+	&quot;# LOOPS                   = ${LOOPS}\n&quot; +
+	&quot;# PACKAGE_SIZE            = ${PACKAGE_SIZE}\n&quot; +
+	&quot;# NEXT_REQUEST_TIME       = ${NEXT_REQUEST_TIME}\n&quot; +
+	&quot;# ABORT_ON_RESPONSE_ERROR = ${ABORT_ON_RESPONSE_ERROR}\n&quot; +
+	&quot;#\n&quot; +
+	&quot;# RESTART_WILDFLY_EVERY_X_LOOPS  = ${RESTART_WILDFLY_EVERY_X_LOOPS} (enabled if grater than 0)\n&quot; +
+	&quot;# RESTART_WILDFLY_ADMIN_USER     = ${RESTART_WILDFLY_ADMIN_USER}\n&quot; +
+	&quot;# RESTART_WILDFLY_ADMIN_PASSWORD = ${RESTART_WILDFLY_ADMIN_PASSWORD}\n&quot; +
+	&quot;#\n&quot; +
+	&quot;# GET_PSNS_EVERY_X_LOOPS         = ${GET_PSNS_EVERY_X_LOOPS} (enabled if grater than 0)\n&quot; +
+	&quot;# GET_PSNS_HOW_MANY              = ${GET_PSNS_HOW_MANY}\n&quot; +
+	&quot;#\n&quot; +
+	&quot;# DB_STATS_LOGGING_EVERY_X_LOOPS  = ${DB_STATS_LOGGING_EVERY_X_LOOPS} (enabled if grater than 0)\n&quot; +
+	&quot;# DB_STATS_DB_HOST                = ${DB_STATS_DB_HOST}\n&quot; +
+	&quot;# DB_STATS_DB_PORT                = ${DB_STATS_DB_PORT}\n&quot; +
+	&quot;# DB_STATS_DB_NAME                = ${DB_STATS_DB_NAME}\n&quot; +
+	&quot;# DB_STATS_DB_USER                = ${DB_STATS_DB_USER}\n&quot; +
+	&quot;# DB_STATS_DB_PASSWORD            = ${DB_STATS_DB_PASSWORD}\n&quot; +
+	&quot;#&quot;;
+System.out.println(out);
+log.info(&quot;\n&quot;+out);</stringProp>
+          <stringProp name="BeanShellSampler.filename"></stringProp>
+          <stringProp name="BeanShellSampler.parameters"></stringProp>
+          <boolProp name="BeanShellSampler.resetInterpreter">false</boolProp>
+        </BeanShellSampler>
+        <hashTree/>
+        <BeanShellSampler guiclass="BeanShellSamplerGui" testclass="BeanShellSampler" testname="&gt;&gt; set properties" enabled="true">
+          <stringProp name="BeanShellSampler.query">import java.util.regex.Pattern;
+import java.util.regex.Matcher;
+
+Pattern pattern = Pattern.compile(&quot;(1|yes|on|true)&quot;);
+Matcher matcher = pattern.matcher(&quot;${ABORT_ON_RESPONSE_ERROR}&quot;.toLowerCase());
+props.put(&quot;ABORT_ON_RESPONSE_ERROR&quot;, matcher.find().toString());
+
+props.put(&quot;PSN_COUNT&quot;,    &quot;0&quot;);
+props.put(&quot;RESULT_COUNT&quot;, &quot;0&quot;);
+props.put(&quot;TEST_TIME&quot;,    ${__time(&quot;yyyy-MM-dd HH:mm:ss.SSS&quot;)});
+</stringProp>
+          <stringProp name="BeanShellSampler.filename"></stringProp>
+          <stringProp name="BeanShellSampler.parameters"></stringProp>
+          <boolProp name="BeanShellSampler.resetInterpreter">false</boolProp>
+        </BeanShellSampler>
+        <hashTree/>
+      </hashTree>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="loadtest" enabled="true">
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+          <stringProp name="LoopController.loops">${LOOPS}</stringProp>
+        </elementProp>
+        <stringProp name="ThreadGroup.num_threads">${THREADS}</stringProp>
+        <stringProp name="ThreadGroup.ramp_time">${RAMP_UP}</stringProp>
+        <boolProp name="ThreadGroup.scheduler">false</boolProp>
+        <stringProp name="ThreadGroup.duration"></stringProp>
+        <stringProp name="ThreadGroup.delay">2</stringProp>
+        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
+      </ThreadGroup>
+      <hashTree>
+        <CounterConfig guiclass="CounterConfigGui" testclass="CounterConfig" testname="count LOOP_COUNT" enabled="true">
+          <stringProp name="CounterConfig.start">1</stringProp>
+          <stringProp name="CounterConfig.end"></stringProp>
+          <stringProp name="CounterConfig.incr">1</stringProp>
+          <stringProp name="CounterConfig.name">LOOP_COUNT</stringProp>
+          <stringProp name="CounterConfig.format"></stringProp>
+          <boolProp name="CounterConfig.per_user">true</boolProp>
+        </CounterConfig>
+        <hashTree/>
+        <IfController guiclass="IfControllerPanel" testclass="IfController" testname="(only 1. loop) check domain(s)" enabled="true">
+          <stringProp name="IfController.condition">${__groovy(vars.get(&quot;LOOP_COUNT&quot;) == &quot;1&quot;)}</stringProp>
+          <boolProp name="IfController.evaluateAll">false</boolProp>
+          <boolProp name="IfController.useExpression">true</boolProp>
+        </IfController>
+        <hashTree>
+          <ModuleController guiclass="ModuleControllerGui" testclass="ModuleController" testname="set individual variables" enabled="true">
+            <collectionProp name="ModuleController.node_path">
+              <stringProp name="764597751">Test Plan</stringProp>
+              <stringProp name="-1780918500">gPAS-Loadtest (v1.10.0-2023.1.0)</stringProp>
+              <stringProp name="109328029">setUp</stringProp>
+              <stringProp name="-1861648978">set individual variables</stringProp>
+            </collectionProp>
+          </ModuleController>
+          <hashTree/>
+          <BeanShellSampler guiclass="BeanShellSamplerGui" testclass="BeanShellSampler" testname="&gt;&gt; set variables per thread" enabled="true">
+            <stringProp name="BeanShellSampler.query">vars.put(&quot;HOW_MANY_DOMAINS&quot;, &quot;${__groovy(${HOW_MANY_DOMAINS}&lt;1 ? 1 : &apos;${HOW_MANY_DOMAINS}&apos;)}&quot;);
+
+vars.put(&quot;TEST_TIME&quot;, props.get(&quot;TEST_TIME&quot;));
+vars.put(&quot;ABORT_ON_RESPONSE_ERROR&quot;, props.get(&quot;ABORT_ON_RESPONSE_ERROR&quot;));
+
+//log.info(&quot;\n#\n# DOMAIN: ${DOMAIN}&quot;+
+//&quot;\n# DB_STATS_DB_URL: &quot;+vars.get(&quot;DB_STATS_DB_URL&quot;)+&quot;\n#&quot;);</stringProp>
+            <stringProp name="BeanShellSampler.filename"></stringProp>
+            <stringProp name="BeanShellSampler.parameters"></stringProp>
+            <boolProp name="BeanShellSampler.resetInterpreter">false</boolProp>
+          </BeanShellSampler>
+          <hashTree/>
+          <LoopController guiclass="LoopControlPanel" testclass="LoopController" testname="create domain(s)" enabled="true">
+            <boolProp name="LoopController.continue_forever">true</boolProp>
+            <stringProp name="LoopController.loops">${HOW_MANY_DOMAINS}</stringProp>
+          </LoopController>
+          <hashTree>
+            <CounterConfig guiclass="CounterConfigGui" testclass="CounterConfig" testname="count DOMAIN_NUMBER" enabled="true">
+              <stringProp name="CounterConfig.start">1</stringProp>
+              <stringProp name="CounterConfig.end"></stringProp>
+              <stringProp name="CounterConfig.incr">1</stringProp>
+              <stringProp name="CounterConfig.name">DOMAIN_NUMBER</stringProp>
+              <stringProp name="CounterConfig.format"></stringProp>
+              <boolProp name="CounterConfig.per_user">false</boolProp>
+            </CounterConfig>
+            <hashTree/>
+            <BeanShellSampler guiclass="BeanShellSamplerGui" testclass="BeanShellSampler" testname="&gt;&gt; set domain for this loop" enabled="true">
+              <stringProp name="BeanShellSampler.query">vars.put(&quot;CURRENT_DOMAIN&quot;, &quot;${__groovy(${DOMAIN_NUMBER}&gt;1 ? &apos;${DOMAIN}_${DOMAIN_NUMBER}&apos; : &apos;${DOMAIN}&apos;)}&quot;);
+
+if (${HOW_MANY_DOMAINS}&gt;1) {
+	//${__setProperty(&quot;PSN_COUNT_PER_DOMAIN${__groovy(${DOMAIN_NUMBER}&gt;1 ? &apos;_${DOMAIN_NUMBER}&apos; : &apos;&apos;)}&quot;, &quot;0&quot;)}
+	//${__setProperty(&quot;RESULT_COUNT_PER_DOMAIN${__groovy(${DOMAIN_NUMBER}&gt;1 ? &apos;_${DOMAIN_NUMBER}&apos; : &apos;&apos;)}&quot;, &quot;0&quot;)}
+	props.put(&quot;PSN_COUNT_PER_DOMAIN${__groovy(${DOMAIN_NUMBER}&gt;1 ? &apos;_${DOMAIN_NUMBER}&apos; : &apos;&apos;)}&quot;, &quot;0&quot;);
+	props.put(&quot;RESULT_COUNT_PER_DOMAIN${__groovy(${DOMAIN_NUMBER}&gt;1 ? &apos;_${DOMAIN_NUMBER}&apos; : &apos;&apos;)}&quot;, &quot;0&quot;);
+}
+
+log.info(&quot;### creating DOMAIN: &quot;+vars.get(&quot;CURRENT_DOMAIN&quot;));</stringProp>
+              <stringProp name="BeanShellSampler.filename"></stringProp>
+              <stringProp name="BeanShellSampler.parameters"></stringProp>
+              <boolProp name="BeanShellSampler.resetInterpreter">false</boolProp>
+            </BeanShellSampler>
+            <hashTree/>
+            <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="test domain exists" enabled="true">
+              <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+              <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+                <collectionProp name="Arguments.arguments">
+                  <elementProp name="" elementType="HTTPArgument">
+                    <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                    <stringProp name="Argument.value">&lt;soapenv:Envelope xmlns:soapenv=&quot;http://schemas.xmlsoap.org/soap/envelope/&quot; xmlns:psn=&quot;http://psn.ttp.ganimed.icmvc.emau.org/&quot;&gt;&#xd;
+   &lt;soapenv:Header/&gt;&#xd;
+   &lt;soapenv:Body&gt;&#xd;
+      &lt;psn:listDomains/&gt;&#xd;
+   &lt;/soapenv:Body&gt;&#xd;
+&lt;/soapenv:Envelope&gt;</stringProp>
+                    <stringProp name="Argument.metadata">=</stringProp>
+                  </elementProp>
+                </collectionProp>
+              </elementProp>
+              <stringProp name="HTTPSampler.domain">${GPAS_SOAP_HOST}</stringProp>
+              <stringProp name="HTTPSampler.port">${GPAS_SOAP_PORT}</stringProp>
+              <stringProp name="HTTPSampler.protocol">${GPAS_SOAP_PROTOCOL}</stringProp>
+              <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+              <stringProp name="HTTPSampler.path">${GPAS_SOAP_CONTEXT}/${GPAS_SOAP_MANAGEMENT}</stringProp>
+              <stringProp name="HTTPSampler.method">POST</stringProp>
+              <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+              <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+              <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+              <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+              <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+              <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+              <stringProp name="HTTPSampler.response_timeout"></stringProp>
+            </HTTPSamplerProxy>
+            <hashTree>
+              <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="test StatusCode200" enabled="true">
+                <collectionProp name="Asserion.test_strings">
+                  <stringProp name="49586">200</stringProp>
+                </collectionProp>
+                <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
+                <boolProp name="Assertion.assume_success">false</boolProp>
+                <intProp name="Assertion.test_type">16</intProp>
+                <stringProp name="Assertion.custom_message"></stringProp>
+              </ResponseAssertion>
+              <hashTree/>
+              <XPathExtractor guiclass="XPathExtractorGui" testclass="XPathExtractor" testname="set DOMAIN_EXISTS (true|false)" enabled="true">
+                <stringProp name="XPathExtractor.default">false</stringProp>
+                <stringProp name="XPathExtractor.refname">DOMAIN_EXISTS</stringProp>
+                <stringProp name="XPathExtractor.matchNumber">1</stringProp>
+                <stringProp name="XPathExtractor.xpathQuery">//name=&quot;${CURRENT_DOMAIN}&quot;</stringProp>
+                <boolProp name="XPathExtractor.validate">false</boolProp>
+                <boolProp name="XPathExtractor.tolerant">false</boolProp>
+                <boolProp name="XPathExtractor.namespace">false</boolProp>
+              </XPathExtractor>
+              <hashTree/>
+              <XPathExtractor guiclass="XPathExtractorGui" testclass="XPathExtractor" testname="set NUMBER_OF_PSNS" enabled="true">
+                <stringProp name="XPathExtractor.default">0</stringProp>
+                <stringProp name="XPathExtractor.refname">NUMBER_OF_PSNS</stringProp>
+                <stringProp name="XPathExtractor.matchNumber">1</stringProp>
+                <stringProp name="XPathExtractor.xpathQuery">//numberOfPseudonyms[1]</stringProp>
+                <boolProp name="XPathExtractor.validate">false</boolProp>
+                <boolProp name="XPathExtractor.tolerant">false</boolProp>
+                <boolProp name="XPathExtractor.namespace">false</boolProp>
+              </XPathExtractor>
+              <hashTree/>
+            </hashTree>
+            <IfController guiclass="IfControllerPanel" testclass="IfController" testname="add domain, if not exists" enabled="true">
+              <stringProp name="IfController.condition">${__groovy(vars.get(&quot;DOMAIN_EXISTS&quot;) != &quot;true&quot;)}</stringProp>
+              <boolProp name="IfController.evaluateAll">false</boolProp>
+              <boolProp name="IfController.useExpression">true</boolProp>
+            </IfController>
+            <hashTree>
+              <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="add domain" enabled="true">
+                <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+                <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+                  <collectionProp name="Arguments.arguments">
+                    <elementProp name="" elementType="HTTPArgument">
+                      <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                      <stringProp name="Argument.value">&lt;soapenv:Envelope xmlns:soapenv=&quot;http://schemas.xmlsoap.org/soap/envelope/&quot; xmlns:psn=&quot;http://psn.ttp.ganimed.icmvc.emau.org/&quot;&gt;&#xd;
+   &lt;soapenv:Header/&gt;&#xd;
+   &lt;soapenv:Body&gt;&#xd;
+      &lt;psn:addDomain&gt;&#xd;
+         &lt;domainDTO&gt;&#xd;
+            &lt;name&gt;${CURRENT_DOMAIN}&lt;/name&gt;&#xd;
+            &lt;checkDigitClass&gt;${CHECK_DIGIT_CLASS}&lt;/checkDigitClass&gt;&#xd;
+            &lt;alphabet&gt;${ALPHABET}&lt;/alphabet&gt;&#xd;
+            &lt;config&gt;&#xd;
+               &lt;forceCache&gt;${PROP_FORCE_CACHE}&lt;/forceCache&gt;&#xd;
+               &lt;psnLength&gt;${PROP_PSN_LENGTH}&lt;/psnLength&gt;&#xd;
+            	&lt;psnPrefix&gt;${PROP_PREFIX}&lt;/psnPrefix&gt;&#xd;
+            &lt;/config&gt;&#xd;
+            &lt;comment&gt;${COMMENT}&lt;/comment&gt;&#xd;
+            ${__groovy(&quot;${PARENT_DOMAIN_NAME}&quot; ? &quot;&lt;parentDomainName&gt;${PARENT_DOMAIN_NAME}&lt;/parentDomainName&gt;&quot; :&quot;&quot;)}&#xd;
+         &lt;/domainDTO&gt;&#xd;
+      &lt;/psn:addDomain&gt;&#xd;
+   &lt;/soapenv:Body&gt;&#xd;
+&lt;/soapenv:Envelope&gt;</stringProp>
+                      <stringProp name="Argument.metadata">=</stringProp>
+                    </elementProp>
+                  </collectionProp>
+                </elementProp>
+                <stringProp name="HTTPSampler.domain">${GPAS_SOAP_HOST}</stringProp>
+                <stringProp name="HTTPSampler.port">${GPAS_SOAP_PORT}</stringProp>
+                <stringProp name="HTTPSampler.protocol">${GPAS_SOAP_PROTOCOL}</stringProp>
+                <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+                <stringProp name="HTTPSampler.path">${GPAS_SOAP_CONTEXT}/${GPAS_SOAP_MANAGEMENT}</stringProp>
+                <stringProp name="HTTPSampler.method">POST</stringProp>
+                <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+                <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+                <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+                <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+                <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+                <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+                <stringProp name="HTTPSampler.response_timeout"></stringProp>
+              </HTTPSamplerProxy>
+              <hashTree>
+                <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="test StatusCode200" enabled="true">
+                  <collectionProp name="Asserion.test_strings">
+                    <stringProp name="49586">200</stringProp>
+                  </collectionProp>
+                  <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
+                  <boolProp name="Assertion.assume_success">false</boolProp>
+                  <intProp name="Assertion.test_type">16</intProp>
+                  <stringProp name="Assertion.custom_message"></stringProp>
+                </ResponseAssertion>
+                <hashTree/>
+              </hashTree>
+            </hashTree>
+            <BeanShellSampler guiclass="BeanShellSamplerGui" testclass="BeanShellSampler" testname="log PSN-count before" enabled="true">
+              <stringProp name="BeanShellSampler.query">//${__setProperty(&quot;NUMBER_OF_PSNS_${CURRENT_DOMAIN}&quot;, ${NUMBER_OF_PSNS})}
+props.put(&quot;NUMBER_OF_PSNS_${CURRENT_DOMAIN}&quot;, ${NUMBER_OF_PSNS});
+
+log.info(&quot;### DOMAIN ${CURRENT_DOMAIN}: ${NUMBER_OF_PSNS} PSNs existing\n#&quot;);
+System.out.println(&quot;#\n# DOMAIN ${CURRENT_DOMAIN}: ${NUMBER_OF_PSNS} PSNs existing\n#&quot;);
+</stringProp>
+              <stringProp name="BeanShellSampler.filename"></stringProp>
+              <stringProp name="BeanShellSampler.parameters"></stringProp>
+              <boolProp name="BeanShellSampler.resetInterpreter">false</boolProp>
+            </BeanShellSampler>
+            <hashTree/>
+          </hashTree>
+          <IfController guiclass="IfControllerPanel" testclass="IfController" testname="(opt) create stats-logging-table" enabled="true">
+            <stringProp name="IfController.condition">${__groovy(${__threadNum}==1 &amp;&amp; ${DB_STATS_LOGGING_EVERY_X_LOOPS}&gt;0)}</stringProp>
+            <boolProp name="IfController.evaluateAll">false</boolProp>
+            <boolProp name="IfController.useExpression">true</boolProp>
+          </IfController>
+          <hashTree>
+            <JDBCDataSource guiclass="TestBeanGUI" testclass="JDBCDataSource" testname="connect stats-db" enabled="true">
+              <boolProp name="autocommit">true</boolProp>
+              <stringProp name="checkQuery">SELECT 1</stringProp>
+              <stringProp name="connectionAge">5000</stringProp>
+              <stringProp name="dataSource">_CONN_STATS</stringProp>
+              <stringProp name="dbUrl">jdbc:mysql://${DB_STATS_DB_HOST}:${DB_STATS_DB_PORT}/${DB_STATS_DB_NAME}?useSSL=false&amp;allowPublicKeyRetrieval=true</stringProp>
+              <stringProp name="driver">com.mysql.cj.jdbc.Driver</stringProp>
+              <boolProp name="keepAlive">false</boolProp>
+              <stringProp name="password">${DB_STATS_DB_PASSWORD}</stringProp>
+              <stringProp name="poolMax">10</stringProp>
+              <stringProp name="timeout">10000</stringProp>
+              <stringProp name="transactionIsolation">DEFAULT</stringProp>
+              <stringProp name="trimInterval">60000</stringProp>
+              <stringProp name="username">${DB_STATS_DB_USER}</stringProp>
+              <boolProp name="preinit">false</boolProp>
+              <stringProp name="initQuery"></stringProp>
+              <stringProp name="connectionProperties"></stringProp>
+            </JDBCDataSource>
+            <hashTree/>
+            <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="create stats-table" enabled="true">
+              <stringProp name="dataSource">_CONN_STATS</stringProp>
+              <stringProp name="queryType">Update Statement</stringProp>
+              <stringProp name="query">CREATE TABLE IF NOT EXISTS `jmeter_stats` (
+	`id` INT NOT NULL AUTO_INCREMENT,
+	`timestamp` timestamp(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+	`starttime` timestamp(3) NULL,
+	`key` VARCHAR(255) NOT NULL,
+	`value` VARCHAR(255) NOT NULL,
+	PRIMARY KEY (`id`),
+	INDEX `datetime` (`timestamp`),
+	INDEX `starttime` (`starttime`),
+	UNIQUE INDEX `timestamp_key` (`timestamp`, `key`)
+)
+COLLATE=&apos;utf8mb4_unicode_ci&apos;
+;
+</stringProp>
+              <stringProp name="queryArguments"></stringProp>
+              <stringProp name="queryArgumentsTypes"></stringProp>
+              <stringProp name="variableNames"></stringProp>
+              <stringProp name="resultVariable"></stringProp>
+              <stringProp name="queryTimeout"></stringProp>
+              <stringProp name="resultSetMaxRows"></stringProp>
+              <stringProp name="resultSetHandler">Store as String</stringProp>
+            </JDBCSampler>
+            <hashTree>
+              <BeanShellPostProcessor guiclass="TestBeanGUI" testclass="BeanShellPostProcessor" testname="abort on response error (sql)" enabled="true">
+                <stringProp name="filename"></stringProp>
+                <stringProp name="parameters"></stringProp>
+                <boolProp name="resetInterpreter">false</boolProp>
+                <stringProp name="script">if (&quot;${ABORT_ON_RESPONSE_ERROR}&quot;==&quot;true&quot; &amp;&amp; !&quot;200&quot;.equals(prev.getResponseCode())) {
+	String out = &quot;### STOP TEST&quot;+(&quot;${THREADS}&quot;!=&quot;1&quot; ?&quot; (thread:${__threadNum})&quot; :&quot;&quot;)+&quot;: sql-error (create:&quot;+prev.getResponseCode()+&quot;)&quot;;
+	log.info(out);
+	System.out.println(out);
+	ctx.getEngine().stopTest();
+}</stringProp>
+              </BeanShellPostProcessor>
+              <hashTree/>
+            </hashTree>
+          </hashTree>
+          <IfController guiclass="IfControllerPanel" testclass="IfController" testname="(opt) write first stats-values per thread" enabled="true">
+            <stringProp name="IfController.condition">${__groovy(${DB_STATS_LOGGING_EVERY_X_LOOPS}&gt;0)}</stringProp>
+            <boolProp name="IfController.evaluateAll">false</boolProp>
+            <boolProp name="IfController.useExpression">true</boolProp>
+          </IfController>
+          <hashTree>
+            <BeanShellSampler guiclass="BeanShellSamplerGui" testclass="BeanShellSampler" testname="&gt;&gt; get interesting variables" enabled="true">
+              <stringProp name="BeanShellSampler.query">String[] keySet = {
+	&quot;PSN_COUNT&quot;, &quot;RESULT_COUNT&quot;
+};
+String out = &quot;&quot;;
+String starttime = vars.get(&quot;TEST_TIME&quot;);
+
+String addKey(String key) {
+	if ((vars.get(key)!=null || props.get(key)!=null) &amp;&amp; (&quot;${ABORT_ON_RESPONSE_ERROR}&quot;!=&quot;true&quot; || !key.contains(&quot;RESULT&quot;)))
+		return &quot;(&apos;&quot;+starttime+&quot;&apos;,&apos;&quot;+key+&quot;&apos;,&quot;+(vars.get(key)==null ?props.get(key) :vars.get(key))+&quot;),&quot;;
+	return &quot;&quot;;
+}
+
+for (key : keySet)
+{
+	out += addKey(key);
+}
+if (${HOW_MANY_DOMAINS}&gt;1) for (i=1; i&lt;=${HOW_MANY_DOMAINS}; i++)
+{
+	out += addKey(&quot;PSN_COUNT_PER_DOMAIN&quot; + (i&gt;1 ? &quot;_&quot;+i : &quot;&quot;));
+	out += addKey(&quot;RESULT_COUNT_PER_DOMAIN&quot; + (i&gt;1 ? &quot;_&quot;+i : &quot;&quot;));
+}
+
+log.info(out.substring(0, out.length() -1));
+vars.put(&quot;STAT_KEY_VALUE_PAIRS&quot;, out.substring(0, out.length() -1));</stringProp>
+              <stringProp name="BeanShellSampler.filename"></stringProp>
+              <stringProp name="BeanShellSampler.parameters"></stringProp>
+              <boolProp name="BeanShellSampler.resetInterpreter">false</boolProp>
+            </BeanShellSampler>
+            <hashTree/>
+            <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="write first stats-values" enabled="true">
+              <stringProp name="dataSource">_CONN_STATS</stringProp>
+              <stringProp name="queryType">Update Statement</stringProp>
+              <stringProp name="query">INSERT IGNORE INTO `jmeter_stats` (`starttime`,`key`,`value`) VALUES ${STAT_KEY_VALUE_PAIRS};
+</stringProp>
+              <stringProp name="queryArguments"></stringProp>
+              <stringProp name="queryArgumentsTypes"></stringProp>
+              <stringProp name="variableNames"></stringProp>
+              <stringProp name="resultVariable"></stringProp>
+              <stringProp name="queryTimeout"></stringProp>
+              <stringProp name="resultSetMaxRows"></stringProp>
+              <stringProp name="resultSetHandler">Store as String</stringProp>
+            </JDBCSampler>
+            <hashTree>
+              <BeanShellPostProcessor guiclass="TestBeanGUI" testclass="BeanShellPostProcessor" testname="abort on response error (sql)" enabled="true">
+                <stringProp name="filename"></stringProp>
+                <stringProp name="parameters"></stringProp>
+                <boolProp name="resetInterpreter">false</boolProp>
+                <stringProp name="script">if (&quot;${ABORT_ON_RESPONSE_ERROR}&quot;==&quot;true&quot; &amp;&amp; !&quot;200&quot;.equals(prev.getResponseCode())) {
+	String out = &quot;### STOP TEST&quot;+(&quot;${THREADS}&quot;!=&quot;1&quot; ?&quot; (thread:${__threadNum})&quot; :&quot;&quot;)+&quot;: sql-error (first values:&quot;+prev.getResponseCode()+&quot;)&quot;;
+	log.info(out);
+	System.out.println(out);
+	ctx.getEngine().stopTest();
+}</stringProp>
+              </BeanShellPostProcessor>
+              <hashTree/>
+            </hashTree>
+          </hashTree>
+        </hashTree>
+        <BeanShellSampler guiclass="BeanShellSamplerGui" testclass="BeanShellSampler" testname="&gt;&gt; set domain for this loop" enabled="true">
+          <stringProp name="BeanShellSampler.query">int num = ${__Random(1,${HOW_MANY_DOMAINS})};
+vars.put(&quot;DOMAIN_NUM&quot;, &quot;&quot;+num);
+if (num==1) {
+	vars.put(&quot;CURRENT_DOMAIN&quot;, &quot;${DOMAIN}&quot;);
+} else {
+	vars.put(&quot;CURRENT_DOMAIN&quot;, &quot;${DOMAIN}_&quot; + num);
+}
+
+log.info(&quot;### THREAD:&quot;+${__threadNum}+&quot;, LOOP:&quot;+${LOOP_COUNT}+&quot;, DOMAIN:&quot;+vars.get(&quot;CURRENT_DOMAIN&quot;));</stringProp>
+          <stringProp name="BeanShellSampler.filename"></stringProp>
+          <stringProp name="BeanShellSampler.parameters"></stringProp>
+          <boolProp name="BeanShellSampler.resetInterpreter">false</boolProp>
+        </BeanShellSampler>
+        <hashTree/>
+        <GenericController guiclass="LogicControllerGui" testclass="GenericController" testname="generate and send package" enabled="true"/>
+        <hashTree>
+          <BeanShellSampler guiclass="BeanShellSamplerGui" testclass="BeanShellSampler" testname="&gt;&gt; set parameter (getOrCreatePseudonymForList)" enabled="true">
+            <stringProp name="BeanShellSampler.query">// max value-size ~64k bytes (entspricht ~1.200x UUIDs(36 bytes) + Tags(17 bytes))
+Integer total = ${PACKAGE_SIZE};
+Integer parts = 0;
+StringJoiner VALUES = null;
+
+do {
+  VALUES = new StringJoiner(&quot;&lt;/values&gt;&lt;values&gt;&quot;);
+  for (i=0; i&lt;1200 &amp;&amp; total&gt;0; i++,total--) VALUES.add(UUID.randomUUID().toString());
+  vars.put(&quot;VALUES&quot;+(parts++), VALUES.toString());
+} while (total&gt;0);
+
+// count PSNs over all threads
+props.put(&quot;PSN_COUNT&quot;, &quot;&quot; + (${__P(PSN_COUNT)} + ${PACKAGE_SIZE} ));
+if (${HOW_MANY_DOMAINS}&gt;1) {
+	props.put(&quot;PSN_COUNT_PER_DOMAIN&quot; + (${DOMAIN_NUM}&gt;1 ?&quot;_&quot;+${DOMAIN_NUM} :&quot;&quot;), &quot;&quot;+(Integer.parseInt(props.get(&quot;PSN_COUNT_PER_DOMAIN&quot;+(${DOMAIN_NUM}&gt;1 ?&quot;_&quot;+${DOMAIN_NUM} :&quot;&quot;))) + ${PACKAGE_SIZE} ));
+}</stringProp>
+            <stringProp name="BeanShellSampler.filename"></stringProp>
+            <stringProp name="BeanShellSampler.parameters"></stringProp>
+            <boolProp name="BeanShellSampler.resetInterpreter">false</boolProp>
+          </BeanShellSampler>
+          <hashTree/>
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="getOrCreatePseudonymForList" enabled="true">
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+              <collectionProp name="Arguments.arguments">
+                <elementProp name="" elementType="HTTPArgument">
+                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                  <stringProp name="Argument.value">&lt;soapenv:Envelope xmlns:soapenv=&quot;http://schemas.xmlsoap.org/soap/envelope/&quot; xmlns:psn=&quot;http://psn.ttp.ganimed.icmvc.emau.org/&quot;&gt;&#xd;
+   &lt;soapenv:Header/&gt;&#xd;
+   &lt;soapenv:Body&gt;&#xd;
+      &lt;psn:getOrCreatePseudonymForList&gt;&#xd;
+         &lt;!--1 or more repetitions:--&gt;&#xd;
+         ${__groovy(&#xd;
+         		String values = &apos;&apos;;&#xd;
+         		for (int i=0; vars.get(&apos;VALUES&apos;+i); i++) values += &apos;&lt;values&gt;&apos; + vars.get(&apos;VALUES&apos;+i) + &apos;&lt;/values&gt;&apos;;&#xd;
+         		values;&#xd;
+         )}&#xd;
+         &lt;domainName&gt;${CURRENT_DOMAIN}&lt;/domainName&gt;&#xd;
+      &lt;/psn:getOrCreatePseudonymForList&gt;&#xd;
+   &lt;/soapenv:Body&gt;&#xd;
+&lt;/soapenv:Envelope&gt;</stringProp>
+                  <stringProp name="Argument.metadata">=</stringProp>
+                </elementProp>
+              </collectionProp>
+            </elementProp>
+            <stringProp name="HTTPSampler.domain">${GPAS_SOAP_HOST}</stringProp>
+            <stringProp name="HTTPSampler.port">${GPAS_SOAP_PORT}</stringProp>
+            <stringProp name="HTTPSampler.protocol">${GPAS_SOAP_PROTOCOL}</stringProp>
+            <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+            <stringProp name="HTTPSampler.path">${GPAS_SOAP_CONTEXT}/${GPAS_SOAP_SERVICE}</stringProp>
+            <stringProp name="HTTPSampler.method">POST</stringProp>
+            <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+            <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+            <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+            <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+            <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+            <stringProp name="HTTPSampler.response_timeout"></stringProp>
+          </HTTPSamplerProxy>
+          <hashTree>
+            <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer" enabled="true">
+              <stringProp name="ConstantTimer.delay">${NEXT_REQUEST_TIME}</stringProp>
+            </ConstantTimer>
+            <hashTree/>
+            <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="test StatusCode200" enabled="true">
+              <collectionProp name="Asserion.test_strings">
+                <stringProp name="49586">200</stringProp>
+              </collectionProp>
+              <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
+              <boolProp name="Assertion.assume_success">false</boolProp>
+              <intProp name="Assertion.test_type">16</intProp>
+              <stringProp name="Assertion.custom_message"></stringProp>
+            </ResponseAssertion>
+            <hashTree/>
+            <BeanShellAssertion guiclass="BeanShellAssertionGui" testclass="BeanShellAssertion" testname="cache RESULT" enabled="true">
+              <stringProp name="BeanShellAssertion.query">if (${THREADS}==1 &amp;&amp; ${GET_PSNS_EVERY_X_LOOPS}&gt;0 &amp;&amp; ${LOOP_COUNT} % ${GET_PSNS_EVERY_X_LOOPS}==0) {
+	vars.put(&quot;GET_PSNS_LAST_RESULT&quot;, new String(ResponseData));
+} else {
+	vars.remove(&quot;GET_PSNS_LAST_RESULT&quot;);
+}
+</stringProp>
+              <stringProp name="BeanShellAssertion.filename"></stringProp>
+              <stringProp name="BeanShellAssertion.parameters"></stringProp>
+              <boolProp name="BeanShellAssertion.resetInterpreter">false</boolProp>
+            </BeanShellAssertion>
+            <hashTree/>
+            <XPathExtractor guiclass="XPathExtractorGui" testclass="XPathExtractor" testname="set ENTRY_COUNT" enabled="true">
+              <stringProp name="XPathExtractor.default">0</stringProp>
+              <stringProp name="XPathExtractor.refname">ENTRY_COUNT</stringProp>
+              <stringProp name="XPathExtractor.matchNumber">-1</stringProp>
+              <stringProp name="XPathExtractor.xpathQuery">count(/Envelope/Body/getOrCreatePseudonymForListResponse/return/entry)</stringProp>
+              <boolProp name="XPathExtractor.validate">false</boolProp>
+              <boolProp name="XPathExtractor.tolerant">false</boolProp>
+              <boolProp name="XPathExtractor.namespace">false</boolProp>
+            </XPathExtractor>
+            <hashTree/>
+            <ResultCollector guiclass="StatVisualizer" testclass="ResultCollector" testname="Aggregate Report" enabled="true">
+              <boolProp name="ResultCollector.error_logging">false</boolProp>
+              <objProp>
+                <name>saveConfig</name>
+                <value class="SampleSaveConfiguration">
+                  <time>false</time>
+                  <latency>true</latency>
+                  <timestamp>true</timestamp>
+                  <success>true</success>
+                  <label>true</label>
+                  <code>false</code>
+                  <message>false</message>
+                  <threadName>true</threadName>
+                  <dataType>false</dataType>
+                  <encoding>false</encoding>
+                  <assertions>false</assertions>
+                  <subresults>false</subresults>
+                  <responseData>false</responseData>
+                  <samplerData>false</samplerData>
+                  <xml>false</xml>
+                  <fieldNames>true</fieldNames>
+                  <responseHeaders>false</responseHeaders>
+                  <requestHeaders>false</requestHeaders>
+                  <responseDataOnError>false</responseDataOnError>
+                  <saveAssertionResultsFailureMessage>false</saveAssertionResultsFailureMessage>
+                  <assertionsResultsToSave>0</assertionsResultsToSave>
+                </value>
+              </objProp>
+              <stringProp name="filename">${AGGREGATE_REPORT}</stringProp>
+            </ResultCollector>
+            <hashTree/>
+            <BeanShellPostProcessor guiclass="TestBeanGUI" testclass="BeanShellPostProcessor" testname="abort on response error (soap)" enabled="true">
+              <stringProp name="filename"></stringProp>
+              <stringProp name="parameters"></stringProp>
+              <boolProp name="resetInterpreter">false</boolProp>
+              <stringProp name="script">if (&quot;${ABORT_ON_RESPONSE_ERROR}&quot;==&quot;true&quot; &amp;&amp; !&quot;200&quot;.equals(prev.getResponseCode())) {
+	String out = &quot;### STOP TEST&quot;+(&quot;${THREADS}&quot;!=&quot;1&quot; ?&quot; (thread:${__threadNum})&quot; :&quot;&quot;)+&quot;: soap-error (getOrCreate:&quot;+prev.getResponseCode()+&quot;)&quot;;
+	log.info(out);
+	System.out.println(out);
+	ctx.getEngine().stopTest();
+}</stringProp>
+            </BeanShellPostProcessor>
+            <hashTree/>
+            <BeanShellPostProcessor guiclass="TestBeanGUI" testclass="BeanShellPostProcessor" testname="abort on response error (count)" enabled="true">
+              <stringProp name="filename"></stringProp>
+              <stringProp name="parameters"></stringProp>
+              <boolProp name="resetInterpreter">false</boolProp>
+              <stringProp name="script">if (&quot;${ABORT_ON_RESPONSE_ERROR}&quot;==&quot;true&quot; &amp;&amp; ${ENTRY_COUNT}!=${PACKAGE_SIZE}) {
+	String out = &quot;### STOP TEST&quot;+(&quot;${THREADS}&quot;!=&quot;1&quot; ?&quot; (thread:${__threadNum})&quot; :&quot;&quot;)+&quot;: count-error (${PACKAGE_SIZE}!=${ENTRY_COUNT})&quot;;
+	log.info(out);
+	System.out.println(out);
+	ctx.getEngine().stopTest();
+}</stringProp>
+            </BeanShellPostProcessor>
+            <hashTree/>
+          </hashTree>
+          <BeanShellSampler guiclass="BeanShellSamplerGui" testclass="BeanShellSampler" testname="set RESULT_COUNT" enabled="true">
+            <stringProp name="BeanShellSampler.query">// count results over all threads
+props.put(&quot;RESULT_COUNT&quot;, &quot;&quot; + (${__P(RESULT_COUNT)} + ${ENTRY_COUNT}));
+if (${HOW_MANY_DOMAINS}&gt;1) {
+	props.put(&quot;RESULT_COUNT_PER_DOMAIN&quot; + (${DOMAIN_NUM}&gt;1 ?&quot;_&quot;+${DOMAIN_NUM} :&quot;&quot;), &quot;&quot;+(Integer.parseInt(props.get(&quot;RESULT_COUNT_PER_DOMAIN&quot;+(${DOMAIN_NUM}&gt;1 ?&quot;_&quot;+${DOMAIN_NUM} :&quot;&quot;))) + ${ENTRY_COUNT} ));
+}
+
+/*
+String out = &quot;#\n&quot;+
+             &quot;# TEST_TIME: ${TEST_TIME}\n&quot;+
+             &quot;# ENTRY_COUNT: ${ENTRY_COUNT}\n&quot;+
+             &quot;# RESULT_COUNT: &quot; + props.get(&quot;RESULT_COUNT&quot;) + &quot;\n&quot;+
+             &quot;# RESULT_COUNT_PER_DOMAIN&quot;+(${DOMAIN_NUM}&gt;1 ?&quot;_&quot;+${DOMAIN_NUM} :&quot;&quot;)+&quot;: &quot;+vars.get(&quot;RESULT_COUNT_PER_DOMAIN&quot;+(${DOMAIN_NUM}&gt;1 ?&quot;_&quot;+${DOMAIN_NUM} :&quot;&quot;))+&quot;\n&quot;+
+             &quot;#&quot;;
+log.info(&quot;\n&quot;+out);
+System.out.println(out);
+//*/</stringProp>
+            <stringProp name="BeanShellSampler.filename"></stringProp>
+            <stringProp name="BeanShellSampler.parameters"></stringProp>
+            <boolProp name="BeanShellSampler.resetInterpreter">false</boolProp>
+          </BeanShellSampler>
+          <hashTree/>
+        </hashTree>
+        <IfController guiclass="IfControllerPanel" testclass="IfController" testname="(opt) get PSNs" enabled="true">
+          <stringProp name="IfController.condition">${__groovy(${THREADS}==1 &amp;&amp; ${GET_PSNS_EVERY_X_LOOPS}&gt;0 &amp;&amp; ${LOOP_COUNT} % ${GET_PSNS_EVERY_X_LOOPS}==0)}</stringProp>
+          <boolProp name="IfController.evaluateAll">false</boolProp>
+          <boolProp name="IfController.useExpression">true</boolProp>
+          <stringProp name="TestPlan.comments">optional, only 1 thread is running</stringProp>
+        </IfController>
+        <hashTree>
+          <BeanShellSampler guiclass="BeanShellSamplerGui" testclass="BeanShellSampler" testname="get RESULT" enabled="true">
+            <stringProp name="BeanShellSampler.query">import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
+
+boolean isSet(String value) {return (vars.get(value) != null &amp;&amp; vars.get(value).length() &gt; 0 &amp;&amp; vars.get(value).startsWith(&quot;${&quot;) == false);}
+
+// parse Response as Document
+Document doc = null;
+try {
+	doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new InputSource(new StringReader(vars.get(&quot;GET_PSNS_LAST_RESULT&quot;))));
+	
+	Integer total = ${GET_PSNS_HOW_MANY};
+	String expression = &quot;/Envelope/Body/getOrCreatePseudonymForListResponse/return/entry&quot;;
+	NodeList entries = (NodeList) XPathFactory.newInstance().newXPath().compile(expression).evaluate(doc, XPathConstants.NODESET);
+	i = 0;
+	for (; i&lt;entries.getLength() &amp;&amp; i&lt;=total; i++) {
+		vars.put(&quot;RESULT_PSN_&quot; + i, entries.item(i).getElementsByTagName(&quot;value&quot;).item(0).getTextContent());
+	}
+	// delete the surplus
+	for (; isSet(&quot;RESULT_PSN_&quot; + i); i++) {
+		vars.remove(&quot;RESULT_PSN_&quot; + i);
+	}
+} catch (Exception e) {  
+	e.printStackTrace();
+}
+
+vars.put(&quot;GET_PSNS_TS&quot;, &quot;${__time()}&quot;);</stringProp>
+            <stringProp name="BeanShellSampler.filename"></stringProp>
+            <stringProp name="BeanShellSampler.parameters"></stringProp>
+            <boolProp name="BeanShellSampler.resetInterpreter">false</boolProp>
+          </BeanShellSampler>
+          <hashTree/>
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="getValueForList" enabled="true">
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+              <collectionProp name="Arguments.arguments">
+                <elementProp name="" elementType="HTTPArgument">
+                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                  <stringProp name="Argument.value">&lt;soapenv:Envelope xmlns:soapenv=&quot;http://schemas.xmlsoap.org/soap/envelope/&quot; xmlns:psn=&quot;http://psn.ttp.ganimed.icmvc.emau.org/&quot;&gt;&#xd;
+   &lt;soapenv:Header/&gt;&#xd;
+   &lt;soapenv:Body&gt;&#xd;
+      &lt;psn:getValueForList&gt;&#xd;
+         &lt;!--1 or more repetitions:--&gt;&#xd;
+         ${__groovy(&#xd;
+         		String values = &apos;&apos;;&#xd;
+         		for (int i=0; vars.get(&apos;RESULT_PSN_&apos;+i); i++) values += &apos;&lt;psnList&gt;&apos; + vars.get(&apos;RESULT_PSN_&apos;+i) + &apos;&lt;/psnList&gt;&apos;;&#xd;
+         		values;&#xd;
+         )}&#xd;
+         &lt;domainName&gt;${CURRENT_DOMAIN}&lt;/domainName&gt;&#xd;
+      &lt;/psn:getValueForList&gt;&#xd;
+   &lt;/soapenv:Body&gt;&#xd;
+&lt;/soapenv:Envelope&gt;</stringProp>
+                  <stringProp name="Argument.metadata">=</stringProp>
+                </elementProp>
+              </collectionProp>
+            </elementProp>
+            <stringProp name="HTTPSampler.domain">${GPAS_SOAP_HOST}</stringProp>
+            <stringProp name="HTTPSampler.port">${GPAS_SOAP_PORT}</stringProp>
+            <stringProp name="HTTPSampler.protocol">${GPAS_SOAP_PROTOCOL}</stringProp>
+            <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+            <stringProp name="HTTPSampler.path">${GPAS_SOAP_CONTEXT}/${GPAS_SOAP_SERVICE}</stringProp>
+            <stringProp name="HTTPSampler.method">POST</stringProp>
+            <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+            <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+            <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+            <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+            <stringProp name="HTTPSampler.implementation">HttpClient4</stringProp>
+            <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+            <stringProp name="HTTPSampler.response_timeout"></stringProp>
+          </HTTPSamplerProxy>
+          <hashTree>
+            <ResultCollector guiclass="StatVisualizer" testclass="ResultCollector" testname="Aggregate Report" enabled="true">
+              <boolProp name="ResultCollector.error_logging">false</boolProp>
+              <objProp>
+                <name>saveConfig</name>
+                <value class="SampleSaveConfiguration">
+                  <time>false</time>
+                  <latency>true</latency>
+                  <timestamp>true</timestamp>
+                  <success>true</success>
+                  <label>true</label>
+                  <code>false</code>
+                  <message>false</message>
+                  <threadName>true</threadName>
+                  <dataType>false</dataType>
+                  <encoding>false</encoding>
+                  <assertions>false</assertions>
+                  <subresults>false</subresults>
+                  <responseData>false</responseData>
+                  <samplerData>false</samplerData>
+                  <xml>false</xml>
+                  <fieldNames>true</fieldNames>
+                  <responseHeaders>false</responseHeaders>
+                  <requestHeaders>false</requestHeaders>
+                  <responseDataOnError>false</responseDataOnError>
+                  <saveAssertionResultsFailureMessage>false</saveAssertionResultsFailureMessage>
+                  <assertionsResultsToSave>0</assertionsResultsToSave>
+                </value>
+              </objProp>
+              <stringProp name="filename">${AGGREGATE_REPORT}</stringProp>
+            </ResultCollector>
+            <hashTree/>
+            <BeanShellPostProcessor guiclass="TestBeanGUI" testclass="BeanShellPostProcessor" testname="abort on response error (soap)" enabled="true">
+              <stringProp name="filename"></stringProp>
+              <stringProp name="parameters"></stringProp>
+              <boolProp name="resetInterpreter">false</boolProp>
+              <stringProp name="script">if (&quot;${ABORT_ON_RESPONSE_ERROR}&quot;==&quot;true&quot; &amp;&amp; !&quot;200&quot;.equals(prev.getResponseCode())) {
+	String out = &quot;### STOP TEST&quot;+(&quot;${THREADS}&quot;!=&quot;1&quot; ?&quot; (thread:${__threadNum})&quot; :&quot;&quot;)+&quot;: soap-error (getValueForList:&quot;+prev.getResponseCode()+&quot;)&quot;;
+	log.info(out);
+	System.out.println(out);
+	ctx.getEngine().stopTest();
+}</stringProp>
+            </BeanShellPostProcessor>
+            <hashTree/>
+          </hashTree>
+          <BeanShellSampler guiclass="BeanShellSamplerGui" testclass="BeanShellSampler" testname="&gt;&gt; set GPAS_GETVALUEFORLIST_TIME" enabled="true">
+            <stringProp name="BeanShellSampler.query">import java.math.BigInteger;
+BigInteger timeStart = new BigInteger(&quot;${GET_PSNS_TS}&quot;);
+BigInteger timeEnd = new BigInteger(&quot;${__time()}&quot;);
+
+Float getValueForListTime = (timeEnd.subtract(timeStart).floatValue() / 1000);
+vars.put(&quot;GPAS_GETVALUEFORLIST_TIME&quot;, getValueForListTime.toString());
+
+String out = &quot;### GET VALUE FOR LIST (at loop: ${LOOP_COUNT}, in time: &quot; + getValueForListTime + &quot;s)&quot;;
+System.out.println(out);
+log.info(out);</stringProp>
+            <stringProp name="BeanShellSampler.filename"></stringProp>
+            <stringProp name="BeanShellSampler.parameters"></stringProp>
+            <boolProp name="BeanShellSampler.resetInterpreter">false</boolProp>
+          </BeanShellSampler>
+          <hashTree/>
+        </hashTree>
+        <IfController guiclass="IfControllerPanel" testclass="IfController" testname="(opt) restart wildfly" enabled="true">
+          <stringProp name="IfController.condition">${__groovy(${THREADS}==1 &amp;&amp; ${__threadNum}==1 &amp;&amp; ${RESTART_WILDFLY_EVERY_X_LOOPS}&gt;0 &amp;&amp; ${LOOP_COUNT} % ${RESTART_WILDFLY_EVERY_X_LOOPS}==0)}</stringProp>
+          <boolProp name="IfController.evaluateAll">false</boolProp>
+          <boolProp name="IfController.useExpression">true</boolProp>
+          <stringProp name="TestPlan.comments">optional, only 1 thread is running</stringProp>
+        </IfController>
+        <hashTree>
+          <BeanShellSampler guiclass="BeanShellSamplerGui" testclass="BeanShellSampler" testname="&gt;&gt; set WILDFLY_RESTARTED=false" enabled="true">
+            <stringProp name="BeanShellSampler.query">//log.info(&quot;\n#\n# restarting wildfly\n#&quot;);
+
+vars.put(&quot;WILDFLY_RESTARTED&quot;, &quot;false&quot;);
+vars.put(&quot;WILDFLY_RESTART_TS&quot;, &quot;${__time(/1000,)}&quot;);</stringProp>
+            <stringProp name="BeanShellSampler.filename"></stringProp>
+            <stringProp name="BeanShellSampler.parameters"></stringProp>
+            <boolProp name="BeanShellSampler.resetInterpreter">false</boolProp>
+          </BeanShellSampler>
+          <hashTree/>
+          <AuthManager guiclass="AuthPanel" testclass="AuthManager" testname="HTTP Authorization Manager" enabled="true">
+            <collectionProp name="AuthManager.auth_list">
+              <elementProp name="" elementType="Authorization">
+                <stringProp name="Authorization.url">${GPAS_SOAP_PROTOCOL}://${GPAS_SOAP_HOST}</stringProp>
+                <stringProp name="Authorization.username">${RESTART_WILDFLY_ADMIN_USER}</stringProp>
+                <stringProp name="Authorization.password">${RESTART_WILDFLY_ADMIN_PASSWORD}</stringProp>
+                <stringProp name="Authorization.domain"></stringProp>
+                <stringProp name="Authorization.realm"></stringProp>
+                <stringProp name="Authorization.mechanism">DIGEST</stringProp>
+              </elementProp>
+            </collectionProp>
+            <boolProp name="AuthManager.controlledByThreadGroup">false</boolProp>
+          </AuthManager>
+          <hashTree/>
+          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="Set HTTP-Header" enabled="true">
+            <collectionProp name="HeaderManager.headers">
+              <elementProp name="" elementType="Header">
+                <stringProp name="Header.name">Content-Type</stringProp>
+                <stringProp name="Header.value">application/json; charset=utf-8</stringProp>
+              </elementProp>
+            </collectionProp>
+          </HeaderManager>
+          <hashTree/>
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="reload deployments" enabled="true">
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+              <collectionProp name="Arguments.arguments">
+                <elementProp name="" elementType="HTTPArgument">
+                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                  <stringProp name="Argument.value">{&#xd;
+	&quot;operation&quot;:	&quot;reload&quot;,&#xd;
+	&quot;address&quot;:	[]&#xd;
+}</stringProp>
+                  <stringProp name="Argument.metadata">=</stringProp>
+                </elementProp>
+              </collectionProp>
+            </elementProp>
+            <stringProp name="HTTPSampler.domain">${GPAS_SOAP_HOST}</stringProp>
+            <stringProp name="HTTPSampler.port">9990</stringProp>
+            <stringProp name="HTTPSampler.protocol">${GPAS_SOAP_PROTOCOL}</stringProp>
+            <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+            <stringProp name="HTTPSampler.path">management</stringProp>
+            <stringProp name="HTTPSampler.method">POST</stringProp>
+            <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+            <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+            <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+            <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+            <stringProp name="HTTPSampler.implementation">HttpClient4</stringProp>
+            <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+            <stringProp name="HTTPSampler.response_timeout"></stringProp>
+            <stringProp name="TestPlan.comments">https://wildscribe.github.io/WildFly/16.0/index.html#op-reload</stringProp>
+          </HTTPSamplerProxy>
+          <hashTree/>
+          <WhileController guiclass="WhileControllerGui" testclass="WhileController" testname="wait for restart" enabled="true">
+            <stringProp name="WhileController.condition">${__groovy(vars.get(&quot;WILDFLY_RESTARTED&quot;) == &quot;false&quot;)}</stringProp>
+          </WhileController>
+          <hashTree>
+            <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer" enabled="true">
+              <stringProp name="ConstantTimer.delay">1000</stringProp>
+            </ConstantTimer>
+            <hashTree/>
+            <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="check state" enabled="true">
+              <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+              <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+                <collectionProp name="Arguments.arguments">
+                  <elementProp name="" elementType="HTTPArgument">
+                    <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                    <stringProp name="Argument.value">{&#xd;
+	&quot;operation&quot;:	&quot;read-attribute&quot;,&#xd;
+	&quot;name&quot;:		&quot;server-state&quot;,&#xd;
+	&quot;json.pretty&quot;:	1&#xd;
+}</stringProp>
+                    <stringProp name="Argument.metadata">=</stringProp>
+                  </elementProp>
+                </collectionProp>
+              </elementProp>
+              <stringProp name="HTTPSampler.domain">${GPAS_SOAP_HOST}</stringProp>
+              <stringProp name="HTTPSampler.port">9990</stringProp>
+              <stringProp name="HTTPSampler.protocol">${GPAS_SOAP_PROTOCOL}</stringProp>
+              <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+              <stringProp name="HTTPSampler.path">management</stringProp>
+              <stringProp name="HTTPSampler.method">POST</stringProp>
+              <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+              <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+              <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+              <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+              <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+              <stringProp name="HTTPSampler.implementation">HttpClient4</stringProp>
+              <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+              <stringProp name="HTTPSampler.response_timeout"></stringProp>
+              <stringProp name="TestPlan.comments">https://docs.jboss.org/author/display/WFLY/The%20HTTP%20management%20API.html</stringProp>
+            </HTTPSamplerProxy>
+            <hashTree>
+              <BeanShellAssertion guiclass="BeanShellAssertionGui" testclass="BeanShellAssertion" testname="set WILDFLY_RESTARTED=true when ResponseCode=200" enabled="true">
+                <stringProp name="BeanShellAssertion.query">Failure = false;
+
+if (&quot;200&quot;.equals(ResponseCode)) vars.put(&quot;WILDFLY_RESTARTED&quot;, &quot;true&quot;);
+	
+//log.info(&quot;\n#\n# ResponseCode: &quot;+ResponseCode+&quot;\n#&quot;);
+</stringProp>
+                <stringProp name="BeanShellAssertion.filename"></stringProp>
+                <stringProp name="BeanShellAssertion.parameters"></stringProp>
+                <boolProp name="BeanShellAssertion.resetInterpreter">false</boolProp>
+              </BeanShellAssertion>
+              <hashTree/>
+              <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="check known response-code" enabled="true">
+                <collectionProp name="Asserion.test_strings">
+                  <stringProp name="52472">503</stringProp>
+                  <stringProp name="49586">200</stringProp>
+                  <stringProp name="36759048">Non HTTP response code: org.apache.http.NoHttpResponseException</stringProp>
+                </collectionProp>
+                <stringProp name="Assertion.custom_message"></stringProp>
+                <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
+                <boolProp name="Assertion.assume_success">true</boolProp>
+                <intProp name="Assertion.test_type">48</intProp>
+              </ResponseAssertion>
+              <hashTree/>
+            </hashTree>
+            <BeanShellSampler guiclass="BeanShellSamplerGui" testclass="BeanShellSampler" testname="&gt;&gt; set WILDFLY_RESTART_TIME" enabled="true">
+              <stringProp name="BeanShellSampler.query">if (vars.get(&quot;WILDFLY_RESTARTED&quot;).equals(&quot;true&quot;))
+{
+	Integer wfRestartTime = ${__time(/1000,)} - ${WILDFLY_RESTART_TS};
+	vars.put(&quot;WILDFLY_RESTART_TIME&quot;, wfRestartTime.toString());
+
+	String out = &quot;### WILDFLY RESTARTED (at loop: ${LOOP_COUNT}, in time: &quot; + wfRestartTime + &quot;s)&quot;;
+	System.out.println(out);
+	log.info(out);
+}</stringProp>
+              <stringProp name="BeanShellSampler.filename"></stringProp>
+              <stringProp name="BeanShellSampler.parameters"></stringProp>
+              <boolProp name="BeanShellSampler.resetInterpreter">false</boolProp>
+            </BeanShellSampler>
+            <hashTree/>
+          </hashTree>
+        </hashTree>
+        <IfController guiclass="IfControllerPanel" testclass="IfController" testname="(opt) stats-logging" enabled="true">
+          <stringProp name="TestPlan.comments">optional</stringProp>
+          <stringProp name="IfController.condition">${__groovy(${DB_STATS_LOGGING_EVERY_X_LOOPS}&gt;0 &amp;&amp; ${LOOP_COUNT} % ${DB_STATS_LOGGING_EVERY_X_LOOPS}==0)}</stringProp>
+          <boolProp name="IfController.evaluateAll">false</boolProp>
+          <boolProp name="IfController.useExpression">true</boolProp>
+        </IfController>
+        <hashTree>
+          <BeanShellSampler guiclass="BeanShellSamplerGui" testclass="BeanShellSampler" testname="&gt;&gt; get interesting variables" enabled="true">
+            <stringProp name="BeanShellSampler.query">String[] keySet = {
+	&quot;LOOP_COUNT&quot;,
+	&quot;PSN_COUNT&quot;,
+	&quot;PSN_COUNT_PER_DOMAIN${__groovy(${DOMAIN_NUM}&gt;1 ? &apos;_${DOMAIN_NUM}&apos; : &apos;&apos;)}&quot;,
+	&quot;RESULT_COUNT&quot;,
+	&quot;RESULT_COUNT_PER_DOMAIN${__groovy(${DOMAIN_NUM}&gt;1 ? &apos;_${DOMAIN_NUM}&apos; : &apos;&apos;)}&quot;,
+	&quot;WILDFLY_RESTART_TIME&quot;,
+	&quot;GPAS_GETVALUEFORLIST_TIME&quot;
+};
+String out = &quot;&quot;;
+String starttime = vars.get(&quot;TEST_TIME&quot;);
+
+for (key : keySet)
+{
+	if (vars.get(key)!=null || props.get(key)!=null)
+	{
+		if (${HOW_MANY_DOMAINS} == 1 &amp;&amp; key.contains(&quot;PER_DOMAIN&quot;)) continue;
+		if (&quot;${ABORT_ON_RESPONSE_ERROR}&quot;==&quot;true&quot; &amp;&amp; (key.contains(&quot;RESULT&quot;))) continue;
+		out += &quot;(&apos;&quot;+starttime+&quot;&apos;,&apos;&quot; + (key==&quot;LOOP_COUNT&quot; ?&quot;LOOP_COUNT_PER_THREAD&quot;+(${__threadNum}&gt;1 ?&quot;_&quot;+${__threadNum} :&quot;&quot;) :key) + &quot;&apos;,&apos;&quot; + (vars.get(key)==null ? props.get(key) : vars.get(key))+ &quot;&apos;),&quot;;
+	}
+}
+
+// clearing
+vars.remove(&quot;WILDFLY_RESTART_TIME&quot;);
+vars.remove(&quot;GPAS_GETVALUEFORLIST_TIME&quot;);
+
+// all variables
+//for (entry : vars.entrySet()) out += &quot;(&apos;&quot; + entry.getKey() + &quot;&apos;,&apos;&quot; + entry.getValue() + &quot;&apos;),&quot;;
+
+//log.info(out.substring(0, out.length() -1));
+vars.put(&quot;STAT_KEY_VALUE_PAIRS&quot;, out.substring(0, out.length() -1));</stringProp>
+            <stringProp name="BeanShellSampler.filename"></stringProp>
+            <stringProp name="BeanShellSampler.parameters"></stringProp>
+            <boolProp name="BeanShellSampler.resetInterpreter">false</boolProp>
+          </BeanShellSampler>
+          <hashTree/>
+          <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="write stats-values" enabled="true">
+            <stringProp name="dataSource">_CONN_STATS</stringProp>
+            <stringProp name="queryType">Update Statement</stringProp>
+            <stringProp name="query">INSERT IGNORE INTO `jmeter_stats` (`starttime`,`key`,`value`) VALUES ${STAT_KEY_VALUE_PAIRS};
+</stringProp>
+            <stringProp name="queryArguments"></stringProp>
+            <stringProp name="queryArgumentsTypes"></stringProp>
+            <stringProp name="variableNames"></stringProp>
+            <stringProp name="resultVariable"></stringProp>
+            <stringProp name="queryTimeout"></stringProp>
+            <stringProp name="resultSetMaxRows"></stringProp>
+            <stringProp name="resultSetHandler">Store as String</stringProp>
+          </JDBCSampler>
+          <hashTree>
+            <BeanShellPostProcessor guiclass="TestBeanGUI" testclass="BeanShellPostProcessor" testname="abort on response error (sql)" enabled="true">
+              <stringProp name="filename"></stringProp>
+              <stringProp name="parameters"></stringProp>
+              <boolProp name="resetInterpreter">false</boolProp>
+              <stringProp name="script">if (&quot;${ABORT_ON_RESPONSE_ERROR}&quot;==&quot;true&quot; &amp;&amp; !&quot;200&quot;.equals(prev.getResponseCode())) {
+	String out = &quot;### STOP TEST&quot;+(&quot;${THREADS}&quot;!=&quot;1&quot; ?&quot; (thread:${__threadNum})&quot; :&quot;&quot;)+&quot;: sql-error (last values:&quot;+prev.getResponseCode()+&quot;)&quot;;
+	log.info(out);
+	System.out.println(out);
+	ctx.getEngine().stopTest();
+}</stringProp>
+            </BeanShellPostProcessor>
+            <hashTree/>
+          </hashTree>
+        </hashTree>
+      </hashTree>
+      <PostThreadGroup guiclass="PostThreadGroupGui" testclass="PostThreadGroup" testname="tearDown" enabled="true">
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+          <stringProp name="LoopController.loops">1</stringProp>
+        </elementProp>
+        <stringProp name="ThreadGroup.num_threads">1</stringProp>
+        <stringProp name="ThreadGroup.ramp_time">1</stringProp>
+        <boolProp name="ThreadGroup.scheduler">false</boolProp>
+        <stringProp name="ThreadGroup.duration"></stringProp>
+        <stringProp name="ThreadGroup.delay"></stringProp>
+        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
+      </PostThreadGroup>
+      <hashTree>
+        <ModuleController guiclass="ModuleControllerGui" testclass="ModuleController" testname="set individual variables" enabled="true">
+          <collectionProp name="ModuleController.node_path">
+            <stringProp name="764597751">Test Plan</stringProp>
+            <stringProp name="-1780918500">gPAS-Loadtest (v1.10.0-2023.1.0)</stringProp>
+            <stringProp name="109328029">setUp</stringProp>
+            <stringProp name="-1861648978">set individual variables</stringProp>
+          </collectionProp>
+        </ModuleController>
+        <hashTree/>
+        <LoopController guiclass="LoopControlPanel" testclass="LoopController" testname="get psn-count per domain" enabled="true">
+          <boolProp name="LoopController.continue_forever">true</boolProp>
+          <stringProp name="LoopController.loops">${HOW_MANY_DOMAINS}</stringProp>
+        </LoopController>
+        <hashTree>
+          <CounterConfig guiclass="CounterConfigGui" testclass="CounterConfig" testname="count DOMAIN_NUMBER" enabled="true">
+            <stringProp name="CounterConfig.start">1</stringProp>
+            <stringProp name="CounterConfig.end"></stringProp>
+            <stringProp name="CounterConfig.incr">1</stringProp>
+            <stringProp name="CounterConfig.name">DOMAIN_NUMBER</stringProp>
+            <stringProp name="CounterConfig.format"></stringProp>
+            <boolProp name="CounterConfig.per_user">false</boolProp>
+          </CounterConfig>
+          <hashTree/>
+          <BeanShellSampler guiclass="BeanShellSamplerGui" testclass="BeanShellSampler" testname="&gt;&gt; set domain for this loop" enabled="true">
+            <stringProp name="BeanShellSampler.query">vars.put(&quot;CURRENT_DOMAIN&quot;, &quot;${__groovy(${DOMAIN_NUMBER}&gt;1 ? &apos;${DOMAIN}_${DOMAIN_NUMBER}&apos; : &apos;${DOMAIN}&apos;)}&quot;);
+
+//log.info(&quot;\n#\n# DOMAIN: ${CURRENT_DOMAIN}&quot;+
+//&quot;\n# DB_STATS_DB_URL: &quot;+vars.get(&quot;DB_STATS_DB_URL&quot;)+&quot;\n#&quot;);</stringProp>
+            <stringProp name="BeanShellSampler.filename"></stringProp>
+            <stringProp name="BeanShellSampler.parameters"></stringProp>
+            <boolProp name="BeanShellSampler.resetInterpreter">false</boolProp>
+          </BeanShellSampler>
+          <hashTree/>
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="get number of PSNs" enabled="true">
+            <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+              <collectionProp name="Arguments.arguments">
+                <elementProp name="" elementType="HTTPArgument">
+                  <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                  <stringProp name="Argument.value">&lt;soapenv:Envelope xmlns:soapenv=&quot;http://schemas.xmlsoap.org/soap/envelope/&quot; xmlns:psn=&quot;http://psn.ttp.ganimed.icmvc.emau.org/&quot;&gt;&#xd;
+   &lt;soapenv:Header/&gt;&#xd;
+   &lt;soapenv:Body&gt;&#xd;
+      &lt;psn:getDomain&gt;&#xd;
+         &lt;domainName&gt;${CURRENT_DOMAIN}&lt;/domainName&gt;&#xd;
+      &lt;/psn:getDomain&gt;&#xd;
+   &lt;/soapenv:Body&gt;&#xd;
+&lt;/soapenv:Envelope&gt;</stringProp>
+                  <stringProp name="Argument.metadata">=</stringProp>
+                </elementProp>
+              </collectionProp>
+            </elementProp>
+            <stringProp name="HTTPSampler.domain">${GPAS_SOAP_HOST}</stringProp>
+            <stringProp name="HTTPSampler.port">${GPAS_SOAP_PORT}</stringProp>
+            <stringProp name="HTTPSampler.protocol">${GPAS_SOAP_PROTOCOL}</stringProp>
+            <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+            <stringProp name="HTTPSampler.path">${GPAS_SOAP_CONTEXT}/${GPAS_SOAP_MANAGEMENT}</stringProp>
+            <stringProp name="HTTPSampler.method">POST</stringProp>
+            <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+            <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+            <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+            <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+            <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+            <stringProp name="HTTPSampler.response_timeout"></stringProp>
+          </HTTPSamplerProxy>
+          <hashTree>
+            <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="test StatusCode200" enabled="true">
+              <collectionProp name="Asserion.test_strings">
+                <stringProp name="49586">200</stringProp>
+              </collectionProp>
+              <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
+              <boolProp name="Assertion.assume_success">false</boolProp>
+              <intProp name="Assertion.test_type">16</intProp>
+              <stringProp name="Assertion.custom_message"></stringProp>
+            </ResponseAssertion>
+            <hashTree/>
+            <XPathExtractor guiclass="XPathExtractorGui" testclass="XPathExtractor" testname="set NUMBER_OF_PSNS" enabled="true">
+              <stringProp name="XPathExtractor.default"></stringProp>
+              <stringProp name="XPathExtractor.refname">NUMBER_OF_PSNS</stringProp>
+              <stringProp name="XPathExtractor.matchNumber">1</stringProp>
+              <stringProp name="XPathExtractor.xpathQuery">//numberOfPseudonyms[1]</stringProp>
+              <boolProp name="XPathExtractor.validate">false</boolProp>
+              <boolProp name="XPathExtractor.tolerant">false</boolProp>
+              <boolProp name="XPathExtractor.namespace">false</boolProp>
+            </XPathExtractor>
+            <hashTree/>
+          </hashTree>
+          <BeanShellSampler guiclass="BeanShellSamplerGui" testclass="BeanShellSampler" testname="log PSN-count" enabled="true">
+            <stringProp name="BeanShellSampler.query">String out = &quot;#\n&quot; + 
+	&quot;# ${CURRENT_DOMAIN}: ${__property(&quot;NUMBER_OF_PSNS_${CURRENT_DOMAIN}&quot;)} PSNs existing before\n&quot; + 
+	&quot;# ${CURRENT_DOMAIN}: ${NUMBER_OF_PSNS} PSNs existing now\n&quot; + 
+	&quot;# ${CURRENT_DOMAIN}: &quot; + (${NUMBER_OF_PSNS} - ${__property(&quot;NUMBER_OF_PSNS_${CURRENT_DOMAIN}&quot;)}) + &quot; PSNs added\n#&quot;;
+log.info(&quot;\n&quot;+out);
+System.out.println(out);</stringProp>
+            <stringProp name="BeanShellSampler.filename"></stringProp>
+            <stringProp name="BeanShellSampler.parameters"></stringProp>
+            <boolProp name="BeanShellSampler.resetInterpreter">false</boolProp>
+          </BeanShellSampler>
+          <hashTree/>
+        </hashTree>
+      </hashTree>
+      <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree" enabled="true">
+        <boolProp name="ResultCollector.error_logging">false</boolProp>
+        <objProp>
+          <name>saveConfig</name>
+          <value class="SampleSaveConfiguration">
+            <time>true</time>
+            <latency>true</latency>
+            <timestamp>true</timestamp>
+            <success>true</success>
+            <label>true</label>
+            <code>true</code>
+            <message>true</message>
+            <threadName>true</threadName>
+            <dataType>true</dataType>
+            <encoding>false</encoding>
+            <assertions>true</assertions>
+            <subresults>true</subresults>
+            <responseData>false</responseData>
+            <samplerData>false</samplerData>
+            <xml>false</xml>
+            <fieldNames>true</fieldNames>
+            <responseHeaders>false</responseHeaders>
+            <requestHeaders>false</requestHeaders>
+            <responseDataOnError>false</responseDataOnError>
+            <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+            <assertionsResultsToSave>0</assertionsResultsToSave>
+            <bytes>true</bytes>
+            <sentBytes>true</sentBytes>
+            <url>true</url>
+            <threadCounts>true</threadCounts>
+            <idleTime>true</idleTime>
+            <connectTime>true</connectTime>
+          </value>
+        </objProp>
+        <stringProp name="filename"></stringProp>
+      </ResultCollector>
+      <hashTree/>
+    </hashTree>
+  </hashTree>
+</jmeterTestPlan>

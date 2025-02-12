@@ -1,0 +1,80 @@
+/*-
+ * ###license-information-start###
+ * gPAS - a Generic Pseudonym Administration Service
+ * __
+ * Copyright (C) 2013 - 2024 Independent Trusted Third Party of the University Medicine Greifswald
+ * 							kontakt-ths@uni-greifswald.de
+ * 							concept and implementation
+ * 							l.geidel
+ * 							web client
+ * 							a.blumentritt
+ * 							docker
+ * 							r.schuldt
+ * 							please cite our publications
+ * 							http://dx.doi.org/10.3414/ME14-01-0133
+ * 							http://dx.doi.org/10.1186/s12967-015-0545-6
+ * __
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * ###license-information-end###
+ */
+/* author: Arne Blumentritt  */
+@import url("ths_responsive.css");
+
+/* BEGIN PROJECT COLORS */
+
+:root {
+	--primary-color: #009EE2;
+	--primary-highlight-color: #26BAED;
+	--primary-focus-color: #26BAED80;
+	--secondary-color: #F2A007;
+	--tertiary-color: #a81150;
+}
+
+/* END PROJECT COLORS */
+
+.ui-treenode, .ui-treenode-content {
+	width: 200px;
+}
+
+.ui-treenode-label .tree-cut {
+	position: absolute;
+	left: 0;
+	margin: 7px 0 0 -47px;
+	background-color: transparent;
+	border: none;
+	color: #626262;
+}
+
+.psn-tree > table > tbody > tr > td:first-child > .ui-treenode-content::before {
+	width: 0;
+	height: 0;
+}
+
+.psn-tree .ui-treenode-content::before {
+	content: '';
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+}
+
+.psn-tree .ui-treenode.anonym > .ui-treenode-content {
+	border-style: dashed;
+}
+
+.psn-tree > table {
+	width: initial !important;
+}

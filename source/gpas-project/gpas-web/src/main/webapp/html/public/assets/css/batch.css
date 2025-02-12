@@ -1,0 +1,118 @@
+/*-
+ * ###license-information-start###
+ * gPAS - a Generic Pseudonym Administration Service
+ * __
+ * Copyright (C) 2013 - 2024 Independent Trusted Third Party of the University Medicine Greifswald
+ * 							kontakt-ths@uni-greifswald.de
+ * 							concept and implementation
+ * 							l.geidel
+ * 							web client
+ * 							a.blumentritt
+ * 							docker
+ * 							r.schuldt
+ * 							please cite our publications
+ * 							http://dx.doi.org/10.3414/ME14-01-0133
+ * 							http://dx.doi.org/10.1186/s12967-015-0545-6
+ * __
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * ###license-information-end###
+ */
+/* Styles for batch page */
+th.hl, td.hl {
+	opacity: 0.5;
+}
+
+th.hl:hover {
+	opacity: 1;
+}
+
+th:nth-child(1).hl-1, th:nth-child(2).hl-2, th:nth-child(3).hl-3, th:nth-child(4).hl-4, th:nth-child(5).hl-5, th:nth-child(6).hl-6, th:nth-child(7).hl-7,
+th:nth-child(8).hl-8, th:nth-child(9).hl-9,
+th:nth-child(10).hl-10, th:nth-child(11).hl-11, th:nth-child(12).hl-12,
+th:nth-child(13).hl-13, th:nth-child(14).hl-14, th:nth-child(15).hl-15,
+th:nth-child(16).hl-16, th:nth-child(17).hl-17, th:nth-child(18).hl-18,
+th:nth-child(19).hl-19, th:nth-child(20).hl-20 {
+	opacity: 1;
+	background-color: var(--primary-color);
+	color: #FFF;
+}
+
+th:nth-child(1).hls-1, th:nth-child(2).hls-2, th:nth-child(3).hls-3, th:nth-child(4).hls-4, th:nth-child(5).hls-5, th:nth-child(6).hls-6, th:nth-child(7).hls-7,
+th:nth-child(8).hls-8, th:nth-child(9).hls-9,
+th:nth-child(10).hls-10, th:nth-child(11).hls-11, th:nth-child(12).hls-12,
+th:nth-child(13).hls-13, th:nth-child(14).hls-14, th:nth-child(15).hls-15,
+th:nth-child(16).hls-16, th:nth-child(17).hls-17, th:nth-child(18).hls-18,
+th:nth-child(19).hls-19, th:nth-child(20).hls-20 {
+	opacity: 1;
+	background-color: var(--secondary-color);
+	color: #FFF;
+}
+
+th:nth-child(1).hlt-1, th:nth-child(2).hlt-2, th:nth-child(3).hlt-3, th:nth-child(4).hlt-4, th:nth-child(5).hlt-5, th:nth-child(6).hlt-6, th:nth-child(7).hlt-7,
+th:nth-child(8).hlt-8, th:nth-child(9).hlt-9,
+th:nth-child(10).hlt-10, th:nth-child(11).hlt-11, th:nth-child(12).hlt-12,
+th:nth-child(13).hlt-13, th:nth-child(14).hlt-14, th:nth-child(15).hlt-15,
+th:nth-child(16).hlt-16, th:nth-child(17).hlt-17, th:nth-child(18).hlt-18,
+th:nth-child(19).hlt-19, th:nth-child(20).hlt-20 {
+	opacity: 1;
+	background-color: var(--tertiary-color);
+	color: #FFF;
+}
+
+td:nth-child(1).hl-1, td:nth-child(2).hl-2, td:nth-child(3).hl-3, td:nth-child(4).hl-4, td:nth-child(5).hl-5, td:nth-child(6).hl-6, td:nth-child(7).hl-7,
+td:nth-child(8).hl-8, td:nth-child(9).hl-9,
+td:nth-child(10).hl-10, td:nth-child(11).hl-11, td:nth-child(12).hl-12,
+td:nth-child(13).hl-13, td:nth-child(14).hl-14, td:nth-child(15).hl-15,
+td:nth-child(16).hl-16, td:nth-child(17).hl-17, td:nth-child(18).hl-18,
+td:nth-child(19).hl-19, td:nth-child(20).hl-20,
+td:nth-child(1).hls-1, td:nth-child(2).hls-2, td:nth-child(3).hls-3, td:nth-child(4).hls-4, td:nth-child(5).hls-5, td:nth-child(6).hls-6, td:nth-child(7).hls-7,
+td:nth-child(8).hls-8, td:nth-child(9).hls-9,
+td:nth-child(10).hls-10, td:nth-child(11).hls-11, td:nth-child(12).hls-12,
+td:nth-child(13).hls-13, td:nth-child(14).hls-14, td:nth-child(15).hls-15,
+td:nth-child(16).hls-16, td:nth-child(17).hls-17, td:nth-child(18).hls-18,
+td:nth-child(19).hls-19, td:nth-child(20).hls-20,
+td:nth-child(1).hlt-1, td:nth-child(2).hlt-2, td:nth-child(3).hlt-3, td:nth-child(4).hlt-4, td:nth-child(5).hlt-5, td:nth-child(6).hlt-6, td:nth-child(7).hlt-7,
+td:nth-child(8).hlt-8, td:nth-child(9).hlt-9,
+td:nth-child(10).hlt-10, td:nth-child(11).hlt-11, td:nth-child(12).hlt-12,
+td:nth-child(13).hlt-13, td:nth-child(14).hlt-14, td:nth-child(15).hlt-15,
+td:nth-child(16).hlt-16, td:nth-child(17).hlt-17, td:nth-child(18).hlt-18,
+td:nth-child(19).hlt-19, td:nth-child(20).hlt-20{
+	opacity: 1;
+	font-weight: bold;
+}
+
+th.relative {
+	padding: 0 !important;
+	height: 35px;
+}
+
+.relative > .ui-column-title {
+	position: relative;
+	display: block;
+}
+
+.thButton {
+	position: absolute;
+	width: 100%;
+	left: 0;
+	opacity: 0;
+	margin: -6px 0 0 0 !important;
+	height: 35px !important;
+}
+
+.thLabel {
+	font-weight: normal;
+	float: right;
+	margin: -5px -6px 0 0;
+}

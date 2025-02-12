@@ -1,0 +1,9 @@
+version: '3'
+
+services:
+  selenium:
+    image: selenium/standalone-chrome:latest
+    privileged: true
+    shm_size: 2g
+    ports:
+      - "4444:4444"

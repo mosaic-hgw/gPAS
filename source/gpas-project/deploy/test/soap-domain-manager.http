@@ -1,0 +1,206 @@
+# https://www.jetbrains.com/help/idea/http-client-in-product-code-editor.html
+# https://www.jetbrains.com/help/idea/exploring-http-syntax.html#environment-variables
+
+@soap_manage_url = {{protocol}}://{{host}}:{{port}}/{{soap_context}}/{{soap_manage}}
+
+
+### Add Domain (Classic)
+POST {{soap_manage_url}}
+Content-Type: application/xml
+
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:psn="http://psn.ttp.ganimed.icmvc.emau.org/">
+	<soapenv:Header/>
+	<soapenv:Body>
+		<psn:addDomain>
+			<domainDTO>
+				<!--Optional:-->
+				<name>{{domain_name}}</name>
+				<comment>{{domain_name}}</comment>
+				<label>{{domain_name}}</label>
+				<!--Optional:-->
+				<checkDigitClass>{{domain_check}}</checkDigitClass>
+				<alphabet>{{domain_alphabet}}</alphabet>
+				<config>{{domain_config}}</config>
+			</domainDTO>
+		</psn:addDomain>
+	</soapenv:Body>
+</soapenv:Envelope>
+
+
+### Add Domain (Modern)
+POST {{soap_manage_url}}
+Content-Type: application/xml
+
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:psn="http://psn.ttp.ganimed.icmvc.emau.org/">
+	<soapenv:Header/>
+	<soapenv:Body>
+		<psn:addDomain>
+			<domainDTO>
+				<!--Optional:-->
+				<name>{{domain_name}}</name>
+				<!--Optional:-->
+				<label>{{domain_name}}</label>
+				<!--Optional:-->
+				<checkDigitClass>{{domain_check}}</checkDigitClass>
+				<!--Optional:-->
+				<alphabet>{{domain_alphabet}}</alphabet>
+				<!--Optional:-->
+				<config>
+					<!--Optional:-->
+					<forceCache>DEFAULT</forceCache>
+					<includePrefixInCheckDigitCalculation>false</includePrefixInCheckDigitCalculation>
+					<includeSuffixInCheckDigitCalculation>false</includeSuffixInCheckDigitCalculation>
+					<maxDetectedErrors>2</maxDetectedErrors>
+					<multiPsnDomain>true</multiPsnDomain>
+					<psnLength>8</psnLength>
+					<!--Optional:-->
+					<psnPrefix>test_</psnPrefix>
+					<!--Optional:-->
+					<!--psnSuffix>?</psnSuffix-->
+					<psnsDeletable>true</psnsDeletable>
+					<sendNotificationsWeb>false</sendNotificationsWeb>
+					<useLastCharAsDelimiterAfterXChars>0</useLastCharAsDelimiterAfterXChars>
+					<!--Optional:-->
+					<validateValuesViaParents>OFF</validateValuesViaParents>
+				</config>
+				<!--Optional:-->
+				<comment>{{domain_name}} domain</comment>
+				<!--Zero or more repetitions:-->
+				<!--parentDomainNames>?</parentDomainNames-->
+			</domainDTO>
+		</psn:addDomain>
+	</soapenv:Body>
+</soapenv:Envelope>
+
+
+### Delete Domain
+POST {{soap_manage_url}}
+Content-Type: application/xml
+
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:psn="http://psn.ttp.ganimed.icmvc.emau.org/">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <psn:deleteDomain>
+         <domainName>{{domain_name}}</domainName>
+      </psn:deleteDomain>
+   </soapenv:Body>
+</soapenv:Envelope>
+
+
+### Delete Domain with PSNs
+POST {{soap_manage_url}}
+Content-Type: application/xml
+
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:psn="http://psn.ttp.ganimed.icmvc.emau.org/">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <psn:deleteDomainWithPSNs>
+         <domainName>{{domain_name}}</domainName>
+      </psn:deleteDomainWithPSNs>
+   </soapenv:Body>
+</soapenv:Envelope>
+
+
+### Get Domain
+POST {{soap_manage_url}}
+Content-Type: application/xml
+
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:psn="http://psn.ttp.ganimed.icmvc.emau.org/">
+	<soapenv:Header/>
+	<soapenv:Body>
+		<psn:getDomain>
+			<domainName>{{domain_name}}</domainName>
+		</psn:getDomain>
+	</soapenv:Body>
+</soapenv:Envelope>
+
+### List Domains
+POST {{soap_manage_url}}
+Content-Type: application/xml
+
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:psn="http://psn.ttp.ganimed.icmvc.emau.org/">
+	<soapenv:Header/>
+	<soapenv:Body>
+		<psn:listDomains/>
+	</soapenv:Body>
+</soapenv:Envelope>
+
+
+### List PSNs
+POST {{soap_manage_url}}
+Content-Type: application/xml
+
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:psn="http://psn.ttp.ganimed.icmvc.emau.org/">
+	<soapenv:Header/>
+	<soapenv:Body>
+		<psn:listPSNs>
+			<domainName>{{domain_name}}</domainName>
+		</psn:listPSNs>
+	</soapenv:Body>
+</soapenv:Envelope>
+
+
+### Update Domain
+POST {{soap_manage_url}}
+Content-Type: application/xml
+
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:psn="http://psn.ttp.ganimed.icmvc.emau.org/">
+	<soapenv:Header/>
+	<soapenv:Body>
+		<psn:updateDomain>
+			<domainDTO>
+				<!--Optional:-->
+				<name>{{domain_name}}</name>
+				<!--Optional:-->
+				<label>{{domain_name}}</label>
+				<!--Optional:-->
+				<checkDigitClass>{{domain_check}}</checkDigitClass>
+				<!--Optional:-->
+				<alphabet>{{domain_alphabet}}</alphabet>
+				<!--Optional:-->
+				<config>
+					<!--Optional:-->
+					<forceCache>DEFAULT</forceCache>
+					<includePrefixInCheckDigitCalculation>false</includePrefixInCheckDigitCalculation>
+					<includeSuffixInCheckDigitCalculation>false</includeSuffixInCheckDigitCalculation>
+					<maxDetectedErrors>2</maxDetectedErrors>
+					<multiPsnDomain>true</multiPsnDomain>
+					<psnLength>8</psnLength>
+					<!--Optional:-->
+					<psnPrefix>test_</psnPrefix>
+					<!--Optional:-->
+					<!--psnSuffix>?</psnSuffix-->
+					<psnsDeletable>true</psnsDeletable>
+					<sendNotificationsWeb>false</sendNotificationsWeb>
+					<useLastCharAsDelimiterAfterXChars>0</useLastCharAsDelimiterAfterXChars>
+					<!--Optional:-->
+					<validateValuesViaParents>OFF</validateValuesViaParents>
+				</config>
+				<!--Optional:-->
+				<!--comment>?</comment-->
+				<!--Zero or more repetitions:-->
+				<!--parentDomainNames>?</parentDomainNames-->
+			</domainDTO>
+		</psn:updateDomain>
+	</soapenv:Body>
+</soapenv:Envelope>
+
+
+### Update Domain in Use
+POST {{soap_manage_url}}
+Content-Type: application/xml
+
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:psn="http://psn.ttp.ganimed.icmvc.emau.org/">
+	<soapenv:Header/>
+	<soapenv:Body>
+		<psn:updateDomainInUse>
+			<domainName>{{domain_name}}</domainName>
+			<label>{{domain_name}}</label>
+			<!--comment>?</comment-->
+			<!--1 or more repetitions:-->
+			<!--parentDomainNames>?</parentDomainNames-->
+			<sendNotificationsWeb>false</sendNotificationsWeb>
+			<psnsDeletable>true</psnsDeletable>
+		</psn:updateDomainInUse>
+	</soapenv:Body>
+</soapenv:Envelope>

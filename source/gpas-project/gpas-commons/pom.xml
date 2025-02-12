@@ -1,0 +1,29 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<artifactId>gpas-commons</artifactId>
+	<packaging>jar</packaging>
+	<parent>
+		<groupId>org.emau.icmvc.ganimed.ttp</groupId>
+		<artifactId>gpas-project</artifactId>
+		<version>2024.3.0</version>
+	</parent>
+
+	<dependencies>
+		<dependency>
+			<groupId>com.sun.xml.ws</groupId>
+			<artifactId>jaxws-rt</artifactId>
+			<type>pom</type>
+		</dependency>
+		<!-- e.g. for notificationservice and keycloak-based soap auth-->
+		<dependency>
+			<groupId>org.emau.icmvc.ttp</groupId>
+			<artifactId>ths-utils</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+		</dependency>
+	</dependencies>
+
+</project>

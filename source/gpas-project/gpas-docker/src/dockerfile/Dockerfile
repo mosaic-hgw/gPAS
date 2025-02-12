@@ -1,0 +1,72 @@
+ARG TAG=${docker.baseImage}
+FROM ${TAG}
+
+# ###license-information-start###
+# gPAS - a Generic Pseudonym Administration Service
+# __
+# Copyright (C) 2013 - ${build.year} Independent Trusted Third Party of the University Medicine Greifswald
+# 							kontakt-ths@uni-greifswald.de
+
+# 							concept and implementation
+# 							l.geidel
+# 							web client
+# 							a.blumentritt
+# 							docker
+# 							r.schuldt
+
+# 							please cite our publications
+# 							http://dx.doi.org/10.3414/ME14-01-0133
+# 							http://dx.doi.org/10.1186/s12967-015-0545-6
+# __
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+# ###license-information-end###
+
+# tool-defaults
+ENV TTP_${project.upperName}_VERSION        ${project.version}
+ENV TTP_${project.upperName}_WEB_AUTH_MODE  none
+
+# mysql-defaults
+ENV TTP_${project.upperName}_DB_HOST        mysql
+ENV TTP_${project.upperName}_DB_PORT        3306
+ENV TTP_${project.upperName}_DB_NAME        ${project.shortName}
+ENV TTP_${project.upperName}_DB_USER        ${project.shortName}_user
+ENV TTP_${project.upperName}_DB_PASS        ${project.shortName}_password
+
+# gras-defaults
+ENV TTP_GRAS_DB_HOST        mysql
+ENV TTP_GRAS_DB_PORT        3306
+ENV TTP_GRAS_DB_NAME        gras
+ENV TTP_GRAS_DB_USER        gras_user
+ENV TTP_GRAS_DB_PASS        gras_password
+
+# keycloak-defaults
+ENV TTP_KEYCLOAK_SSL_REQUIRED                  all
+ENV TTP_KEYCLOAK_USE_RESOURCE_ROLE_MAPPINGS    false
+ENV TTP_KEYCLOAK_CONFIDENTIAL_PORT             8443
+
+# annotations
+LABEL maintainer                           = "ronny.schuldt@uni-greifswald.de" \
+      org.opencontainers.image.authors     = "university-medicine greifswald" \
+      org.opencontainers.image.source      = "https://github.com/mosaic-hgw/${project.name}" \
+      org.opencontainers.image.vendor      = "uni-greifswald.de" \
+      org.opencontainers.image.title       = "${project.name}" \
+      org.opencontainers.image.version     = "${project.version}" \
+      org.opencontainers.image.description = "gPAS - a Generic Pseudonym Administration Service" \
+      org.opencontainers.image.license     = "AGPLv3"
+
+# copy files
+COPY --chown=${PROCESS_UID}:${PROCESS_GID} ["deployments/*ar", "${ENTRY_WILDFLY_DEPLOYS}/"]
+COPY --chown=${PROCESS_UID}:${PROCESS_GID} ["jboss/*",         "${ENTRY_WILDFLY_CLI}/"]
+
+RUN register --add-version="${project.parent.name}:${project.version}"

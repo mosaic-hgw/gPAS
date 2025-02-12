@@ -1,0 +1,368 @@
+# add datasource for gpas
+##########################
+set gpasDbHost=mysql
+#>available-env< TTP_DB_HOST
+if (outcome == "success") of :resolve-expression(expression=${env.TTP_DB_HOST})
+	set gpasDbHost=${env.TTP_DB_HOST}
+end-if
+#>deprecated-env< GPAS_DB_HOST TTP_GPAS_DB_HOST
+if (outcome == "success") of :resolve-expression(expression=${env.GPAS_DB_HOST})
+	set gpasDbHost=${env.GPAS_DB_HOST}
+end-if
+#>available-env< TTP_GPAS_DB_HOST mysql
+if (outcome == "success") of :resolve-expression(expression=${env.TTP_GPAS_DB_HOST})
+	set gpasDbHost=${env.TTP_GPAS_DB_HOST}
+end-if
+
+set gpasDbPort=3306
+#>available-env< TTP_DB_PORT
+if (outcome == "success") of :resolve-expression(expression=${env.TTP_DB_PORT})
+	set gpasDbPort=${env.TTP_DB_PORT}
+end-if
+#>deprecated-env< GPAS_DB_PORT TTP_GPAS_DB_PORT
+if (outcome == "success") of :resolve-expression(expression=${env.GPAS_DB_PORT})
+	set gpasDbPort=${env.GPAS_DB_PORT}
+end-if
+#>available-env< TTP_GPAS_DB_PORT 3306
+if (outcome == "success") of :resolve-expression(expression=${env.TTP_GPAS_DB_PORT})
+	set gpasDbPort=${env.TTP_GPAS_DB_PORT}
+end-if
+
+set gpasDbName=gpas
+#>deprecated-env< GPAS_DB_NAME TTP_GPAS_DB_NAME
+if (outcome == "success") of :resolve-expression(expression=${env.GPAS_DB_NAME})
+	set gpasDbName=${env.GPAS_DB_NAME}
+end-if
+#>available-env< TTP_GPAS_DB_NAME gpas
+if (outcome == "success") of :resolve-expression(expression=${env.TTP_GPAS_DB_NAME})
+	set gpasDbName=${env.TTP_GPAS_DB_NAME}
+end-if
+
+set gpasDbUser=gpas_user
+#>available-env< TTP_DB_USER
+if (outcome == "success") of :resolve-expression(expression=${env.TTP_DB_USER})
+	set gpasDbUser=${env.TTP_DB_USER}
+end-if
+#>deprecated-env< GPAS_DB_USER TTP_GPAS_DB_USER
+if (outcome == "success") of :resolve-expression(expression=${env.GPAS_DB_USER})
+	set gpasDbUser=${env.GPAS_DB_USER}
+end-if
+#>available-env< TTP_GPAS_DB_USER gpas_user
+if (outcome == "success") of :resolve-expression(expression=${env.TTP_GPAS_DB_USER})
+	set gpasDbUser=${env.TTP_GPAS_DB_USER}
+end-if
+
+set gpasDbPass=gpas_password
+#>available-env< TTP_DB_PASS
+if (outcome == "success") of :resolve-expression(expression=${env.TTP_DB_PASS})
+	set gpasDbPass=${env.TTP_DB_PASS}
+end-if
+#>deprecated-env< GPAS_DB_PASS TTP_GPAS_DB_PASS
+if (outcome == "success") of :resolve-expression(expression=${env.GPAS_DB_PASS})
+	set gpasDbPass=${env.GPAS_DB_PASS}
+end-if
+#>available-env< TTP_GPAS_DB_PASS gpas_password
+if (outcome == "success") of :resolve-expression(expression=${env.TTP_GPAS_DB_PASS})
+	set gpasDbPass=${env.TTP_GPAS_DB_PASS}
+end-if
+
+if (outcome != "success") of /subsystem=datasources/data-source=gpasDS:read-resource
+    echo \>\>\> add datasources gpasDS
+    data-source add \
+        --name=gpasDS \
+        --driver-name=mysql \
+        --jndi-name=java:jboss/datasources/gpasDS \
+        --connection-url=jdbc:mysql://$gpasDbHost:$gpasDbPort/$gpasDbName?useSSL=false&allowPublicKeyRetrieval=true&rewriteBatchedStatements=true \
+        --user-name=$gpasDbUser \
+        --password=$gpasDbPass \
+        --use-ccm=true \
+        --min-pool-size=0 \
+        --max-pool-size=20 \
+        --flush-strategy=FailingConnectionOnly \
+        --use-java-context=true \
+        --jta=true \
+        --enabled=true \
+        --check-valid-connection-sql="select 1" \
+        --validate-on-match=false \
+        --background-validation=true \
+        --background-validation-millis=10000
+end-if
+
+
+# add logger for gpas
+######################
+set logLevel="INFO"
+if (outcome == "success") of :resolve-expression(expression=${env.TTP_LOG_LEVEL})
+	set logLevel=${env.TTP_LOG_LEVEL}
+end-if
+#>deprecated-env< GPAS_LOG_LEVEL TTP_GPAS_LOG_LEVEL
+if (outcome == "success") of :resolve-expression(expression=${env.GPAS_LOG_LEVEL})
+	set logLevel=${env.GPAS_LOG_LEVEL}
+end-if
+#>available-env< TTP_GPAS_LOG_LEVEL INFO
+if (outcome == "success") of :resolve-expression(expression=${env.TTP_GPAS_LOG_LEVEL})
+	set logLevel=${env.TTP_GPAS_LOG_LEVEL}
+end-if
+if (result ~= "(TRACE|DEBUG|INFO|WARN|ERROR|FATAL)") of :resolve-expression(expression=$logLevel)
+	echo \>\>\> set gpas-logger to level $logLevel
+else
+	echo \<\<\< given loglevel not allowed ($logLevel), set INFO
+	set logLevel="INFO"
+end-if
+
+set logTo="console"
+if (outcome == "success") of :resolve-expression(expression=${env.TTP_LOG_TO})
+	set logTo=${env.TTP_LOG_TO}
+end-if
+#>deprecated-env< GPAS_FILE_LOG TTP_GPAS_LOG_TO
+if (result ~= "(?i)(on|true|yes|1)") of :resolve-expression(expression=${env.GPAS_FILE_LOG})
+    set logTo="file"
+end-if
+if (result ~= "(?i)(off|false|no|0)") of :resolve-expression(expression=${env.GPAS_FILE_LOG})
+    set logTo="console"
+end-if
+#>deprecated-env< TTP_GPAS_LOG_TO_FILE TTP_GPAS_LOG_TO
+if (result ~= "(?i)(on|true|yes|1)") of :resolve-expression(expression=${env.TTP_GPAS_LOG_TO_FILE})
+    set logTo="file"
+end-if
+if (result ~= "(?i)(off|false|no|0)") of :resolve-expression(expression=${env.TTP_GPAS_LOG_TO_FILE})
+    set logTo="console"
+end-if
+#>available-env< TTP_GPAS_LOG_TO CONSOLE
+if (outcome == "success") of :resolve-expression(expression=${env.TTP_GPAS_LOG_TO})
+	set logTo=${env.TTP_GPAS_LOG_TO}
+end-if
+if (outcome != "success") of /subsystem=logging/logger=org.emau.icmvc.ttp.psn:read-resource
+    /subsystem=logging/logger=org.emau.icmvc.ttp.psn:add(use-parent-handlers=false,handlers=[])
+end-if
+if (outcome != "success") of /subsystem=logging/logger=org.emau.icmvc.ganimed.ttp.psn:read-resource
+    /subsystem=logging/logger=org.emau.icmvc.ganimed.ttp.psn:add(use-parent-handlers=false,handlers=[])
+end-if
+/subsystem=logging/logger=org.emau.icmvc.ttp.psn:write-attribute(name=level,value=$logLevel)
+/subsystem=logging/logger=org.emau.icmvc.ganimed.ttp.psn:write-attribute(name=level,value=$logLevel)
+if (result ~= "(?i).*file.*") of :resolve-expression(expression=$logTo)
+	echo \>\>\> add gpas-logger as separate file (gpas.log)
+	/subsystem=logging/custom-handler=gpas-file-handler:add(class=org.jboss.logmanager.handlers.PeriodicSizeRotatingFileHandler, module=org.jboss.logmanager, formatter="%d{HH:mm:ss,SSS} %-5p [%c] (%t) %s%E%n", properties={rotateSize=10240000,maxBackupIndex=20,append=true,suffix=".yyyy-MM-dd",fileName="${jboss.server.log.dir}/gpas/gpas.log"})
+    /subsystem=logging/logger=org.emau.icmvc.ttp.psn:add-handler(name="gpas-file-handler")
+	/subsystem=logging/logger=org.emau.icmvc.ganimed.ttp.psn:add-handler(name="gpas-file-handler")
+end-if
+if (result ~= "(?i).*console.*") of :resolve-expression(expression=$logTo)
+	echo \>\>\> add gpas-logger to console
+	/subsystem=logging/console-handler=gpas-console-handler:add(named-formatter=COLOR-PATTERN)
+    /subsystem=logging/logger=org.emau.icmvc.ttp.psn:add-handler(name="gpas-console-handler")
+	/subsystem=logging/logger=org.emau.icmvc.ganimed.ttp.psn:add-handler(name="gpas-console-handler")
+end-if
+
+
+set wfOverlaysDir=${docker.wildfly.jboss}
+if (outcome == "success") of :resolve-expression(expression=${env.WF_OVERLAYS_DIR})
+	set wfOverlaysDir=${env.WF_OVERLAYS_DIR}
+end-if
+#>deprecated-env< GPAS_AUTH_MODE TTP_GPAS_WEB_AUTH_MODE
+#>available-env< TTP_GPAS_WEB_AUTH_MODE
+set authMode=${GPAS_AUTH_MODE}
+if (outcome == "success") of :resolve-expression(expression=${env.TTP_GPAS_WEB_AUTH_MODE})
+	set authMode=${env.TTP_GPAS_WEB_AUTH_MODE}
+end-if
+# gRAS-Authentication for WEB
+##############################
+if (result ~= "(?i)(gras)") of :resolve-expression(expression=$authMode)
+    echo \>\>\> install gpas-Authentication for $authMode-Authentication
+    deployment-overlay add \
+        --name=gpasGrasAuth \
+        --content=/WEB-INF/web.xml=$wfOverlaysDir/gpas_gras_web.xml,/WEB-INF/jboss-web.xml=$wfOverlaysDir/gpas_gras_jboss-web.xml \
+        --deployments=gpas-web-*.war \
+        --redeploy-affected
+end-if
+
+
+# KeyCloak-Authentication for WEB
+##################################
+if (result ~= "(?i)(keycloak-json)") of :resolve-expression(expression=$authMode)
+    echo \>\>\> install gpas-Authentication for $authMode-Authentication
+    deployment-overlay add \
+        --name=gpasOIDCAuth \
+        --content=/WEB-INF/web.xml=$wfOverlaysDir/gpas_oidc_web.xml,/WEB-INF/oidc.json=$wfOverlaysDir/oidc.json \
+        --deployments=gpas-web-*.war \
+        --redeploy-affected
+end-if
+
+# KeyCloak-Authentication for WEB (alternative Methode)
+########################################################
+set ttpWebKeycloakRealm=ttp
+#>deprecated-env< KEYCLOAK_REALM TTP_KEYCLOAK_REALM
+if (outcome == "success") of :resolve-expression(expression=${env.KEYCLOAK_REALM})
+	set ttpWebKeycloakRealm=${env.KEYCLOAK_REALM}
+end-if
+#>available-env< TTP_KEYCLOAK_REALM ttp
+if (outcome == "success") of :resolve-expression(expression=${env.TTP_KEYCLOAK_REALM})
+	set ttpWebKeycloakRealm=${env.TTP_KEYCLOAK_REALM}
+end-if
+#>available-env< TTP_WEB_KEYCLOAK_REALM ttp
+if (outcome == "success") of :resolve-expression(expression=${env.TTP_WEB_KEYCLOAK_REALM})
+	set ttpWebKeycloakRealm=${env.TTP_WEB_KEYCLOAK_REALM}
+end-if
+
+set ttpWebKeycloakClientId=ths
+#>deprecated-env< KEYCLOAK_RESOURCE TTP_KEYCLOAK_CLIENT_ID
+if (outcome == "success") of :resolve-expression(expression=${env.KEYCLOAK_RESOURCE})
+	set ttpWebKeycloakClientId=${env.KEYCLOAK_RESOURCE}
+end-if
+#>deprecated-env< KEYCLOAK_CLIENT_ID TTP_KEYCLOAK_CLIENT_ID
+if (outcome == "success") of :resolve-expression(expression=${env.KEYCLOAK_CLIENT_ID})
+	set ttpWebKeycloakClientId=${env.KEYCLOAK_CLIENT_ID}
+end-if
+#>available-env< TTP_KEYCLOAK_CLIENT_ID ths
+if (outcome == "success") of :resolve-expression(expression=${env.TTP_KEYCLOAK_CLIENT_ID})
+	set ttpWebKeycloakClientId=${env.TTP_KEYCLOAK_CLIENT_ID}
+end-if
+#>available-env< TTP_WEB_KEYCLOAK_CLIENT_ID ths
+if (outcome == "success") of :resolve-expression(expression=${env.TTP_WEB_KEYCLOAK_CLIENT_ID})
+	set ttpWebKeycloakClientId=${env.TTP_WEB_KEYCLOAK_CLIENT_ID}
+end-if
+
+set ttpWebKeycloakBaseUrl=<PROTOCOL://HOST_OR_IP:PORT/auth/>
+#>deprecated-env< KEYCLOAK_SERVER_URL TTP_KEYCLOAK_SERVER_URL
+if (outcome == "success") of :resolve-expression(expression=${env.KEYCLOAK_SERVER_URL})
+	set ttpWebKeycloakBaseUrl=${env.KEYCLOAK_SERVER_URL}
+end-if
+#>available-env< TTP_KEYCLOAK_SERVER_URL
+if (outcome == "success") of :resolve-expression(expression=${env.TTP_KEYCLOAK_SERVER_URL})
+	set ttpWebKeycloakBaseUrl=${env.TTP_KEYCLOAK_SERVER_URL}
+end-if
+#>available-env< TTP_WEB_KEYCLOAK_SERVER_URL
+if (outcome == "success") of :resolve-expression(expression=${env.TTP_WEB_KEYCLOAK_SERVER_URL})
+	set ttpWebKeycloakBaseUrl=${env.TTP_WEB_KEYCLOAK_SERVER_URL}
+end-if
+
+set ttpWebKeycloakSecret=<CLIENT_SECRET>
+#>deprecated-env< KEYCLOAK_CLIENT_SECRET TTP_KEYCLOAK_CLIENT_SECRET
+if (outcome == "success") of :resolve-expression(expression=${env.KEYCLOAK_CLIENT_SECRET})
+	set ttpWebKeycloakSecret=${env.KEYCLOAK_CLIENT_SECRET}
+end-if
+#>available-env< TTP_KEYCLOAK_CLIENT_SECRET
+if (outcome == "success") of :resolve-expression(expression=${env.TTP_KEYCLOAK_CLIENT_SECRET})
+	set ttpWebKeycloakSecret=${env.TTP_KEYCLOAK_CLIENT_SECRET}
+end-if
+#>available-env< TTP_WEB_KEYCLOAK_CLIENT_SECRET
+if (outcome == "success") of :resolve-expression(expression=${env.TTP_WEB_KEYCLOAK_CLIENT_SECRET})
+	set ttpWebKeycloakSecret=${env.TTP_WEB_KEYCLOAK_CLIENT_SECRET}
+end-if
+
+set ttpWebKeycloakSslRequired=external
+#>deprecated-env< KEYCLOAK_SSL_REQUIRED TTP_KEYCLOAK_SSL_REQUIRED
+if (outcome == "success") of :resolve-expression(expression=${env.KEYCLOAK_SSL_REQUIRED})
+	set ttpWebKeycloakSslRequired=${env.KEYCLOAK_SSL_REQUIRED}
+end-if
+#>available-env< TTP_KEYCLOAK_SSL_REQUIRED external
+if (outcome == "success") of :resolve-expression(expression=${env.TTP_KEYCLOAK_SSL_REQUIRED})
+	set ttpWebKeycloakSslRequired=${env.TTP_KEYCLOAK_SSL_REQUIRED}
+end-if
+#>available-env< TTP_WEB_KEYCLOAK_SSL_REQUIRED external
+if (outcome == "success") of :resolve-expression(expression=${env.TTP_WEB_KEYCLOAK_SSL_REQUIRED})
+	set ttpWebKeycloakSslRequired=${env.TTP_WEB_KEYCLOAK_SSL_REQUIRED}
+end-if
+
+set ttpWebKeycloakConfidentialPort=8443
+#>deprecated-env< KEYCLOAK_CONFIDENTIAL_PORT TTP_KEYCLOAK_CONFIDENTIAL_PORT
+if (outcome == "success") of :resolve-expression(expression=${env.KEYCLOAK_CONFIDENTIAL_PORT})
+	set ttpWebKeycloakConfidentialPort=${env.KEYCLOAK_CONFIDENTIAL_PORT}
+end-if
+#>available-env< TTP_KEYCLOAK_CONFIDENTIAL_PORT 8443
+if (outcome == "success") of :resolve-expression(expression=${env.TTP_KEYCLOAK_CONFIDENTIAL_PORT})
+	set ttpWebKeycloakConfidentialPort=${env.TTP_KEYCLOAK_CONFIDENTIAL_PORT}
+end-if
+#>available-env< TTP_WEB_KEYCLOAK_CONFIDENTIAL_PORT 8443
+if (outcome == "success") of :resolve-expression(expression=${env.TTP_WEB_KEYCLOAK_CONFIDENTIAL_PORT})
+	set ttpWebKeycloakConfidentialPort=${env.TTP_WEB_KEYCLOAK_CONFIDENTIAL_PORT}
+end-if
+
+set ttpWebKeycloakUseResourceRoleMappings=false
+#>deprecated-env< KEYCLOAK_USE_RESOURCE_ROLE_MAPPINGS TTP_KEYCLOAK_USE_RESOURCE_ROLE_MAPPINGS
+if (outcome == "success") of :resolve-expression(expression=${env.KEYCLOAK_USE_RESOURCE_ROLE_MAPPINGS})
+	set ttpWebKeycloakUseResourceRoleMappings=${env.KEYCLOAK_USE_RESOURCE_ROLE_MAPPINGS}
+end-if
+#>available-env< TTP_KEYCLOAK_USE_RESOURCE_ROLE_MAPPINGS false
+if (outcome == "success") of :resolve-expression(expression=${env.TTP_KEYCLOAK_USE_RESOURCE_ROLE_MAPPINGS})
+	set ttpWebKeycloakUseResourceRoleMappings=${env.TTP_KEYCLOAK_USE_RESOURCE_ROLE_MAPPINGS}
+end-if
+#>available-env< TTP_WEB_KEYCLOAK_USE_RESOURCE_ROLE_MAPPINGS false
+if (outcome == "success") of :resolve-expression(expression=${env.TTP_WEB_KEYCLOAK_USE_RESOURCE_ROLE_MAPPINGS})
+	set ttpWebKeycloakUseResourceRoleMappings=${env.TTP_WEB_KEYCLOAK_USE_RESOURCE_ROLE_MAPPINGS}
+end-if
+if (result ~= "(?i)(keycloak)") of :resolve-expression(expression=$authMode)
+    echo \>\>\> install gpas-Authentication for $authMode-Authentication
+    deployment-overlay add \
+        --name=gpasOIDCAuth \
+        --content=/WEB-INF/web.xml=$wfOverlaysDir/gpas_oidc_web.xml \
+        --deployments=gpas-web-*.war \
+        --redeploy-affected
+    set gpasVersion=${GPAS_VERSION}
+    /subsystem=elytron-oidc-client/secure-deployment=gpas-web-$gpasVersion.war:add( \
+        provider-url=$ttpWebKeycloakBaseUrl/realms/$ttpWebKeycloakRealm, \
+        client-id=$ttpWebKeycloakClientId, \
+        ssl-required=$ttpWebKeycloakSslRequired, \
+        confidential-port=$ttpWebKeycloakConfidentialPort, \
+        use-resource-role-mappings=$ttpWebKeycloakUseResourceRoleMappings \
+    )
+    /subsystem=elytron-oidc-client/secure-deployment=gpas-web-$gpasVersion.war/credential=secret:add(secret=$ttpWebKeycloakSecret)
+end-if
+
+# KeyCloak-Authentication for SOAP
+###################################
+#>available-env< TTP_GPAS_SOAP_KEYCLOAK_ENABLE false
+if (result ~= "(?i)(on|true|yes|1)") of :resolve-expression(expression=${env.TTP_GPAS_SOAP_KEYCLOAK_ENABLE})
+    echo \>\>\> set system-property for TTP_GPAS_SOAP_KEYCLOAK_ENABLE
+    /system-property=ttp.auth.soap.keycloak.gpas.enabled:add(value=true)
+else
+	try
+		/system-property=ttp.auth.soap.keycloak.gpas.enabled:add(value=false)
+	catch
+	end-try
+end-if
+
+# Authentication-Roles for SOAP
+###################################
+# roles (role.gpas.[user|admin].[name|services])
+#>available-env< TTP_GPAS_SOAP_ROLE_USER_NAME
+if (outcome == "success") of :resolve-expression(expression=${env.TTP_GPAS_SOAP_ROLE_USER_NAME})
+    set temp="${env.TTP_GPAS_SOAP_ROLE_USER_NAME}"
+    echo \>\>\> set system-property for TTP_GPAS_SOAP_ROLE_USER_NAME
+    /system-property=ttp.auth.soap.role.gpas.user.name:add(value=$temp)
+end-if
+#>available-env< TTP_GPAS_SOAP_ROLE_USER_SERVICES
+if (outcome == "success") of :resolve-expression(expression=${env.TTP_GPAS_SOAP_ROLE_USER_SERVICES})
+    set temp="${env.TTP_GPAS_SOAP_ROLE_USER_SERVICES}"
+    echo \>\>\> set system-property for TTP_GPAS_SOAP_ROLE_USER_SERVICES
+    /system-property=ttp.auth.soap.role.gpas.user.services:add(value=$temp)
+end-if
+#>available-env< TTP_GPAS_SOAP_ROLE_ADMIN_NAME
+if (outcome == "success") of :resolve-expression(expression=${env.TTP_GPAS_SOAP_ROLE_ADMIN_NAME})
+    set temp="${env.TTP_GPAS_SOAP_ROLE_ADMIN_NAME}"
+    echo \>\>\> set system-property for TTP_GPAS_SOAP_ROLE_ADMIN_NAME
+    /system-property=ttp.auth.soap.role.gpas.admin.name:add(value=$temp)
+end-if
+#>available-env< TTP_GPAS_SOAP_ROLE_ADMIN_SERVICES
+if (outcome == "success") of :resolve-expression(expression=${env.TTP_GPAS_SOAP_ROLE_ADMIN_SERVICES})
+    set temp="${env.TTP_GPAS_SOAP_ROLE_ADMIN_SERVICES}"
+    echo \>\>\> set system-property for TTP_GPAS_SOAP_ROLE_ADMIN_SERVICES
+    /system-property=ttp.auth.soap.role.gpas.admin.services:add(value=$temp)
+end-if
+
+# ROOT-CONTEXT
+###############
+set temp=gpas-web
+#>available-env< TTP_GPAS_WEB_CONTEXT gpas-web
+if (outcome == "success") of :resolve-expression(expression=${env.TTP_GPAS_WEB_CONTEXT})
+    set temp=${env.TTP_GPAS_WEB_CONTEXT}
+end-if
+echo \>\>\> set system-property env.TTP_GPAS_WEB_CONTEXT to $temp
+/system-property=env.TTP_GPAS_WEB_CONTEXT:add(value=$temp)
+
+set temp=gpas
+#>available-env< TTP_GPAS_SOAP_CONTEXT gpas
+if (outcome == "success") of :resolve-expression(expression=${env.TTP_GPAS_SOAP_CONTEXT})
+    set temp=${env.TTP_GPAS_SOAP_CONTEXT}
+end-if
+echo \>\>\> set system-property env.TTP_GPAS_SOAP_CONTEXT to $temp
+/system-property=env.TTP_GPAS_SOAP_CONTEXT:add(value=$temp)

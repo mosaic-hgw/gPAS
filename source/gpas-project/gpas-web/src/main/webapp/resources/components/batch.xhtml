@@ -1,0 +1,196 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+		"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!--
+  ###license-information-start###
+  gPAS - a Generic Pseudonym Administration Service
+  __
+  Copyright (C) 2013 - 2024 Independent Trusted Third Party of the University Medicine Greifswald
+  							kontakt-ths@uni-greifswald.de
+  							concept and implementation
+  							l.geidel
+  							web client
+  							a.blumentritt
+  							docker
+  							r.schuldt
+  							please cite our publications
+  							http://dx.doi.org/10.3414/ME14-01-0133
+  							http://dx.doi.org/10.1186/s12967-015-0545-6
+  __
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU Affero General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+  
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+  
+  You should have received a copy of the GNU Affero General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  ###license-information-end###
+  -->
+
+
+<!-- author: Arne Blumentritt -->
+
+<html xmlns:components="http://java.sun.com/jsf/composite/components"
+	  xmlns:composite="http://java.sun.com/jsf/composite"
+	  xmlns:f="http://java.sun.com/jsf/core"
+	  xmlns:file="http://java.sun.com/jsf/composite/components/file"
+	  xmlns:h="http://java.sun.com/jsf/html"
+	  xmlns:p="http://primefaces.org/ui"
+	  xmlns:ui="http://java.sun.com/jsf/facelets">
+
+<composite:interface>
+	<composite:attribute name="import" type="java.lang.Boolean" required="false" default="false" />
+</composite:interface>
+
+<composite:implementation>
+	<p:importConstants type="org.emau.icmvc.ttp.psn.frontend.controller.BatchController" var="BatchController" />
+
+	<h:form>
+		<p:poll listener="#{batchController.keepUserSessionAlive()}" interval="#{batchController.timeoutInterval}" />
+
+		<p:panel>
+			<h4>
+				<h:outputText value="#{msg['batch.step.upload'.concat(cc.attrs.import ? '.import' : '')]}" />
+			</h4>
+
+			<file:upload webFile="#{batchController.webFile}" rendered="#{empty batchController.webFile.uploadFile}" update="#{cc.attrs.id}:progress:size" />
+			<file:details webFile="#{batchController.webFile}" onNewUpload="#{batchController.onNewUpload}"
+						  rendered="#{not empty batchController.webFile.uploadFile}" />
+		</p:panel>
+
+		<p:panel rendered="#{not empty batchController.webFile.elements}" style="margin-top: 15px;">
+			<h4>
+				<h:outputText value="#{msg['batch.step.checkData'.concat(cc.attrs.import ? '.import' : '')]}" />
+				<components:tooltip id="checkDataHint" value="#{msg['batch.step.checkData.hint']}" />
+			</h4>
+			<p:dataTable id="elements" widgetVar="elements" value="#{batchController.webFile.elements}" var="_row" paginator="true"
+						 paginatorPosition="bottom" paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
+						 currentPageReportTemplate="{startRecord}-{endRecord} #{cmsg['ui.table.of']} {totalRecords}" rows="10" pageLinks="3"
+						 emptyMessage="#{cmsg['ui.table.empty']}">
+
+				<f:facet name="header" style="text-align:left; padding: 0;">
+					<p:inputText id="globalFilter" onkeyup="PF('elements').filter()" placeholder="#{cmsg['ui.table.filter']}" />
+				</f:facet>
+
+				<p:columns filterStyle="display:none;" filterMatchMode="contains" filterBy="#{_columnIndex lt _row.size() ? _row.get(_columnIndex) : ''}"
+						   value="#{batchController.webFile.columns}" var="_column" columnIndexVar="_columnIndex"
+						   styleClass="hl hl-#{batchController.webFile.getSelectedColumnCSSForName(BatchController.VALUE)} hls-#{batchController.webFile.getSelectedColumnCSSForName(BatchController.PSEUDONYM)} hlt-#{batchController.webFile.getSelectedColumnCSSForName(BatchController.DOMAIN)} relative">
+					<f:facet name="header">
+						#{_column}
+						<p:commandButton actionListener="#{batchController.webFile.setSelectedColumnForName(BatchController.VALUE, _columnIndex)}"
+										 update="@form:elements, @form:options" process="@this" value=" " styleClass="secondary thButton"
+										 rendered="#{batchController.selectedAction.name() != 'IMPORT' and batchController.webFile.selectedColumn ne _columnIndex}" />
+
+						<ui:fragment rendered="#{batchController.selectedAction.name() == 'IMPORT'}">
+							<h:outputText styleClass="thLabel tag tag_transparent"
+										  value="#{msg['batch.action.IMPORT.column.'.concat(batchController.webFile.getNameForSelectedColumn(_columnIndex))]}"
+										  rendered="#{batchController.webFile.getNameForSelectedColumn(_columnIndex) != null}" />
+
+							<p:button id="toggleColumnName" styleClass="secondary thButton" value=" " onclick="return false;" />
+
+							<p:contextMenu event="click" for="toggleColumnName">
+								<p:menuitem action="#{batchController.webFile.setSelectedColumnForName(BatchController.VALUE, _columnIndex)}"
+											disabled="#{batchController.webFile.getNameForSelectedColumn(_columnIndex) == BatchController.VALUE}"
+											icon="mdi mdi-table-column"
+											process="@this" update="@form:elements" styleClass="font"
+											value="#{msg['batch.action.IMPORT.column.VALUE']}" />
+								<p:separator />
+								<p:menuitem action="#{batchController.webFile.setSelectedColumnForName(BatchController.PSEUDONYM, _columnIndex)}"
+											disabled="#{batchController.webFile.getNameForSelectedColumn(_columnIndex) == BatchController.PSEUDONYM}"
+											icon="mdi mdi-table-column"
+											process="@this" update="@form:elements" styleClass="font"
+											value="#{msg['batch.action.IMPORT.column.PSEUDONYM']}" />
+								<p:separator rendered="#{batchController.fileContainsDomainName}" />
+								<p:menuitem action="#{batchController.webFile.setSelectedColumnForName(BatchController.DOMAIN, _columnIndex)}"
+											disabled="#{batchController.webFile.getNameForSelectedColumn(_columnIndex) == BatchController.DOMAIN}"
+											icon="mdi mdi-table-column"
+											process="@this"
+											rendered="#{batchController.fileContainsDomainName}"
+											update="@form:elements"
+											styleClass="font"
+											value="#{msg['batch.action.IMPORT.column.DOMAIN']}" />
+							</p:contextMenu>
+						</ui:fragment>
+					</f:facet>
+					<h:outputText value="#{_columnIndex lt _row.size() ? _row.get(_columnIndex) : ''}" />
+				</p:columns>
+			</p:dataTable>
+		</p:panel>
+
+		<p:panel rendered="#{not empty batchController.webFile.elements}" id="options" style="margin-top: 15px;">
+			<h4>
+				<h:outputText value="#{msg['batch.step.processData'.concat(cc.attrs.import ? '.import' : '')]}" />
+			</h4>
+
+			<p:panelGrid columns="2" columnClasses="ui-grid-col-3,ui-grid-col-9" layout="grid" styleClass="mb-0">
+
+				<p:outputLabel for="action" value="#{msg['batch.option.action']}" rendered="#{!cc.attrs.import}" />
+				<p:selectOneMenu id="action" value="#{batchController.selectedAction}" required="true" styleClass="fit-content" rendered="#{!cc.attrs.import}">
+					<f:selectItem noSelectionOption="true" itemLabel="#{cmsg['ui.select.pleaseSelect']}" itemDisabled="true" />
+					<f:selectItems value="#{batchController.actionsWithoutImport}" var="_action" itemLabel="#{msg['batch.action.'.concat(_action)]}" />
+					<p:ajax event="itemSelect" update="options, elements" process="@this" listener="#{batchController.onChangeAction}" />
+				</p:selectOneMenu>
+
+				<p:outputLabel for="domain"
+							   value="#{batchController.selectedAction.name() == 'PSEUDONYMISE' or batchController.selectedAction.name() == 'IMPORT' ? msg['batch.option.targetDomain'] : msg['batch.option.sourceDomain']}" />
+				<p:selectOneMenu id="domain" disabled="#{batchController.fileContainsDomainName}" value="#{batchController.selectedDomain}" required="true" filter="true"
+								 filterMatchMode="contains">
+					<f:selectItem noSelectionOption="true" itemLabel="#{cmsg['ui.select.pleaseSelect']}" itemDisabled="true" />
+					<f:selectItems value="#{batchController.domainNames}" var="_domain" itemLabel="#{batchController.getDomainLabel(_domain)}" />
+					<p:ajax event="itemSelect" process="@this" />
+				</p:selectOneMenu>
+
+				<p:column rendered="#{cc.attrs.import}" />
+				<p:selectBooleanCheckbox value="#{batchController.fileContainsDomainName}" itemLabel="#{msg['batch.option.fileContainsDomainName']}"
+										 rendered="#{cc.attrs.import}">
+					<p:ajax event="change" listener="#{batchController.onChangeFileContainsDomain()}" process="@this" update="domain, @form:elements" />
+				</p:selectBooleanCheckbox>
+
+				<p:outputLabel value="#{msg['batch.option.generateNewPseudonyms']}" rendered="#{batchController.selectedAction.name() == 'PSEUDONYMISE'}" />
+				<p:selectBooleanCheckbox id="generateNewPseudonyms" value="#{batchController.generateNewPseudonyms}"
+										 rendered="#{batchController.selectedAction.name() == 'PSEUDONYMISE'}">
+					<p:ajax event="change" process="@this" />
+				</p:selectBooleanCheckbox>
+
+				<p:outputLabel value="#{msg['batch.option.replaceSourceColumn']}"
+							   rendered="#{(batchController.selectedAction.name() == 'PSEUDONYMISE' or batchController.selectedAction.name() == 'DEPSEUDONYMISE') and not empty batchController.selectedAction}" />
+				<p:selectBooleanCheckbox value="#{batchController.replaceSourceColumn}"
+										 rendered="#{(batchController.selectedAction.name() == 'PSEUDONYMISE' or batchController.selectedAction.name() == 'DEPSEUDONYMISE') and not empty batchController.selectedAction}">
+					<p:ajax event="change" update="replaceSourceColumnLabel" process="@this" />
+				</p:selectBooleanCheckbox>
+
+				<p:outputLabel id="replaceSourceColumnLabel"
+							   value="#{batchController.replaceSourceColumn ? msg['batch.option.targetColumnNameReplaced'] : msg['batch.option.targetColumnName']}"
+							   rendered="#{(batchController.selectedAction.name() == 'PSEUDONYMISE' or batchController.selectedAction.name() == 'DEPSEUDONYMISE') and not empty batchController.selectedAction}" />
+				<p:inputText value="#{batchController.targetColumnName}"
+							 rendered="#{(batchController.selectedAction.name() == 'PSEUDONYMISE' or batchController.selectedAction.name() == 'DEPSEUDONYMISE') and not empty batchController.selectedAction}">
+					<p:ajax event="blur" process="@this" />
+				</p:inputText>
+
+				<p:commandButton
+						value="#{batchController.selectedAction.name() == 'IMPORT' ? (batchController.webFile.processed ? cmsg['ui.button.reimport'] : cmsg['ui.button.import']) : (batchController.webFile.processed ? cmsg['ui.button.reprocess'] : cmsg['ui.button.process'])}"
+						icon="mdi mdi-database-import" styleClass="#{batchController.webFile.processed ? 'secondary' : ''}" actionListener="#{batchController.onDoAction}"
+						update="@form" onclick="PF('progressDialog').show();PF('progressBar').start();"
+						oncomplete="PF('progressDialog').hide();PF('progressBar').cancel();" />
+
+			</p:panelGrid>
+		</p:panel>
+
+		<p:panel rendered="#{batchController.webFile.processed}" style="margin-top: 15px;">
+			<h4>
+				<h:outputText value="#{msg['batch.step.download'.concat(cc.attrs.import ? '.import' : '')]}" />
+			</h4>
+			<p:commandButton value="#{cmsg['ui.button.download']}" icon="mdi mdi-download" ajax="false" actionListener="#{batchController.onDownload}" process="@this">
+				<p:fileDownload value="#{batchController.webFile.downloadFile}" />
+			</p:commandButton>
+		</p:panel>
+	</h:form>
+
+	<file:progress id="progress" size="#{batchController.webFile.elements.size()}" progress="#{batchController.progress}" message="#{msg['batch.progress.processing']}" />
+</composite:implementation>
+
+</html>

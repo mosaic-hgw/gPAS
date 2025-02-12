@@ -1,0 +1,16 @@
+####################
+# How to test gPAS #
+####################
+
+1. Voraussetzungen:
+
+* Java 8
+* Apache jMeter, v3.x: http://jmeter.apache.org/
+	- JDBC-Plugin wird genutzt und dafür braucht man den mysql-connector im lib-Verzeichnis von jMeter (https://dev.mysql.com/downloads/connector/j/)
+	- Empfehlenswert ist auch der Plugin-Manager (https://jmeter-plugins.org/wiki/PluginsManager/)
+
+2. Testaufbau:
+
+* Sie sind unterteilt nach den Services managementService und gpasService
+* Die Tests sind als Szenario aufgebaut, d.h. dass sie von oben nach unten von einander größtenteils abhängig sind. Einzelne Test können zwischendurch aber durchaus mal weggeleassen werden.
+

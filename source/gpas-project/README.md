@@ -1,7 +1,4 @@
-![context](https://user-images.githubusercontent.com/12081369/49164566-a5794200-f32f-11e8-8d3a-96244ea00832.png)
-
-Current Docker-Version of gPAS: 2024.3.0 (Dez. 2024)<br/>
-Current Docker-Version of TTP-FHIR-Gateway: 2024.3.0 (Dec. 2024), Details from [ReleaseNotes](https://www.ths-greifswald.de/ttpfhirgw/releasenotes/2024-3-0)
+${ttp.readme.header}
 
 # About #
 The use of pseudonyms is a privacy-enhancing technique supporting privacy-by-design and ensuring non-attribution. Pseudonymisation allows storing directly person identifying data separately and securely from medical data and supports the data controller to meet the GDPR’s data security requirements (Art. 32 lit. 1 EU GDPR).
@@ -60,26 +57,4 @@ Access to relevant application and database servers of the Trusted Third Party t
 * Access restriction at URL level with Basic Authentication (e.g. with NGINX or Apache)
 * use of Keycloak to restrict access to Web-Frontends and technical interfaces
 
-# Additional Information #
-The gPAS was developed by the University Medicine Greifswald and published in 2013 as part of the [MOSAIC-Project](https://ths-greifswald.de/mosaic "") (funded by the DFG HO 1937/2-1).
-
-Selected functionalities of gPAS were developed as part of the following research projects:
-- MIRACUM (funded by the German Federal Ministry of Education and Research 01ZZ1801M)
-
-## Credits ##
-**Concept and implementation:** L. Geidel <br/>
-**Web-Client:** A. Blumentritt, M. Bialke, F.M. Moser <br/>
-**Docker:** R. Schuldt <br/>
-**TTP-FHIR Gateway für gPAS:** M. Bialke, P. Penndorf, L. Geidel, S. Lang, F.M. Moser
-
-## License ##
-**License:** AGPLv3, https://www.gnu.org/licenses/agpl-3.0.en.html <br/>
-**Copyright:** 2013 - 2024 University Medicine Greifswald <br/>
-**Contact:** https://www.ths-greifswald.de/kontakt/
-
-## Publications ##
-- https://dx.doi.org/10.3414/ME14-01-0133
-- https://dx.doi.org/10.1186/s12967-015-0545-6
-
-# Supported languages #
-German, English
+${ttp.readme.footer}
